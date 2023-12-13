@@ -78,7 +78,7 @@ def advocate_register():
         specialization=specialization,
         court_type=court_type,
         languages=languages_json,
-        resume_filename=resume_filename  # Save the filename in the database
+        resume=resume_filename  # Save the filename in the database
     )
 
     # Add and commit to the database

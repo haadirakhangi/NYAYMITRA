@@ -112,7 +112,7 @@ def advocate_details():
             'id': advocate.advocate_id,
             'name': f'{advocate.fname} {advocate.lname}',
             'email': advocate.email,
-            'resume': advocate.resume_filename if advocate.resume_filename else None,
+            'resume': advocate.resume if advocate.resume else None,
             'verified': advocate.verified,
         }
         advocate_data.append(advocate_info)
