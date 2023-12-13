@@ -5,6 +5,7 @@ from server import db, bcrypt
 import json
 from functools import wraps
 from datetime import datetime
+import os
 
 advocate_bp = Blueprint(name='advocates', import_name=__name__)
 
@@ -34,9 +35,10 @@ def single_login_required(f):
 @advocate_bp.route('/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def advocate_register():
-    data = request.json
-    print("Data",data)
-    # Extract data from the JSON
+    data = request.form  # Assuming the data is in form format
+    resume_file = request.files.get('resume')
+
+    # Extract data from the form
     fname = data.get("firstName")
     lname = data.get("lastName")
     email = data.get("email")
@@ -51,19 +53,23 @@ def advocate_register():
     languages = data.get("languages", [])
 
     languages_json = json.dumps(languages)
+
     # Check if the email already exists
     user_exists = Advocate.query.filter_by(email=email).first() is not None
 
     if user_exists:
         return jsonify({"message": "User already exists", "response": False}), 201
 
+    # Save the uploaded resume file
+    resume_filename = save_resume(resume_file)
     # Hash password and create a new user to save to the database
     hash_pass = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = Advocate(
+    # Create an Advocate instance
+    new_advocate = Advocate(
         fname=fname,
         lname=lname,
         email=email,
-        password=hash_pass,
+        password=hash_pass,  # You should hash the password before saving it
         office_address=office_address,
         pincode=pincode,
         state=state,
@@ -71,21 +77,36 @@ def advocate_register():
         experience=experience,
         specialization=specialization,
         court_type=court_type,
-        languages=languages_json
+        languages=languages_json,
+        resume_filename=resume_filename  # Save the filename in the database
     )
 
-    db.session.add(new_user)
+    # Add and commit to the database
+    db.session.add(new_advocate)
     db.session.commit()
 
     # Return response
     response = jsonify({
         "message": "Advocate created successfully",
-        "id": new_user.advocate_id,
-        "email": new_user.email,
+        "id": new_advocate.advocate_id,
+        "email": new_advocate.email,
         "response": True
     }), 201
 
     return response
+
+def save_resume(resume_file):
+    if resume_file:
+        # Save the file to the uploads folder
+        filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}_{resume_file.filename}"
+        resume_file.save(os.path.join('uploads', filename))
+        return filename
+    return None
+
+   
+
+
+    
 
 
 @advocate_bp.route('/login', methods=['POST'])
