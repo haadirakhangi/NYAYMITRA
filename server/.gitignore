@@ -1,0 +1,6 @@
+*.zip
+*.txt
+client/
+.ipynb_checkpoints/
+.env
+venv

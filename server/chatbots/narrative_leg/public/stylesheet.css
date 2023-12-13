@@ -1,0 +1,72 @@
+.css-1705j0v {
+  display: none !important;
+}
+
+/* text box */
+.css-1fbn754{
+  background-color: #FAF2E5 !important;
+  border-radius: 10% !important;
+}
+
+/* browse button */
+.css-10m49x4{
+  background-color: #001B79 !important;
+  color: white !important;
+}
+
+/* Navbar */
+.css-qsb7md{
+  background-color: #FAF6F0 !important;
+}
+
+
+/* chatbot background */
+.css-1s3oi5q{
+  background-color: transparent !important;
+}
+
+/* overall main component */
+.css-17anmg8 {
+  background-image: url(card_back.jpg) !important;
+}
+
+/* chatbot interfacae */
+.css-19mvntf .css-1vb1eow{
+  background-color: rgba(227, 218, 204, 0.8); /* Blue background with 50% transparency */
+  color: black;
+  margin-bottom: 10px !important;
+  border-radius: 10px !important;
+}
+
+.css-1s3oi5q .css-1vb1eow{
+  background-color: rgba(68, 65, 61, 0.9); /* Blue background with 50% transparency */
+  color: white;
+  margin-bottom: 10px !important;
+  border-radius: 10px !important;
+}
+/* .css-uijbxl{
+  background-color: #DDDDDD !important;
+} */
+
+/* new chat button */
+
+.navbar-icon {
+  background-image: url('/public/icon_light.png');
+}
+
+
+.css-12hxhao img{
+  max-width: 25% !important;
+  max-height: 25% !important;
+  /* Ensure the image maintains its aspect ratio */
+  width: auto !important;
+  height: auto !important;
+  /* Improve rendering quality */
+  image-rendering: -webkit-optimize-contrast !important;
+}
+
+/* Time text */
+.css-kt4rn8{
+  margin-top: 5px !important;
+  color: white !important;
+}
