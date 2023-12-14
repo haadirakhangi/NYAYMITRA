@@ -35,7 +35,7 @@ const UserLogin: React.FC = () => {
   };
 
   return (
-    <div style={{ background: '#03a9f4', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ background: '#ffff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className='w-full max-w-2xl p-12 bg-[#250E62] rounded shadow-2xl' style={{
         background: 'linear-gradient(to bottom, #f4c430, #fff, #138808)',
         color: '#250E62', // Text color
