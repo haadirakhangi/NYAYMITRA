@@ -4,6 +4,8 @@ from server.models import Common_Law,Civil_Law,Criminal_Law
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
+import os
+import shutil
 
 def login_required(f):
     @wraps(f)
@@ -34,7 +36,25 @@ def admin_login():
     
     return jsonify ({"message": "Invalid", "response": False}), 404
     
-    
+@admin_bp.route('/update-vectordb', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def update_vectorb():
+    try:
+        # Create 'uploads' directory if it doesn't exist
+        upload_dir = 'update_docs'
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Iterate over each file in the request
+        for file in request.files.getlist('documents'):
+            filename = file.filename
+            filepath = os.path.join(upload_dir, filename)
+            
+            # Save the file to the 'uploads' directory
+            file.save(filepath)
+        shutil.rmtree(upload_dir)
+        return jsonify({"message": "Documents saved successfully", "response": True}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
     
 
 @admin_bp.route('/logout')

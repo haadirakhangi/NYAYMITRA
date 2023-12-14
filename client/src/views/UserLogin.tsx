@@ -57,10 +57,10 @@ const UserLogin: React.FC = () => {
           <h1 className='text-right'>
             Don't have an account?{' '}
             <span className='text-black underline underline-4'>
-              <NavLink to='/register'>Register Now</NavLink>
+              <NavLink to='/user-register'>Register Now</NavLink>
             </span>
           </h1>
-          <button className='btn mb-[10px] mx-autp lg:mx-0 self-center mt-5' type='submit'>
+          <button className='btn mb-[10px] bg-black px-5 py-3 text-white mx-autp lg:mx-0 self-center mt-5' type='submit'>
             Submit
           </button>
         </form>

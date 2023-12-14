@@ -166,6 +166,7 @@ const AdvoRegister = () => {
 
     return (
         <ThemeProvider theme={theme}>
+            <Navbar/>
             <div style={{ margin: "auto", marginTop: "20px", padding: "10px", width: "100vh", backgroundColor: "#26c6da", borderRadius: "10px" }}>
                 <Paper style={{ padding: "20px", marginTop: "50px", textAlign: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", marginBottom: "20px", justifyContent: "center" }}>
