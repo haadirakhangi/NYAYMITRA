@@ -1,3 +1,4 @@
+// UserLogin.tsx
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
@@ -34,36 +35,42 @@ const UserLogin: React.FC = () => {
   };
 
   return (
-    <div className='max-w-xl mx-auto p-12 bg-[#d2b7b7] mt-24 rounded shadow-2xl'>
-      <h2 className='text-2xl font-bold mb-4 text-center'>Login</h2>
-      <div className='mb-4'>
-        <form className='flex flex-col gap-y-4' onSubmit={handleSubmit}>
-          <input
-            className='outline-none border-b border-b-primary h-[60px] bg-transparent font-secondary w-full pl-3 placeholder:text-[#757879]'
-            type='text'
-            placeholder='Email'
-            name='email'
-            value={credentials.email}
-            onChange={handleChange}
-          />
-          <input
-            className='outline-none border-b border-b-primary h-[60px] bg-transparent font-secondary w-full pl-3 placeholder:text-[#757879]'
-            type='password'
-            placeholder='Password'
-            name='password'
-            value={credentials.password}
-            onChange={handleChange}
-          />
-          <h1 className='text-right'>
-            Don't have an account?{' '}
-            <span className='text-black underline underline-4'>
-              <NavLink to='/user-register'>Register Now</NavLink>
-            </span>
-          </h1>
-          <button className='btn mb-[10px] bg-black px-5 py-3 text-white mx-autp lg:mx-0 self-center mt-5' type='submit'>
-            Submit
-          </button>
-        </form>
+    <div style={{ background: '#ffff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className='w-full max-w-2xl p-12 bg-[#250E62] rounded shadow-2xl' style={{
+        background: 'linear-gradient(to bottom, #f4c430, #fff, #138808)',
+        color: '#250E62', // Text color
+        boxShadow: '0 6px 36px rgba(0, 0, 0, 0.8)', 
+      }}>
+        <h2 className='text-2xl font-bold mb-4 text-center'>Login</h2>
+        <div className='mb-4'>
+          <form className='flex flex-col gap-y-4' onSubmit={handleSubmit}>
+            <input
+              className='outline-none border-b border-b-primary h-[60px] bg-transparent font-secondary w-full pl-3 placeholder:text-[#757879] text-[#250E62]'
+              type='text'
+              placeholder='Email'
+              name='email'
+              value={credentials.email}
+              onChange={handleChange}
+            />
+            <input
+              className='outline-none border-b border-b-primary h-[60px] bg-transparent font-secondary w-full pl-3 placeholder:text-[#757879] text-[#250E62]'
+              type='password'
+              placeholder='Password'
+              name='password'
+              value={credentials.password}
+              onChange={handleChange}
+            />
+            <h1 className='text-right text-[#250E62]'>
+              Don't have an account?{' '}
+              <span className='text-[#250E62] underline underline-4'>
+                <NavLink to='/user-register'>Register here</NavLink>
+              </span>
+            </h1>
+            <button className='btn mb-[10px] mx-auto lg:mx-0 self-center mt-5' type='submit'>
+              Submit
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

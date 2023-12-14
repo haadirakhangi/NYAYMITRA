@@ -1,6 +1,6 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import Common_Law,Civil_Law,Criminal_Law
+from server.models import Common_Law,Civil_Law,Criminal_Law,Admin,Advocate
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
@@ -19,15 +19,14 @@ def login_required(f):
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-@admin_bp.route('/login', methods=['GET', 'POST'])
+@admin_bp.route('/login', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def admin_login():
-    og_email='admin@gmail.com'
-    og_password='admin123'
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
 
+<<<<<<< HEAD
     # user = User.query.filter_by(email=email).first()
     if (email==og_email) and (password==og_password):
         session["admin"] = 2
@@ -56,13 +55,38 @@ def update_vectorb():
     except Exception as e:
         return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
     
+=======
+    # Check if the provided email exists
+    admin = Admin.query.filter_by(email=email).first()
+>>>>>>> cf0890a7aa06d9e799af9812a0906d94ec86be72
 
-@admin_bp.route('/logout')
+    if admin and bcrypt.check_password_hash(admin.password, password):
+        session["admin"] = admin.id
+        return jsonify({"message": "Admin logged in successfully", "response": True}), 200
+
+    return jsonify({"message": "Invalid credentials", "response": False}), 401
+
+@admin_bp.route('/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
-@login_required
-def admin_logout():
-    session.pop('admin', None)
-    return jsonify({'message': 'Admin logged out successfully'})
+def admin_register():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    # Check if an admin with the given email already exists
+    existing_admin = Admin.query.filter_by(email=email).first()
+    if existing_admin:
+        return jsonify({"message": "Admin with this email already exists", "response": False}), 409
+
+    # Create a new admin
+    new_admin = Admin(email=email, password=password)
+
+    # Add the new admin to the database
+    db.session.add(new_admin)
+    db.session.commit()
+
+    return jsonify({"message": "Admin registered successfully", "response": True}), 201
+
 
 @admin_bp.route('/dashboard')
 @login_required
@@ -107,3 +131,40 @@ def dashboard():
         location_insights.setdefault(law.location, {}).setdefault('civil', []).append(law.sub_category)
 
         return jsonify({"Insights": "Created succesfully", "response": True}), 200
+    
+@admin_bp.route('/advocate_details')
+@login_required
+def advocate_details():
+    # Fetch all advocate details for verification
+    advocates = Advocate.query.all()
+
+    # Prepare the data in JSON format
+    advocate_data = []
+    for advocate in advocates:
+        advocate_info = {
+            'id': advocate.advocate_id,
+            'name': f'{advocate.fname} {advocate.lname}',
+            'email': advocate.email,
+            'resume': advocate.resume if advocate.resume else None,
+            'verified': advocate.verified,
+        }
+        advocate_data.append(advocate_info)
+
+    return jsonify({'advocates': advocate_data})
+
+@admin_bp.route('/verify_advocate/<int:advocate_id>')
+@login_required
+def verify_advocate(advocate_id):
+    # Fetch the advocate by ID
+    advocate = Advocate.query.get(advocate_id)
+
+    if advocate:
+        # Perform the verification (update the 'verified' field to True)
+        advocate.verified = True
+        db.session.commit()
+
+        # Return a JSON response indicating success
+        return jsonify({'message': 'Advocate verified successfully', 'response': True})
+
+    # If the advocate is not found, return an error JSON response
+    return jsonify({'message': 'Advocate not found', 'response': False}), 404

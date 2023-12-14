@@ -40,6 +40,12 @@ class Advocate(db.Model):
     rating = db.Column(db.Float(precision=2), nullable=True)
     date_joined = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+    # Add file field
+    resume = db.Column(db.LargeBinary, nullable=True)
+    
+    # Add boolean field
+    verified = db.Column(db.Boolean, default=False)
+
     def __repr__(self):
         return f'<Advocate user_id={self.advocate_id} email={self.email}>'
 
@@ -80,4 +86,11 @@ class Civil_Law(db.Model):
         return f'<Civil Law user_id={self.user_id} advocate_id={self.advocate_id} query={self.query} sub-category={self.sub_category}>'
 
     
+class Admin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+
+    def __repr__(self):
+        return f"Admin('{self.email}')"
 

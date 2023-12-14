@@ -67,6 +67,7 @@ const UserRegister: React.FC = () => {
     switch (step) {
       case 1:
         return (
+          
           <div>
             <h1 className='text-xl'>Personal Information</h1>
             <div className='flex gap-x-10'>
@@ -200,11 +201,17 @@ const UserRegister: React.FC = () => {
   };
 
   return (
-    <div className='max-w-xl mx-auto p-12 bg-[#d2b7b7] shadow-2xl mt-12 rounded'>
-      <h1 className='flex justify-center items-center text-xl'>
-        <strong>Registration Form</strong>
-      </h1>
-      <div className='mt-4'>{renderFormStep()}</div>
+    <div style={{ background: '#ffff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className='w-full max-w-2xl p-12 bg-[#250E62] rounded shadow-2xl' style={{
+        background: 'linear-gradient(to bottom, #f4c430, #fff, #138808)',
+        color: '#250E62', // Text color
+        boxShadow: '0 6px 36px rgba(0, 0, 0, 0.8)'
+      }}>
+        <h1 className='flex justify-center items-center text-xl'>
+          <strong>Registration Form</strong>
+        </h1>
+        <div className='mt-4'>{renderFormStep()}</div>
+      </div>
     </div>
   );
 };
