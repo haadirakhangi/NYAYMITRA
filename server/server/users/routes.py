@@ -132,8 +132,10 @@ def voice_chat():
             print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
             for segment in segments:
                 print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+                text2 = segment.text
             text = str([segment.text for segment in segments])
-            print(segments)
+            print("Text",text)
+            print("Text2",text2)
             shutil.rmtree('upload_voice')
             return jsonify({"message": text, "email": "email", "response": True}), 200
 

@@ -17,7 +17,7 @@ import {
     ListItem,
     ListItemText,
 } from '@mui/material';
-import { PieChart, Pie, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import { Chart } from 'react-google-charts';
 import { Link } from 'react-router-dom';
 import logo from '../img/logo-wbag.png';
 import { styled } from '@mui/material/styles';
@@ -35,15 +35,6 @@ const VisuallyHiddenInput = styled('input')({
     whiteSpace: 'nowrap',
     width: 1,
 });
-
-const data = [
-    { name: 'Group A', value: 400 },
-    { name: 'Group B', value: 300 },
-    { name: 'Group C', value: 300 },
-    { name: 'Group D', value: 200 },
-    { name: 'Group E', value: 278 },
-    { name: 'Group F', value: 189 },
-];
 
 const statesOfIndia = [
     'Andhra Pradesh',
@@ -79,6 +70,7 @@ const statesOfIndia = [
 const AdminDashboard: React.FC = () => {
     const [selectedState, setSelectedState] = useState<string>('');
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+    const [chartType, setChartType] = useState<string>('PieChart');
 
     const handleStateChange = (
         event: React.ChangeEvent<{ value: unknown }>
@@ -175,43 +167,58 @@ const AdminDashboard: React.FC = () => {
                                 ))}
                             </Select>
                         </FormControl>
-                        <Typography variant='h5'>Pie Chart</Typography>
-                        <ResponsiveContainer width='100%' height={300}>
-                            <PieChart width={400} height={400}>
-                                <Pie
-                                    dataKey="value"
-                                    isAnimationActive={false}
-                                    data={data}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    label
-                                />
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <Typography variant='h5' style={{ marginTop: '16px', marginBottom: "16px" }}>
-                            Upload Documents to Update The chatbots
-                        </Typography>
+                        <Typography variant='h5'>Chart</Typography>
                         <Button
-                            component='label'
                             variant='contained'
-                            startIcon={<CloudUploadIcon />}
-                        >
-                            Upload file
-                            <VisuallyHiddenInput
-                                type='file'
-                                multiple
-                                onChange={handleFileChange}
-                            />
-                        </Button>
-                        <Button variant='contained'
                             color='primary'
-                            style={{ marginLeft: "10px" }}
-                            onClick={handleSubmit}>
-                            Update Data
+                            style={{ marginLeft: '10px' }}
+                            onClick={() => setChartType(chartType === 'PieChart' ? 'Histogram' : 'PieChart')}
+                        >
+                            {chartType === 'PieChart' ? 'Show Histogram' : 'Show Pie Chart'}
                         </Button>
+                        <Box m={3}>
+                            <Chart
+                                width={'100%'}
+                                height={'400px'}
+                                chartType={chartType}
+                                loader={<div>Loading Chart</div>}
+                                data={[
+                                    ['Task', 'Hours per Day'],
+                                    ['Work', 11],
+                                    ['Eat', 2],
+                                    ['Commute', 2],
+                                    ['Watch TV', 2],
+                                    ['Sleep', 7],
+                                ]}
+                                options={
+                                    chartType === 'Histogram'
+                                        ? { title: 'My Daily Activities', legend: { position: 'none' } }
+                                        : { title: 'My Daily Activities' }
+                                }
+                                rootProps={{ 'data-testid': '1' }}
+                            />
+                            <Typography variant='h5' style={{ marginTop: '16px', marginBottom: "16px" }}>
+                                Upload Documents to Update The chatbots
+                            </Typography>
+                            <Button
+                                component='label'
+                                variant='contained'
+                                startIcon={<CloudUploadIcon />}
+                            >
+                                Upload file
+                                <VisuallyHiddenInput
+                                    type='file'
+                                    multiple
+                                    onChange={handleFileChange}
+                                />
+                            </Button>
+                            <Button variant='contained'
+                                color='primary'
+                                style={{ marginLeft: "10px" }}
+                                onClick={handleSubmit}>
+                                Update Data
+                            </Button>
+                        </Box>
                     </Box>
                 </Container>
             </div>
