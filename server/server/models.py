@@ -96,5 +96,6 @@ class Admin(db.Model):
 
 class LawCatgBenf(db.Model):
     id=db.Column(db.Integer, primary_key=True)
+    doc_name=db.Column(db.String(50),nullable=False)
     category=db.Column(db.String(50))
     beneficiaries=db.Column(db.String(255), nullable=True)

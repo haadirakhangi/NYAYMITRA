@@ -13,7 +13,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         user_id = session.get("admin_id", None)
         if user_id is None:
-            return jsonify({"message": "User not logged in", "response": False}), 401
+            return jsonify({"message": "Admin not logged in", "response": False}), 401
         return f(*args, **kwargs)
     return decorated_function
 
@@ -38,20 +38,27 @@ def admin_login():
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
 @cross_origin(supports_credentials=True)
-def admin_login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+def update_vectorb():
+    try:
+        # Create 'uploads' directory if it doesn't exist
+        upload_dir = 'update_docs'
+        print("I AM BEING CALLLED")
+        os.makedirs(upload_dir, exist_ok=True)
 
-    # Check if the provided email exists
-    admin = Admin.query.filter_by(email=email).first()
-
-    if admin and bcrypt.check_password_hash(admin.password, password):
-        session["admin_id"] = admin.id
-        return jsonify({"message": "Admin logged in successfully", "response": True}), 200
-
-    return jsonify({"message": "Invalid credentials", "response": False}), 401
-
+        # Iterate over each file in the request
+        for file in request.files.getlist('documents'):
+            filename = file.filename
+            filepath = os.path.join(upload_dir, filename)
+            
+            # Save the file to the 'uploads' directory
+            file.save(filepath)
+        vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+        shutil.rmtree(upload_dir)
+        return jsonify({"message": "Documents saved successfully", "response": True}), 200
+    except Exception as e:
+        print("Printing error",e)
+        return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
+    
 @admin_bp.route('/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def admin_register():
