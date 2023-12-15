@@ -20,24 +20,21 @@ def login_required(f):
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-# @admin_bp.route('/login', methods=['POST'])
-# @cross_origin(supports_credentials=True)
-# def admin_login():
-#     data = request.get_json()
-#     email = data.get('email')
-#     password = data.get('password')
+@admin_bp.route('/login', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def admin_login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
 
-#     # user = User.query.filter_by(email=email).first()
-#     if (email==og_email) and (password==og_password):
-#         session["admin"] = 2
-#         print(session.get('admin'))
-#         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
-#     if admin and bcrypt.check_password_hash(admin.password, password):
-#         session["admin"] = admin.id
-#         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
+    # Check if the provided email exists
+    admin = Admin.query.filter_by(email=email).first()
 
-#     return jsonify({"message": "Invalid credentials", "response": False}), 401
-#     return jsonify ({"message": "Invalid", "response": False}), 404
+    if admin and bcrypt.check_password_hash(admin.password, password):
+        session["admin_id"] = admin.id
+        return jsonify({"message": "Admin logged in successfully", "response": True}), 200
+
+    return jsonify({"message": "Invalid credentials", "response": False}), 401
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -50,7 +47,7 @@ def admin_login():
     admin = Admin.query.filter_by(email=email).first()
 
     if admin and bcrypt.check_password_hash(admin.password, password):
-        session["admin"] = admin.id
+        session["admin_id"] = admin.id
         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
 
     return jsonify({"message": "Invalid credentials", "response": False}), 401
