@@ -122,12 +122,13 @@ def nyaymitra_kyr_chain(vectordb):
         ])  
     
     retriever = vectordb.as_retriever()
-    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", return_messages=True)
+    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
 
     chain = ConversationalRetrievalChain.from_llm(
       llm=llm,
       retriever=retriever,
       memory=memory,
+      return_source_documents=True,
       combine_docs_chain_kwargs={"prompt": prompt_template}
     )
     return chain
