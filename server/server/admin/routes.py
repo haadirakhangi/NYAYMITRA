@@ -11,7 +11,7 @@ from chatbots.utils import add_data_to_pinecone_vectorstore
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user_id = session.get("admin", None)
+        user_id = session.get("admin_id", None)
         if user_id is None:
             return jsonify({"message": "User not logged in", "response": False}), 401
         return f(*args, **kwargs)
