@@ -92,6 +92,7 @@ const AdminDashboard: React.FC = () => {
     };
 
     const handleSubmit = async () => {
+        console.log("I am sending shit")
         if (!selectedFiles) {
             console.error('No file selected.');
             return;

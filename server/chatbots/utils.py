@@ -33,7 +33,6 @@ PINECONE_INDEX_NAME = 'nyaymitra'
 LOCAL_FILE_STORE_PATH = os.path.abspath(os.path.join(current_script_directory, os.pardir, 'local_file_store'))    
 CHILD_SPLITTER = RecursiveCharacterTextSplitter(chunk_size=400)        # Splitter For Advanced RAG
 DATA_DIRECTORY = os.path.abspath(os.path.join(current_script_directory, os.pardir, 'nyaymitra_data'))      # Directory Consisting Data For Nyaymitra
-NEW_DATA_DIRECTORY = ''
 
 # Will store the pdfs entered by the user:
 USER_DIRECTORY_FOR_DOC_QNA = '../document_sum/user_data'
@@ -61,7 +60,7 @@ pinecone.init(
 )
 
 # Download Punkt Package
-nltk.download('punkt')
+# nltk.download('punkt')
 
 
 
@@ -84,7 +83,7 @@ def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
 
 # vectordb = load_data_to_pinecone_vectorstore(DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
 
-def add_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
+def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_NAME, embeddings=EMBEDDINGS):
     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
     data = loader.load()
 
@@ -99,7 +98,7 @@ def add_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
     )
 
     vectorstore.add_documents(docs)
-
+    print("Vector Embedding Updated")
     return vectorstore
 
 # vectordb = add_data_to_pinecone_vectorstore(NEW_DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
