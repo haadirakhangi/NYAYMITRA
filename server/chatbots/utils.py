@@ -33,7 +33,6 @@ PINECONE_INDEX_NAME = 'nyaymitra'
 LOCAL_FILE_STORE_PATH = os.path.abspath(os.path.join(current_script_directory, os.pardir, 'local_file_store'))    
 CHILD_SPLITTER = RecursiveCharacterTextSplitter(chunk_size=400)        # Splitter For Advanced RAG
 DATA_DIRECTORY = os.path.abspath(os.path.join(current_script_directory, os.pardir, 'nyaymitra_data'))      # Directory Consisting Data For Nyaymitra
-NEW_DATA_DIRECTORY = ''
 
 # Will store the pdfs entered by the user:
 USER_DIRECTORY_FOR_DOC_QNA = '../document_sum/user_data'
@@ -61,9 +60,7 @@ pinecone.init(
 )
 
 # Download Punkt Package
-nltk.download('punkt')
-
-
+# nltk.download('punkt')
 
 # FUNCTION FOR CREATING INTIAL PINECONE INDEX FROM DIRECTORY
 def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
@@ -84,12 +81,15 @@ def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
 
 # vectordb = load_data_to_pinecone_vectorstore(DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
 
-def add_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
+def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_NAME, embeddings=EMBEDDINGS):
     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
     data = loader.load()
 
     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
     docs = text_splitter.split_documents(data)
+
+    if index_name not in pinecone.list_indexes():
+       pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
 
     index = pinecone.Index(index_name)
     vectorstore = Pinecone(
@@ -99,13 +99,13 @@ def add_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
     )
 
     vectorstore.add_documents(docs)
-
+    print("Vector Embedding Updated")
     return vectorstore
 
 # vectordb = add_data_to_pinecone_vectorstore(NEW_DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
 
 def nyaymitra_kyr_chain(vectordb):
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",streaming=True ,temperature=0.0,max_tokens=1000)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",temperature=0.0,max_tokens=4096)
     system_message_prompt = SystemMessagePromptTemplate.from_template(
        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
         Important Instructions:
@@ -122,12 +122,13 @@ def nyaymitra_kyr_chain(vectordb):
         ])  
     
     retriever = vectordb.as_retriever()
-    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", return_messages=True)
+    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
 
     chain = ConversationalRetrievalChain.from_llm(
       llm=llm,
       retriever=retriever,
       memory=memory,
+      return_source_documents=True,
       combine_docs_chain_kwargs={"prompt": prompt_template}
     )
     return chain
@@ -225,7 +226,7 @@ def get_parent_docs_retriever(index_name, embeddings, local_file_store_path, chi
   return full_doc_retriever
 
 # CHAIN WITH PARENTS DOCS RETRIEVER
-def nyaymitra_kyr_chain(full_doc_retriever):
+def nyaymitra_kyr_chain_with_parent_docs(full_doc_retriever):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",streaming=True ,temperature=0.0,max_tokens=1000)
     # system_message_prompt = SystemMessagePromptTemplate.from_template(
     # "I want you to act as a law agent, understanding all laws and related jargon, and explaining them in a simpler and descriptive way. Return a list of all the related LAWS drafted and provided in the Context for the user_input question and provide proper penal codes if applicable from the ingested PDF, and explain the process and terms in a simpler way. Dont go beyond the context of the pdf please be precise and accurate. The context is:\n{context}"

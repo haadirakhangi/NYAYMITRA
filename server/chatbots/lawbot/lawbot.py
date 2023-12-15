@@ -33,13 +33,15 @@ async def main(message: cl.Message):
     ).send()
     chain = cl.user_session.get("chain")
     cb = cl.AsyncLangchainCallbackHandler()
-    res = await chain.acall(trans_query, callbacks=[cb])
-    final_answer = res.get('answer')
+    response = await chain.acall(trans_query, callbacks=[cb])
+    final_answer = response.get('answer')
+    source_documents = response.get('source_documents', [])
+    source_pdfs = [source_document.metadata['source'] for source_document in source_documents]
+    print('SOURCE DOCUMENTS:',source_pdfs)
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
     else:
         trans_output = final_answer
-    print("formatted output",res)
     # Sql Database
     # data = {}
     # data['answer']=trans_output
