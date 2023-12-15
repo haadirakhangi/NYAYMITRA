@@ -63,8 +63,6 @@ pinecone.init(
 # Download Punkt Package
 nltk.download('punkt')
 
-
-
 # FUNCTION FOR CREATING INTIAL PINECONE INDEX FROM DIRECTORY
 def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
@@ -91,6 +89,9 @@ def add_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
     docs = text_splitter.split_documents(data)
 
+    if index_name not in pinecone.list_indexes():
+       pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
+
     index = pinecone.Index(index_name)
     vectorstore = Pinecone(
       index = index,
@@ -105,7 +106,7 @@ def add_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
 # vectordb = add_data_to_pinecone_vectorstore(NEW_DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
 
 def nyaymitra_kyr_chain(vectordb):
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",streaming=True ,temperature=0.0,max_tokens=1000)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",temperature=0.0,max_tokens=1000)
     system_message_prompt = SystemMessagePromptTemplate.from_template(
        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
         Important Instructions:
