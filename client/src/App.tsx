@@ -4,6 +4,7 @@ import AdvoRegister from "./views/AdvoRegister";
 import Login from "./views/UserLogin";
 import AdvoLogin from "./views/AdvoLogin";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Landing from "./main/landing";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/user-register" element={<Register />} />
         <Route path="/advo-register" element={<AdvoRegister />} />
         <Route path="/advo-login" element={<AdvoLogin />} />
+        <Route path="/landing" element={<Landing />} />
       </Routes>
     </Router>
   );
