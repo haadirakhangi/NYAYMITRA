@@ -20,7 +20,7 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_bp.route('/login', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def admin_login():
-    data = request.get_json()
+    data = request.json
     email = data.get('email')
     password = data.get('password')
 
@@ -36,9 +36,9 @@ def admin_login():
 @admin_bp.route('/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def admin_register():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
 
     # Check if an admin with the given email already exists
     existing_admin = Admin.query.filter_by(email=email).first()
