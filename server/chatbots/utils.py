@@ -60,8 +60,109 @@ pinecone.init(
 )
 
 # Download Punkt Package
-nltk.download('punkt')
+# nltk.download('punkt')
 
+
+
+# FUNCTION FOR CREATING INTIAL PINECONE INDEX FROM DIRECTORY
+def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
+    loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
+    data = loader.load()
+
+    text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+    docs = text_splitter.split_documents(data)
+
+    if index_name in pinecone.list_indexes():
+      pinecone.delete_index(index_name)
+
+    pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
+
+    vectordb = Pinecone.from_documents(documents = docs,index_name = index_name, embedding =embeddings)
+
+    return vectordb
+
+# vectordb = load_data_to_pinecone_vectorstore(DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
+
+def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_NAME, embeddings=EMBEDDINGS):
+    loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
+    data = loader.load()
+
+    text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+    docs = text_splitter.split_documents(data)
+
+    index = pinecone.Index(index_name)
+    vectorstore = Pinecone(
+      index = index,
+      embedding = embeddings,
+      text_key = 'key'
+    )
+
+    vectorstore.add_documents(docs)
+    print("Vector Embedding Updated")
+    return vectorstore
+
+# vectordb = add_data_to_pinecone_vectorstore(NEW_DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
+
+def nyaymitra_kyr_chain(vectordb):
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",streaming=True ,temperature=0.0,max_tokens=1000)
+    system_message_prompt = SystemMessagePromptTemplate.from_template(
+       """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
+        Important Instructions:
+        1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
+        2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
+        3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
+        LEGAL CONTEXT: \n{context}"""
+    )
+    human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
+    
+    prompt_template = ChatPromptTemplate.from_messages([
+            system_message_prompt,
+            human_message_prompt,
+        ])  
+    
+    retriever = vectordb.as_retriever()
+    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", return_messages=True)
+
+    chain = ConversationalRetrievalChain.from_llm(
+      llm=llm,
+      retriever=retriever,
+      memory=memory,
+      combine_docs_chain_kwargs={"prompt": prompt_template}
+    )
+    return chain
+
+# vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS)
+
+def detect_source_langauge(text):
+    detected_language = str(DETECTOR.detect_language_of(text)).split('.')[1].title()
+    print('Detected Language', detected_language)
+    source_language = iso639.Language.from_name(detected_language).part1
+    
+    return source_language
+
+def create_faiss_vectordb_for_document_qna(user_data_directory,embeddings):
+  loader = DirectoryLoader(user_data_directory, loader_cls=UnstructuredFileLoader)
+  docs = loader.load()
+  doc_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+  split_docs = doc_splitter.split_documents(docs)
+  texts = [doc.page_content for doc in split_docs]
+  print(texts)
+  source_language = detect_source_langauge(texts[0])
+  if source_language != 'en':
+     trans_texts = GoogleTranslator(source=source_language, target='en').translate_batch(texts)
+  else:
+     trans_texts = texts
+  
+  print('CREATING EMBEDDINGS FOR USER DOCUMENT')
+  vectordb = FAISS.from_texts(trans_texts, embedding=embeddings)
+  print('FAISS VECTOR DATABASE CREATED')
+  vectordb.save_local(FAISS_INDEX_FILE_PATH)
+
+  return vectordb
+
+# ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
+ 
+# FUNCTION TO CREATE VECTOR DATABASE WITH PARENTS DOCS RETRIEVER
 def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings, local_file_store_path, child_splitter):
     """
     Function to create embeddings for Pinecone database and creating a Parent Document Retriever using a local docstore.
@@ -122,42 +223,8 @@ def get_parent_docs_retriever(index_name, embeddings, local_file_store_path, chi
 
   return full_doc_retriever
 
-# def nyaymitra_kyr_chain(full_doc_retriever):
-#     llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",streaming=True ,temperature=0.0,max_tokens=1000)
-#     # system_message_prompt = SystemMessagePromptTemplate.from_template(
-#     # "I want you to act as a law agent, understanding all laws and related jargon, and explaining them in a simpler and descriptive way. Return a list of all the related LAWS drafted and provided in the Context for the user_input question and provide proper penal codes if applicable from the ingested PDF, and explain the process and terms in a simpler way. Dont go beyond the context of the pdf please be precise and accurate. The context is:\n{context}"
-#     # )
-#     # system_message_prompt = SystemMessagePromptTemplate.from_template(
-#     #    "You are a law expert in India, and your task is to help users know their rights given a query. You will be provided with context from legal documents from India that you are supposed to use to respond to the user's queries. The user might not understand legal jargon. So, after stating the legal jargon, simplify them for better understanding of the user. Use all the relevant laws from the context based on the user's query. Only include the most relevant laws and articles from the context based on the user query. Do not use any law or article from the context if it's not relevant to the query. The context is: \n{context}"
-#     # )
-#     system_message_prompt = SystemMessagePromptTemplate.from_template(
-#        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
-#         Important Instructions:
-#         1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
-#         2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
-#         3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
-#         LEGAL CONTEXT: \n{context}"""
-#     )
-#     human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
-    
-#     prompt_template = ChatPromptTemplate.from_messages([
-#             system_message_prompt,
-#             human_message_prompt,
-#         ])  
-
-#     memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", return_messages=True)
-
-#     chain = ConversationalRetrievalChain.from_llm(
-#       llm=llm,
-#       retriever=full_doc_retriever,
-#       # input_key="query",
-#       # return_source_documents=True,
-#       memory=memory,
-#       combine_docs_chain_kwargs={"prompt": prompt_template}
-#     )
-#     return chain
-
-def nyaymitra_kyr_chain(vectordb):
+# CHAIN WITH PARENTS DOCS RETRIEVER
+def nyaymitra_kyr_chain(full_doc_retriever):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",streaming=True ,temperature=0.0,max_tokens=1000)
     # system_message_prompt = SystemMessagePromptTemplate.from_template(
     # "I want you to act as a law agent, understanding all laws and related jargon, and explaining them in a simpler and descriptive way. Return a list of all the related LAWS drafted and provided in the Context for the user_input question and provide proper penal codes if applicable from the ingested PDF, and explain the process and terms in a simpler way. Dont go beyond the context of the pdf please be precise and accurate. The context is:\n{context}"
@@ -179,43 +246,15 @@ def nyaymitra_kyr_chain(vectordb):
             system_message_prompt,
             human_message_prompt,
         ])  
-    
-    retriever = vectordb.as_retriever()
+
     memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", return_messages=True)
 
     chain = ConversationalRetrievalChain.from_llm(
       llm=llm,
-      retriever=retriever,
+      retriever=full_doc_retriever,
+      # input_key="query",
+      # return_source_documents=True,
       memory=memory,
       combine_docs_chain_kwargs={"prompt": prompt_template}
     )
     return chain
-
-# vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS)
-
-def detect_source_langauge(text):
-    detected_language = str(DETECTOR.detect_language_of(text)).split('.')[1].title()
-    print('Detected Language', detected_language)
-    source_language = iso639.Language.from_name(detected_language).part1
-    
-    return source_language
-
-def create_faiss_vectordb_for_document_qna(user_data_directory,embeddings):
-  loader = DirectoryLoader(user_data_directory, loader_cls=UnstructuredFileLoader)
-  docs = loader.load()
-  doc_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-  split_docs = doc_splitter.split_documents(docs)
-  texts = [doc.page_content for doc in split_docs]
-  print(texts)
-  source_language = detect_source_langauge(texts[0])
-  if source_language != 'en':
-     trans_texts = GoogleTranslator(source=source_language, target='en').translate_batch(texts)
-  else:
-     trans_texts = texts
-  
-  print('CREATING EMBEDDINGS FOR USER DOCUMENT')
-  vectordb = FAISS.from_texts(trans_texts, embedding=embeddings)
-  print('FAISS VECTOR DATABASE CREATED')
-  vectordb.save_local(FAISS_INDEX_FILE_PATH)
-
-  return vectordb
