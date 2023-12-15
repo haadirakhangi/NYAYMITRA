@@ -4,11 +4,14 @@ from server.models import Common_Law,Civil_Law,Criminal_Law,Admin,Advocate
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
+import os
+import shutil
+from chatbots.utils import add_data_to_pinecone_vectorstore
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user_id = session.get("admin", None)
+        user_id = session.get("admin_id", None)
         if user_id is None:
             return jsonify({"message": "User not logged in", "response": False}), 401
         return f(*args, **kwargs)
@@ -20,6 +23,22 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_bp.route('/login', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def admin_login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+
+    # Check if the provided email exists
+    admin = Admin.query.filter_by(email=email).first()
+
+    if admin and bcrypt.check_password_hash(admin.password, password):
+        session["admin_id"] = admin.id
+        return jsonify({"message": "Admin logged in successfully", "response": True}), 200
+
+    return jsonify({"message": "Invalid credentials", "response": False}), 401
+    
+@admin_bp.route('/update-vectordb', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def admin_login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
@@ -28,7 +47,7 @@ def admin_login():
     admin = Admin.query.filter_by(email=email).first()
 
     if admin and bcrypt.check_password_hash(admin.password, password):
-        session["admin"] = admin.id
+        session["admin_id"] = admin.id
         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
 
     return jsonify({"message": "Invalid credentials", "response": False}), 401
@@ -36,9 +55,9 @@ def admin_login():
 @admin_bp.route('/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def admin_register():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
 
     # Check if an admin with the given email already exists
     existing_admin = Admin.query.filter_by(email=email).first()

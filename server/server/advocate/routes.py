@@ -35,7 +35,7 @@ def single_login_required(f):
 @advocate_bp.route('/register', methods=['POST'])
 @cross_origin(supports_credentials=True)
 def advocate_register():
-    data = request.form  # Assuming the data is in form format
+    data = request.json  # Assuming the data is in form format
     resume_file = request.files.get('resume')
 
     # Extract data from the form
@@ -49,8 +49,11 @@ def advocate_register():
     city = data.get("city")
     experience = data.get("experience")
     specialization = data.get("specialization")
-    court_type = data.get("typeCourt")
-    languages = data.get("languages", [])
+    court_type = data.get("courtType")
+    languages = data.get("languages")
+
+    languages_str = data.get("languages")
+    languages = languages_str.split(",") if languages_str else []
 
     languages_json = json.dumps(languages)
 
