@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect } from "react";
 import axios from "axios";
-
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 import {
   useChatInteract,
   useChatMessages,
@@ -14,69 +15,7 @@ import { useState } from "react";
 const CHAINLIT_SERVER = "http://localhost:8000";
 const userEnv = {};
 
-const recordAndSendVoice = async () => {
-  try {
-    // Access user's microphone
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    // Use MediaRecorder to record voice
-    const mediaRecorder = new MediaRecorder(stream);
-    const audioChunks: Blob[] = [];
-
-    let resolvePromise; // This will be used to resolve the promise when needed
-    const voicePromise = new Promise((resolve) => {
-      resolvePromise = resolve;
-    });
-
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
-      }
-    };
-
-    mediaRecorder.onstop = async () => {
-      // Combine recorded audio chunks into a single Blob
-      const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-
-      // Send the Blob to Flask API using fetch
-      const formData = new FormData();
-      formData.append('voice', audioBlob, 'voice.wav');
-
-      try {
-        const response = await axios.post("http://127.0.0.1:5000/user/voice-chat", formData);
-        console.log('Voice sent successfully', response.data);
-
-        // Resolve the promise with the response
-        resolvePromise(response.data.message);
-      } catch (error) {
-        console.error('Error sending voice to Flask API:', error);
-        // Reject the promise if there is an error
-        resolvePromise(null);
-      }
-    };
-
-    // Start recording
-    mediaRecorder.start();
-
-    // Record for 5 seconds (you can adjust the duration)
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
-    // Stop recording
-    mediaRecorder.stop();
-
-    // Stop the microphone stream
-    stream.getTracks().forEach((track) => track.stop());
-
-    // Return the promise that resolves with the response
-    return voicePromise;
-  } catch (error) {
-    console.error('Error recording and sending voice:', error);
-    return null;
-  }
-};
-
-
-export function Playground() {
+export function Lawbot() {
   const { connect } = useChatSession();
   const [inputValue, setInputValue] = useState("");
   const { sendMessage } = useChatInteract();
@@ -85,18 +24,76 @@ export function Playground() {
     connect({ wsEndpoint: CHAINLIT_SERVER, userEnv });
   }, [connect]);
 
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+
+  const startRecording = async () => {
+    try {
+      // Access user's microphone
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Use MediaRecorder to record voice
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+
+      const audioChunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        // Combine recorded audio chunks into a single Blob
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+
+        // Send the Blob to Flask API using fetch
+        const formData = new FormData();
+        formData.append('voice', audioBlob, 'voice.wav');
+
+        try {
+          console.log("Sended the voice op")
+          const response = await axios.post("http://127.0.0.1:5000/user/voice-chat", formData);
+          console.log('Voice sent successfully', response.data);
+
+          // Resolve the promise with the response
+          setInputValue(response.data.message);
+          handleSendMessage();
+        } catch (error) {
+          console.error('Error sending voice to Flask API:', error);
+          // Reject the promise if there is an error
+        }
+      };
+
+      // Start recording
+      recorder.start();
+    } catch (error) {
+      console.error('Error starting recording:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    // Stop recording
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+    }
+
+    // Stop the microphone stream
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => stream.getTracks().forEach((track) => track.stop()));
+  };
+
   const handleRecordClick = () => {
-    // Call the function to record and send voice
-    recordAndSendVoice().then((response) => {
-      if (response) {
-        // Handle the response here
-        setInputValue(response)
-        console.log('Response from Flask API:', response);
-        handleSendMessage()
-      } else {
-        console.error('Failed to get a response from Flask API.');
-      }
-    });
+    if (isRecording) {
+      // If already recording, stop recording
+      setIsRecording(false);
+      stopRecording();
+    } else {
+      // If not recording, start recording
+      setIsRecording(true);
+      startRecording();
+    }
   };
 
   const handleSendMessage = () => {
@@ -168,7 +165,7 @@ export function Playground() {
             Send
           </Button>
           <Button onClick={handleRecordClick}>
-            Record Voice
+            {isRecording ? <MicOffIcon /> : <MicIcon />}
           </Button>
         </div>
       </div>

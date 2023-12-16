@@ -22,6 +22,8 @@ full_doc_retriever = get_parent_docs_retriever(PINECONE_INDEX_NAME, EMBEDDINGS, 
 @cl.on_chat_start
 async def on_chat_start():
     directory_faiss = "faiss_index"
+    directory = "user_data"
+
     if os.path.exists(directory_faiss):
       shutil.rmtree(directory_faiss)
       print(f"The directory {directory_faiss} has been deleted.")
@@ -42,7 +44,6 @@ async def on_chat_start():
     await cl.sleep(2)
     for file in files:
         file_buffer = io.BytesIO(file.content)
-        directory = "user_data"
         if not os.path.exists(directory):
             os.makedirs(directory)
 
@@ -85,6 +86,7 @@ async def on_chat_start():
             },
         )
     await msg.send()
+    print("now ask question")
     # Let the user know that the system is ready
     msg.content = f"Processing Completed. You can now ask questions!"
     await msg.update()
