@@ -15,7 +15,7 @@ import { useState } from "react";
 const CHAINLIT_SERVER = "http://localhost:8000";
 const userEnv = {};
 
-export function Playground() {
+export function Lawbot() {
   const { connect } = useChatSession();
   const [inputValue, setInputValue] = useState("");
   const { sendMessage } = useChatInteract();

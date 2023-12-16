@@ -44,7 +44,7 @@ def update_vectorb():
         upload_dir = 'update_docs'
         print("I AM BEING CALLLED")
         os.makedirs(upload_dir, exist_ok=True)
-
+ 
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
             filename = file.filename
