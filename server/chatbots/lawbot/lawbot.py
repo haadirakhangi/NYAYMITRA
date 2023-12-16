@@ -15,7 +15,7 @@ vectordb = Pinecone.from_existing_index(PINECONE_INDEX_NAME, EMBEDDINGS, text_ke
 @cl.on_chat_start
 def start_chat():
     # chain = nyaymitra_kyr_chain(full_doc_retriever)
-    chain = nyaymitra_kyr_chain(vectordb)
+    chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
     cl.user_session.set("chain", chain)
 
 @cl.on_message
@@ -37,6 +37,7 @@ async def main(message: cl.Message):
     final_answer = response.get('answer')
     source_documents = response.get('source_documents', [])
     source_pdfs = [source_document.metadata['source'] for source_document in source_documents]
+    print('RESPONSE:', final_answer)
     print('SOURCE DOCUMENTS:',source_pdfs)
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
