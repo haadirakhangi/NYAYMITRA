@@ -26,6 +26,9 @@ type Lawyer = {
 
 type LawyerCardProps = Lawyer;
 
+let rows = 4;
+let cols = 33;
+
 const LawyerCard: React.FC<LawyerCardProps> = ({ id, name, ratings, location, experience, practiceAreas, image }) => {
   const [value, setValue] = useState(ratings);
 
@@ -39,6 +42,15 @@ const LawyerCard: React.FC<LawyerCardProps> = ({ id, name, ratings, location, ex
   const remainingPracticeAreas = practiceAreas.slice(MAX_DISPLAYED_PRACTICE_AREAS);
   const morePracticeAreasCount = remainingPracticeAreas.length;
 
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+
+  const openForm = (): void => {
+    setIsFormOpen(true);
+  };
+
+  const closeForm = (): void => {
+    setIsFormOpen(false);
+  };
   return (
     <div className=''>
       {/* <div style={{ marginRight: '20px' }}>
@@ -99,8 +111,32 @@ const LawyerCard: React.FC<LawyerCardProps> = ({ id, name, ratings, location, ex
                 <br />
                 <span className="text-teal-600 text-md font-semibold flex flex-row items-center">Ratings : <Rating name="read-only" value={value} precision={0.5} readOnly /></span>
               </div>
+              <div>
+                <div className="form-popup" id={`myForm${id}`} style={{ display: isFormOpen ? 'block' : 'none' }}>
+                  <form action="/action_page.php" className="form-container">
+                    <h1>Connect</h1>
 
-              <a href="#" className="m-3 inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-black rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+                    <label><b>Date : </b></label><br />
+                    <input type="date" placeholder="Enter Date" name="date" required />
+                    <br />
+
+                    <label>Time:</label> <br/>
+                    <input type="time" placeholder="Enter Time" id="time" name="time" required/><br/>
+
+                    <label><b>Subject</b></label>
+                    <input type="text" placeholder="Enter Subject" name="subject" required />
+
+                    <label><b>Description</b></label><br />
+                    <textarea id="description" name="description" rows={rows} cols={cols} className='bg-gray-100' placeholder='Enter Description'>
+                    </textarea>
+
+
+                    <button type="submit" className="btn">Get Connected</button>
+                    <button type="button" className="btn cancel" onClick={closeForm}>Close</button>
+                  </form>
+                </div>
+              </div>
+              <a href="#" onClick={openForm} className="m-3 inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-black rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
                 Get Connected
               </a>
             </div>
