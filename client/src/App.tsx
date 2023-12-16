@@ -23,7 +23,6 @@ function App() {
         <Route path="/chatbot-narrative-legalism" element={<NarrativeLegalism />} />
         <Route path="/chatbot-document-summarization" element={<DocumentSummarization />} />
         <Route path="/" element={<Landing />} />
-        <Route path="/chatbot" element={<Playground />} />
         <Route path="/user-login" element={<Login />} />
         <Route path="/user-register" element={<Register />} />
         <Route path="/advo-register" element={<AdvoRegister />} />
