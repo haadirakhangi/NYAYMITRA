@@ -1,6 +1,7 @@
 import React from 'react';
 import img from './assets/images/logo.svg'
 import './assets/css/bd-coming-soon.css'
+import { NavLink } from 'react-router-dom';
 
 const ComingSoonPage: React.FC = () => {
     return (
@@ -12,8 +13,8 @@ const ComingSoonPage: React.FC = () => {
                     </div>
                 </div>
                 <div className='maintain'>
-                    <button className='nav'>Advocate</button>
-                    <button className='nav'>User</button>
+                    <NavLink to='/advo-login'><button className='nav'>Advocate</button></NavLink>
+                    <NavLink to='/user-login'><button className='nav'>User</button></NavLink>
                 </div>
             </header>
 

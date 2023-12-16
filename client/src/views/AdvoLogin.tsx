@@ -115,7 +115,7 @@ const AdvoLogin: React.FC = () => {
           <h1 style={{ marginTop: "20px", marginLeft: "10px" }}>
             Don't have an Account ?{" "}
             <span>
-              <NavLink to="/advoregister">
+              <NavLink to="/advo-register">
                 <strong>Get Started</strong>
               </NavLink>
             </span>
