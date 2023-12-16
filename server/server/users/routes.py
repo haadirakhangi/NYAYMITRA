@@ -5,6 +5,8 @@ from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
 import os
+import sys
+import io
 import shutil
 from faster_whisper import WhisperModel
 
@@ -132,8 +134,10 @@ def voice_chat():
             print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
             for segment in segments:
                 print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+                text2 = segment.text
             text = str([segment.text for segment in segments])
-            print(segments)
+            print("Text",text)
+            print("Text2",text2)
             shutil.rmtree('upload_voice')
             return jsonify({"message": text, "email": "email", "response": True}), 200
 
@@ -163,3 +167,21 @@ def getuser():
 def user_logout():
     session.pop('user_id', None)
     return jsonify({'message': 'User logged out successfully'})
+
+
+@user_bp.route('/document-summarization', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def document_summarization():
+    directory = "chatbots/document_sum/user_data"
+    directory_faiss = "chatbots/document_sum/faiss_index"
+    for file in request.files.getlist('documents'):
+        print("doc sended")
+        filename = file.filename
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        # Creating The Directory For Faiss Index
+        if not os.path.exists(directory_faiss):
+            os.makedirs(directory_faiss)
+        filepath = os.path.join(directory, filename)
+        file.save(filepath)
+    return jsonify({"message": "User logged in successfully","response": True}), 200

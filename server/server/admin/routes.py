@@ -1,6 +1,6 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import Common_Law,Civil_Law,Criminal_Law,Admin,Advocate
+from server.models import User,LawCatgBenf,Admin,Advocate
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
@@ -20,21 +20,21 @@ def login_required(f):
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-@admin_bp.route('/login', methods=['POST'])
-@cross_origin(supports_credentials=True)
-def admin_login():
-    data = request.json
-    email = data.get("email")
-    password = data.get("password")
+# @admin_bp.route('/login', methods=['POST'])
+# @cross_origin(supports_credentials=True)
+# def admin_login():
+#     data = request.json
+#     email = data.get("email")
+#     password = data.get("password")
 
-    # Check if the provided email exists
-    admin = Admin.query.filter_by(email=email).first()
+#     # Check if the provided email exists
+#     admin = Admin.query.filter_by(email=email).first()
 
-    if admin and bcrypt.check_password_hash(admin.password, password):
-        session["admin_id"] = admin.id
-        return jsonify({"message": "Admin logged in successfully", "response": True}), 200
+#     if admin and bcrypt.check_password_hash(admin.password, password):
+#         session["admin_id"] = admin.id
+#         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
 
-    return jsonify({"message": "Invalid credentials", "response": False}), 401
+#     return jsonify({"message": "Invalid credentials", "response": False}), 401
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -44,7 +44,7 @@ def update_vectorb():
         upload_dir = 'update_docs'
         print("I AM BEING CALLLED")
         os.makedirs(upload_dir, exist_ok=True)
-
+ 
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
             filename = file.filename
@@ -84,46 +84,62 @@ def admin_register():
 @admin_bp.route('/dashboard')
 @login_required
 def dashboard():
-   # Fetch laws from different categories
-    common_laws = Common_Law.query.all()
-    criminal_laws = Criminal_Law.query.all()
-    civil_laws = Civil_Law.query.all()
+    # Join the LawCatgBenf table with the User and Advocate tables using foreign keys
+    query = db.session.query(LawCatgBenf.category,
+                             User.city.label('location'),
+                             User.state,
+                             db.func.count().label('count'))
 
-    # Segregate laws according to sub-categories
-    common_subcategories = set(law.sub_category for law in common_laws)
-    criminal_subcategories = set(law.sub_category for law in criminal_laws)
-    civil_subcategories = set(law.sub_category for law in civil_laws)
+    # Join with User table
+    query = query.join(User, LawCatgBenf.user_id == User.user_id)
 
-    # Count sub-category occurrences in each location
-    common_counts = {}
-    criminal_counts = {}
-    civil_counts = {}
+    # Group by category, location, and state
+    query = query.group_by(LawCatgBenf.category, 'location', User.state)
 
-    # Additional insights according to location and sub-categories
-    location_insights = {}
+    # Execute the query
+    user_results = query.all()
 
-    for law in common_laws:
-        common_counts.setdefault(law.location, {}).setdefault(law.sub_category, 0)
-        common_counts[law.location][law.sub_category] += 1
+    # Join the LawCatgBenf table with the Advocate table using foreign keys
+    query = db.session.query(LawCatgBenf.category,
+                             Advocate.city.label('location'),
+                             Advocate.state,
+                             db.func.count().label('count'))
 
-        # Location insights
-        location_insights.setdefault(law.location, {}).setdefault('common', []).append(law.sub_category)
+    # Join with Advocate table
+    query = query.join(Advocate, LawCatgBenf.advocate_id == Advocate.advocate_id)
 
-    for law in criminal_laws:
-        criminal_counts.setdefault(law.location, {}).setdefault(law.sub_category, 0)
-        criminal_counts[law.location][law.sub_category] += 1
+    # Group by category, location, and state
+    query = query.group_by(LawCatgBenf.category, 'location', Advocate.state)
 
-        # Location insights
-        location_insights.setdefault(law.location, {}).setdefault('criminal', []).append(law.sub_category)
+    # Execute the query
+    advocate_results = query.all()
 
-    for law in civil_laws:
-        civil_counts.setdefault(law.location, {}).setdefault(law.sub_category, 0)
-        civil_counts[law.location][law.sub_category] += 1
+    # Combine user and advocate results into a single dictionary
+    insights = {}
 
-        # Location insights
-        location_insights.setdefault(law.location, {}).setdefault('civil', []).append(law.sub_category)
+    for result in user_results:
+        category = result.category
+        location = result.location
+        state = result.state
+        count = result.count
 
-        return jsonify({"Insights": "Created succesfully", "response": True}), 200
+        key = (location, state)
+        if key not in insights:
+            insights[key] = {}
+        insights[key][category] = count
+
+    for result in advocate_results:
+        category = result.category
+        location = result.location
+        state = result.state
+        count = result.count
+
+        key = (location, state)
+        if key not in insights:
+            insights[key] = {}
+        insights[key][category] = count
+
+    return jsonify(insights)
     
 @admin_bp.route('/advocate_details')
 @login_required
