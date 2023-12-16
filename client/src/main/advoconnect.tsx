@@ -27,7 +27,7 @@ type Lawyer = {
 type LawyerCardProps = Lawyer;
 
 let rows = 4;
-let cols = 33;
+let cols = 163;
 
 const LawyerCard: React.FC<LawyerCardProps> = ({ id, name, ratings, location, experience, practiceAreas, image }) => {
   const [value, setValue] = useState(ratings);

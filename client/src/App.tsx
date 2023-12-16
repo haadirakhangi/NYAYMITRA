@@ -17,6 +17,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/chatbot" element={<Playground />} />
         <Route path="/user-login" element={<Login />} />
         <Route path="/user-register" element={<Register />} />

@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 import torch
-
+from langchain.output_parsers import PydanticOutputParser
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, PromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
@@ -11,9 +11,10 @@ from langchain.document_loaders import PyPDFLoader, DirectoryLoader, Unstructure
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.vectorstores import Pinecone, FAISS
-from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory,ConversationBufferMemory
 from langchain.chains import LLMChain, RetrievalQA, ConversationalRetrievalChain
 from langchain.storage import LocalFileStore
+from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.storage._lc_store import create_kv_docstore
 import openai
 import pinecone
@@ -26,7 +27,7 @@ import nltk
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
 load_dotenv()
-
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY_FOR_LAWBOT")
 PINECONE_ENV = os.getenv("PINECONE_ENV")
 PINECONE_INDEX_NAME = 'nyaymitra'
@@ -130,6 +131,35 @@ def nyaymitra_kyr_chain(vectordb):
       memory=memory,
       return_source_documents=True,
       combine_docs_chain_kwargs={"prompt": prompt_template}
+    )
+    return chain
+
+def nyaymitra_kyr_chain_with_local_llm(vectordb):
+    llm = HuggingFacePipeline.from_model_id(model_id="gpt2", task="text-generation", max_new_tokens=2000, max_tokens=2000, max_length=759)
+    system_message_prompt = SystemMessagePromptTemplate.from_template(
+       """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
+        Important Instructions:
+        1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
+        2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
+        3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
+        LEGAL CONTEXT: \n{context}"""
+    )
+    human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
+    
+    prompt_template = ChatPromptTemplate.from_messages([
+            system_message_prompt,
+            human_message_prompt,
+        ])  
+    
+    retriever = vectordb.as_retriever()
+    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
+
+    chain = ConversationalRetrievalChain.from_llm(
+      llm=llm,
+      retriever=retriever,
+      memory=memory,
+      return_source_documents=True,
+      # combine_docs_chain_kwargs={"prompt": prompt_template}
     )
     return chain
 
@@ -260,3 +290,84 @@ def nyaymitra_kyr_chain_with_parent_docs(full_doc_retriever):
       combine_docs_chain_kwargs={"prompt": prompt_template}
     )
     return chain
+
+def admin_pdf_describer(pdf):
+    text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+    print("Splitted into text ")
+    text_chunks = text_splitter.split_documents(pdf)
+    print('Chunks created')
+
+    # Create a FAISS instance for vector database from 'data'
+    vectordb = FAISS.from_documents(documents=text_chunks,
+                                    embedding=EMBEDDINGS)
+    print("saved into local store")
+
+    # Create a retriever for querying the vector database
+    retriever = vectordb.as_retriever(search_kwargs={"k": 3})  
+    # Create a retriever for querying the vector database
+    retriever = vectordb.as_retriever()
+
+    ## Initializing the LLM:
+    llm = ChatOpenAI(temperature=0,openai_api_key = OPENAI_API_KEY)
+
+    ## Initializng the Memory:
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
+    parser = PydanticOutputParser()
+
+    prompt_template = """
+    Format the output in json format using the context and quetsion given below.
+
+    parser = PydanticOutputParser(pydantic_object=Actor)
+    CONTEXT: {context}
+    QUESTION: {question}
+    """
+
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"],
+        partial_variables={"format_instructions": parser.get_format_instructions()},
+    )
+
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm, 
+        chain_type="stuff",
+        memory = memory,
+        retriever=retriever, 
+        verbose=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+
+    query = """
+      You are a Legal Law agent, Understanding all laws and related jargon.
+      You will be a given some document and your task is to categorize it in to the following laws.
+      Labor Rights:
+      Laws related to employment, workers' rights, wages, working conditions, etc
+
+      Consumer Rights:
+      Laws protecting consumers in terms of product quality, safety, and fair trade practices
+
+      Property Rights:
+      Laws related to ownership, transfer, and use of property
+
+      Family Rights:
+      Laws governing marriage, divorce, child custody, and adoption
+
+      Civil Rights:
+      Laws protecting individuals from discrimination, ensuring freedom of speech, etc
+
+      Criminal Rights:
+      Laws related to criminal procedures, rights of the accused, etc
+
+      Health and Safety Rights:
+      Laws related to public health, safety regulations, etc
+
+      Environmental Rights:
+      Laws addressing environmental protection and conservation
+
+      Based on the document Retrieve Accurately 2 things:
+      1. On which Law The document is related to and
+      2. What are the categories of people that are Beneficiary for that particular law.
+    """
+    response = qa_chain.run(query)
+
+    return response
