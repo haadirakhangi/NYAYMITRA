@@ -1,8 +1,5 @@
 from server import db
 from datetime import datetime
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.mutable import MutableList
-
 
 class User(db.Model):
     """User of the app."""
@@ -99,3 +96,9 @@ class LawCatgBenf(db.Model):
     doc_name=db.Column(db.String(50),nullable=False)
     category=db.Column(db.String(50))
     beneficiaries=db.Column(db.String(255), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
+    advocate_id = db.Column(db.Integer, db.ForeignKey('advocate.advocate_id'), nullable=True)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Law Category user_id={self.user_id} advocate_id={self.advocate_id} category={self.category} beneficiaries={self.beneficiaries}>'
