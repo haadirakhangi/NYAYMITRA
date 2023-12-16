@@ -66,9 +66,9 @@ const UserLogin: React.FC = () => {
                 <NavLink to='/user-register'>Register here</NavLink>
               </span>
             </h1>
-            <button className='btn mb-[10px] mx-auto lg:mx-0 self-center mt-5' type='submit'>
+            <NavLink to='/userhome'><button className='btn mb-[10px] mx-auto lg:mx-0 self-center mt-5' type='submit'>
               Submit
-            </button>
+            </button></NavLink>
           </form>
         </div>
       </div>
