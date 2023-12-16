@@ -20,21 +20,21 @@ def login_required(f):
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-# @admin_bp.route('/login', methods=['POST'])
-# @cross_origin(supports_credentials=True)
-# def admin_login():
-#     data = request.json
-#     email = data.get("email")
-#     password = data.get("password")
+@admin_bp.route('/login', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def admin_login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
 
-#     # Check if the provided email exists
-#     admin = Admin.query.filter_by(email=email).first()
+    # Check if the provided email exists
+    admin = Admin.query.filter_by(email=email).first()
 
-#     if admin and bcrypt.check_password_hash(admin.password, password):
-#         session["admin_id"] = admin.id
-#         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
+    if admin and bcrypt.check_password_hash(admin.password, password):
+        session["admin_id"] = admin.id
+        return jsonify({"message": "Admin logged in successfully", "response": True}), 200
 
-#     return jsonify({"message": "Invalid credentials", "response": False}), 401
+    return jsonify({"message": "Invalid credentials", "response": False}), 401
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -42,17 +42,23 @@ def update_vectorb():
     try:
         # Create 'uploads' directory if it doesn't exist
         upload_dir = 'update_docs'
-        print("I AM BEING CALLLED")
+        print("Update vectordb")
         os.makedirs(upload_dir, exist_ok=True)
- 
+
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
             filename = file.filename
             filepath = os.path.join(upload_dir, filename)
-            
-            # Save the file to the 'uploads' directory
             file.save(filepath)
         vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+
+        # TO DO HATIM PLEASE KAR DE------------
+        # LOOP ON EACH FILE IN DIRECTORY
+            # ASYNC vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+            # ASYNC json = categorize_law
+            # ADD FILE NAME IN JSON
+            # STORE IN DATABASE
+            # IN NYAYMITRA FOLDER: STORE THE FILE BASED ON THE CATEGORY, basically subfolders banenge
         shutil.rmtree(upload_dir)
         return jsonify({"message": "Documents saved successfully", "response": True}), 200
     except Exception as e:
