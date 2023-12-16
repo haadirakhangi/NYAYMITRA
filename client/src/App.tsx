@@ -6,7 +6,7 @@ import AdvoLogin from "./views/AdvoLogin";
 import AdminDashboard from "./views/AdminDashboard";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from "./main/landing";
-
+import Lawyers from "./main/advoconnect";
 
 function App() {
 
@@ -20,6 +20,7 @@ function App() {
         <Route path="/advo-login" element={<AdvoLogin />} />
         <Route path="/admin-home" element={<AdminDashboard />} />
         <Route path="/landing" element={<Landing />} />
+        <Route path="/advoconnect" element={<Lawyers />} />
       </Routes>
     </Router>
   );
