@@ -195,8 +195,10 @@ def create_faiss_vectordb_for_document_qna(user_data_directory,embeddings):
 
 
 def autocategorize_law(file_path, embeddings= EMBEDDINGS):
+    loader = UnstructuredFileLoader(file_path=file_path)
+    docs = loader.load()
     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
-    text_chunks = text_splitter.split_documents(file_path)
+    text_chunks = text_splitter.split_documents(docs)
 
     vectordb = FAISS.from_documents(documents=text_chunks, embedding=embeddings)
     retriever = vectordb.as_retriever()
