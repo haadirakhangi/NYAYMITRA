@@ -6,7 +6,7 @@ from functools import wraps
 from datetime import datetime
 import os
 import shutil
-from chatbots.utils import add_data_to_pinecone_vectorstore
+from chatbots.utils import add_data_to_pinecone_vectorstore,autocategorize_law
 
 def login_required(f):
     @wraps(f)
@@ -42,23 +42,21 @@ def update_vectorb():
     try:
         # Create 'uploads' directory if it doesn't exist
         upload_dir = 'update_docs'
+        real_dir = 'nyaymitra_data'
         print("Update vectordb")
-        os.makedirs(upload_dir, exist_ok=True)
+        if os.path.exists(upload_dir):
+            os.makedirs(upload_dir, exist_ok=True)
 
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
             filename = file.filename
             filepath = os.path.join(upload_dir, filename)
             file.save(filepath)
-        vectordb = add_data_to_pinecone_vectorstore(upload_dir)
-
-        # TO DO HATIM PLEASE KAR DE------------
-        # LOOP ON EACH FILE IN DIRECTORY
-            # ASYNC vectordb = add_data_to_pinecone_vectorstore(upload_dir)
-            # ASYNC json = categorize_law
-            # ADD FILE NAME IN JSON
-            # STORE IN DATABASE
-            # IN NYAYMITRA FOLDER: STORE THE FILE BASED ON THE CATEGORY, basically subfolders banenge
+            vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+            json = autocategorize_law(filepath)
+            print("the output json received",json)
+            # real_filepath = os.path.join(real_dir,json.category ,filename)
+            # file.save(real_dir)
         shutil.rmtree(upload_dir)
         return jsonify({"message": "Documents saved successfully", "response": True}), 200
     except Exception as e:
