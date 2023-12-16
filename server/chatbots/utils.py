@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 import torch
-
+from langchain.output_parsers import PydanticOutputParser
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, PromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
@@ -11,7 +11,7 @@ from langchain.document_loaders import PyPDFLoader, DirectoryLoader, Unstructure
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.vectorstores import Pinecone, FAISS
-from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory,ConversationBufferMemory
 from langchain.chains import LLMChain, RetrievalQA, ConversationalRetrievalChain
 from langchain.storage import LocalFileStore
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
@@ -27,7 +27,7 @@ import nltk
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
 load_dotenv()
-
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY_FOR_LAWBOT")
 PINECONE_ENV = os.getenv("PINECONE_ENV")
 PINECONE_INDEX_NAME = 'nyaymitra'
@@ -290,3 +290,84 @@ def nyaymitra_kyr_chain_with_parent_docs(full_doc_retriever):
       combine_docs_chain_kwargs={"prompt": prompt_template}
     )
     return chain
+
+def admin_pdf_describer(pdf):
+    text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+    print("Splitted into text ")
+    text_chunks = text_splitter.split_documents(pdf)
+    print('Chunks created')
+
+    # Create a FAISS instance for vector database from 'data'
+    vectordb = FAISS.from_documents(documents=text_chunks,
+                                    embedding=EMBEDDINGS)
+    print("saved into local store")
+
+    # Create a retriever for querying the vector database
+    retriever = vectordb.as_retriever(search_kwargs={"k": 3})  
+    # Create a retriever for querying the vector database
+    retriever = vectordb.as_retriever()
+
+    ## Initializing the LLM:
+    llm = ChatOpenAI(temperature=0,openai_api_key = OPENAI_API_KEY)
+
+    ## Initializng the Memory:
+    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
+    parser = PydanticOutputParser()
+
+    prompt_template = """
+    Format the output in json format using the context and quetsion given below.
+
+    parser = PydanticOutputParser(pydantic_object=Actor)
+    CONTEXT: {context}
+    QUESTION: {question}
+    """
+
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"],
+        partial_variables={"format_instructions": parser.get_format_instructions()},
+    )
+
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm, 
+        chain_type="stuff",
+        memory = memory,
+        retriever=retriever, 
+        verbose=True,
+        chain_type_kwargs={"prompt": PROMPT}
+    )
+
+    query = """
+      You are a Legal Law agent, Understanding all laws and related jargon.
+      You will be a given some document and your task is to categorize it in to the following laws.
+      Labor Rights:
+      Laws related to employment, workers' rights, wages, working conditions, etc
+
+      Consumer Rights:
+      Laws protecting consumers in terms of product quality, safety, and fair trade practices
+
+      Property Rights:
+      Laws related to ownership, transfer, and use of property
+
+      Family Rights:
+      Laws governing marriage, divorce, child custody, and adoption
+
+      Civil Rights:
+      Laws protecting individuals from discrimination, ensuring freedom of speech, etc
+
+      Criminal Rights:
+      Laws related to criminal procedures, rights of the accused, etc
+
+      Health and Safety Rights:
+      Laws related to public health, safety regulations, etc
+
+      Environmental Rights:
+      Laws addressing environmental protection and conservation
+
+      Based on the document Retrieve Accurately 2 things:
+      1. On which Law The document is related to and
+      2. What are the categories of people that are Beneficiary for that particular law.
+    """
+    response = qa_chain.run(query)
+
+    return response
