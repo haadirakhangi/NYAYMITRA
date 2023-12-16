@@ -59,8 +59,15 @@ def test():
     user_query = request.args.get('query')
 
     if user_query:
-        result = get_specialization_from_text(user_input=user_query)
-        return result
+
+        spec = get_specialization_from_text(user_input=user_query)
+        query = f"SELECT * FROM advocate WHERE specialization={spec}"
+        result = db.session.execute(query)
+
+        # result to a list of dictionaries for JSON response
+        result_dict = [dict(row) for row in result]
+        return jsonify(result_dict)
+        
     else:
         return "Please provide a query parameter."
 
