@@ -53,6 +53,16 @@ async def main(message: cl.Message):
     print("Most repeating File:-",most_common_filename)
     # Extract the most common filename into a variable
     result_filename = most_common_filename
+    # Extracting Glossary
+    glossary_text = ''
+    preprocessed_text = set(preprocess_text(final_answer))
+    for i in preprocessed_text:
+        for j in glossary.keys():
+            if i in j:
+                glossary_text +="<b>" + j + " : " + "</b>" + glossary[j] + "<br/> "
+
+    print('GLOSSARY', glossary_text)
+    
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
     else:
@@ -66,7 +76,7 @@ async def main(message: cl.Message):
         print('Response from Flask server:', response.text)
     else:
         print('Error occurred:', response.status_code)
-        
+
     text_elements = []
     if source_documents:
         for source_idx, source_doc in enumerate(source_documents):
@@ -81,6 +91,9 @@ async def main(message: cl.Message):
             trans_output += f"\nSources: {', '.join(source_names)}"
         else:
             trans_output += "\nNo sources found"
+
+    trans_output += glossary_text
+
 
     await cl.Message(content=trans_output,author="Tool 1",elements=text_elements).send()
 
