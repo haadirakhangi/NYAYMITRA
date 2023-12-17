@@ -25,8 +25,10 @@ from lingua import Language, LanguageDetectorBuilder
 import iso639
 from deep_translator import GoogleTranslator
 import os
+import json
 import nltk
 import time
+import spacy
 
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -57,6 +59,13 @@ EMBEDDINGS = HuggingFaceBgeEmbeddings(
     model_kwargs={'device': DEVICE_TYPE},
     encode_kwargs={'normalize_embeddings': True}# Set True to compute cosine similarity
 )
+
+# Load Glossary
+with open('glossary.json', 'r') as f:
+   glossary = f.read()
+GLOSSARY = json.loads(glossary)
+
+NLP = spacy.load("en_core_web_lg") 
 
 # Initialize Pinecone
 pinecone.init(
@@ -278,7 +287,16 @@ def finetune_for_document_drafting(file_path):
       return model_id
     if status in ['failed', 'cancelled']:
        return 'FINETUNING FAILED'
-
+    
+def preprocess_text(text, nlp = NLP):
+  excluded_tags = {"NOUN", "PROPN"}
+  doc = nlp(text)
+  filtered_tokens = []
+  for token in doc:
+      if token.is_stop or token.is_punct or token.pos_ not in excluded_tags:
+          continue
+      filtered_tokens.append(token.lemma_)
+  return (filtered_tokens)
 
 # ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
  
