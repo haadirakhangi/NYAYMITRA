@@ -5,6 +5,8 @@ flask-bcrypt
 flask_session
 flask-migrate
 langchain
+accelerate
+transformers
 pinecone-client
 openai
 tiktoken
@@ -17,6 +19,6 @@ faiss-cpu
 deep_translator
 python-dotenv
 torch
-unstructured
+unstructured[pdf]
 unstructured[docx]
 faster-whisper

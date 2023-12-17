@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, AutoModelForSeq2SeqLM
 from langchain.output_parsers import PydanticOutputParser
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
@@ -18,6 +19,7 @@ from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.storage._lc_store import create_kv_docstore
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 import openai
+import ast
 import pinecone
 from lingua import Language, LanguageDetectorBuilder
 import iso639
@@ -97,7 +99,7 @@ def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_N
     vectorstore = Pinecone(
       index = index,
       embedding = embeddings,
-      text_key = 'key'
+      text_key = 'key'    
     )
 
     vectorstore.add_documents(docs)
@@ -136,7 +138,18 @@ def nyaymitra_kyr_chain(vectordb):
     return chain
 
 def nyaymitra_kyr_chain_with_local_llm(vectordb):
-    llm = HuggingFacePipeline.from_model_id(model_id="gpt2", task="text-generation", max_new_tokens=2000, max_tokens=2000, max_length=759)
+    # llm = HuggingFacePipeline.from_model_id(model_id="gpt2", task="text-generation", max_new_tokens=2000, max_tokens=2000, max_length=759)
+    model_id = 'gpt2'
+    model = AutoModelForCausalLM.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    pipe = pipeline(
+      'text-generation',
+      model = model, 
+      tokenizer = tokenizer,
+      max_length = 1000
+    )
+
+    llm = HuggingFacePipeline(pipe)
     system_message_prompt = SystemMessagePromptTemplate.from_template(
        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
         Important Instructions:
@@ -203,17 +216,7 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     vectordb = FAISS.from_documents(documents=text_chunks, embedding=embeddings)
     retriever = vectordb.as_retriever()
 
-    llm = ChatOpenAI(temperature=0,openai_api_key = OPENAI_API_KEY)
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
-    
-    category_schema = ResponseSchema(name='category', description = 'From the mentioned categories, which category does the given document belongs to?')
-
-    beneficiary_schema = ResponseSchema(name='beneficiary', description = 'List of beneficiaries who are benefited from this law document. For example: tribals, senior citizens, persons with disability, etc.')
-
-    response_schemas = [category_schema, beneficiary_schema]
-       
-    output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
-    format_instructions = output_parser.get_format_instructions()
+    llm = ChatOpenAI(model = 'gpt-3.5-turbo-1106', temperature=0)
 
     prompt_template = """
     You are a Legal Law agent, Understanding all laws and related jargon.  \
@@ -223,21 +226,19 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     QUESTION: {question}
     CONTEXT: {context}
 
-    {format_instructions}
+    Format the output as a JSON where the keys are category and beneficiary with their corresponding values
     """
 
     prompt = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"])
-    
-    formatted_prompt = prompt.format_prompt(format_instructions= format_instructions)
+        template=prompt_template, input_variables=["question", "context"])
+    print('I AM HERE')
 
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm, 
         chain_type="stuff",
-        memory = memory,
         retriever=retriever, 
         verbose=True,
-        chain_type_kwargs={"prompt": formatted_prompt}
+        chain_type_kwargs={"prompt": prompt}
     )
 
     query = """
@@ -251,10 +252,13 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     Health and Safety Rights:Laws related to public health, safety regulations, etc.\n
     Environmental Rights:Laws addressing environmental protection and conservation\n
     """
+
     response = qa_chain.run(query)
-    output_json = output_parser.parse(response.content)
+    output_json = ast.literal_eval(response)
     print('OUTPUT JSON FOR CATEGORIZATION:\n',output_json)
+    print('TYPE', type(output_json))
     return output_json
+
 
 # ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
  
