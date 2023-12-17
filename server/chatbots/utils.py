@@ -235,7 +235,7 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
         verbose=True,
         chain_type_kwargs={"prompt": prompt}
     )
-
+    print("Now there is shit hapeenning")
     query = """
     Categorize the given law document into one of the following categories. After categorizing it, find out the categories of people that are benefited from this law document.
     Labor Rights:Laws related to employment, workers' rights, wages, working conditions, etc\n

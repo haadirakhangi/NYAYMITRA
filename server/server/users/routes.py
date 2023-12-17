@@ -1,13 +1,16 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import User
+from server.models import User,Advocate
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
 import os
 import sys
 import io
+from openai import OpenAI
+import openai
 import shutil
+import ast
 from faster_whisper import WhisperModel
 
 def login_required(f):
@@ -184,4 +187,40 @@ def document_summarization():
             os.makedirs(directory_faiss)
         filepath = os.path.join(directory, filename)
         file.save(filepath)
+    return jsonify({"message": "User logged in successfully","response": True}), 200
+
+
+prompt_summary = """As a legal assistant, your role is to determine the appropriate legal specialization based on user queries. The available specializations are: Criminal Court, Civil Court, Immigration Court, Family Law, Personal Injury Law, Real Estate Law, and Corporate Law. Focus on identifying one of these specializations. Given a user query related to legal matters, your task is to analyze the content and discern all the applicable legal specialization. The output should be in JSON format, with the key "specialization_name" and the corresponding values are a list of identified legal specializations.
+
+User Query: {query}
+"""
+
+def get_specialization_from_text(user_input):
+    # Use OpenAI API to analyze user input and extract specialization
+    client = OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo-1106",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt_summary.format(query=user_input),
+            },
+        ],
+        response_format={"type": "json_object"},
+    )
+
+    # Extract the recognized specialization from the API response
+    recognized_specialization = ast.literal_eval(response.choices[0].message.content)
+    return recognized_specialization["specialization_name"]
+
+
+@user_bp.route('/get-advocate', methods=['POST'])
+@cross_origin(supports_credentials=True)
+def get_advocate():
+    data = request.json
+    search_value = data.get('search', '')
+    spec = get_specialization_from_text(user_input=search_value)
+    print("Specualizaton:-----------------",spec)
+    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter_by(specialization=spec).all()]
+    print("Result",advocates_data)
     return jsonify({"message": "User logged in successfully","response": True}), 200

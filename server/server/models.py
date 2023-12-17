@@ -43,6 +43,27 @@ class Advocate(db.Model):
     # Add boolean field
     verified = db.Column(db.Boolean, default=False)
 
+    def to_dict(self):
+        return {
+            'advocate_id': self.advocate_id,
+            'fname': self.fname,
+            'lname': self.lname,
+            'email': self.email,
+            'office_address': self.office_address,
+            'pincode': self.pincode,
+            'state': self.state,
+            'city': self.city,
+            'phone_number': self.phone_number,
+            'experience': self.experience,
+            'specialization': self.specialization,
+            'court_type': self.court_type,
+            'languages': self.languages,
+            'rating': self.rating,
+            'date_joined': self.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
+            'resume': self.resume.decode('utf-8') if self.resume else None,
+            'verified': self.verified
+        }
+    
     def __repr__(self):
         return f'<Advocate user_id={self.advocate_id} email={self.email}>'
 
