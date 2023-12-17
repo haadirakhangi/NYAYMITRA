@@ -19,4 +19,5 @@ python-dotenv
 torch
 unstructured
 unstructured[docx]
+unstructured[pdf]
 faster-whisper

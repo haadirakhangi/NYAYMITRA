@@ -44,11 +44,9 @@ def update_vectorb():
         upload_dir = 'update_docs'
         real_dir = 'nyaymitra_data'
         print("Update vectordb")
-        if os.path.exists(upload_dir):
-            os.makedirs(upload_dir, exist_ok=True)
-
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
+            os.makedirs(upload_dir, exist_ok=True)
             filename = file.filename
             filepath = os.path.join(upload_dir, filename)
             file.save(filepath)
@@ -57,7 +55,7 @@ def update_vectorb():
             print("the output json received",json)
             # real_filepath = os.path.join(real_dir,json.category ,filename)
             # file.save(real_dir)
-        shutil.rmtree(upload_dir)
+            shutil.rmtree(upload_dir)
         return jsonify({"message": "Documents saved successfully", "response": True}), 200
     except Exception as e:
         print("Printing error",e)

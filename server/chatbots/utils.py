@@ -192,7 +192,7 @@ def create_faiss_vectordb_for_document_qna(user_data_directory,embeddings):
   vectordb.save_local(FAISS_INDEX_FILE_PATH)
 
   return vectordb
-
+ 
 
 def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     loader = UnstructuredFileLoader(file_path=file_path)
@@ -214,7 +214,7 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
        
     output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
     format_instructions = output_parser.get_format_instructions()
-
+    print("Gving prompt template")
     prompt_template = """
     You are a Legal Law agent, Understanding all laws and related jargon.  \
     You will be a given some document and your task is to categorize it in to the following laws. \
@@ -227,7 +227,7 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     """
 
     prompt = PromptTemplate(
-        template=prompt_template, input_variables=["context", "question"])
+        template=prompt_template, input_variables=["context", "question","format_instructions"])
     
     formatted_prompt = prompt.format_prompt(format_instructions= format_instructions)
 
@@ -239,7 +239,7 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
         verbose=True,
         chain_type_kwargs={"prompt": formatted_prompt}
     )
-
+    print("Now there is shit hapeenning")
     query = """
     Categorize the given law document into one of the following categories. After categorizing it, find out the categories of people that are benefited from this law document.
     Labor Rights:Laws related to employment, workers' rights, wages, working conditions, etc\n
@@ -252,7 +252,9 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     Environmental Rights:Laws addressing environmental protection and conservation\n
     """
     response = qa_chain.run(query)
+    print("The shit has happened")
     output_json = output_parser.parse(response.content)
+    print("The shit which was happened is now parsed")
     print('OUTPUT JSON FOR CATEGORIZATION:\n',output_json)
     return output_json
 

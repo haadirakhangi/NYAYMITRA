@@ -15,7 +15,8 @@ vectordb = Pinecone.from_existing_index(PINECONE_INDEX_NAME, EMBEDDINGS, text_ke
 @cl.on_chat_start
 def start_chat():
     # chain = nyaymitra_kyr_chain(full_doc_retriever)
-    chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
+    chain = nyaymitra_kyr_chain(vectordb)
+    # chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
     cl.user_session.set("chain", chain)
 
 @cl.on_message
@@ -60,20 +61,20 @@ async def main(message: cl.Message):
 
 
     # source_documents = res["source_documents"]
-    # text_elements = []
-    # if source_documents:
-    #     for source_idx, source_doc in enumerate(source_documents):
-    #         source_name = f"source_{source_idx}"
-    #         # Create the text element referenced in the message
-    #         text_elements.append(
-    #             cl.Text(content=source_doc.page_content, name=source_name)
-    #         )
-    #     source_names = [text_el.name for text_el in text_elements]
+    text_elements = []
+    if source_documents:
+        for source_idx, source_doc in enumerate(source_documents):
+            source_name = f"source_{source_idx}"
+            # Create the text element referenced in the message
+            text_elements.append(
+                cl.Text(content=source_doc.page_content, name=source_name)
+            )
+        source_names = [text_el.name for text_el in text_elements]
 
-    #     if source_names:
-    #         answer += f"\nSources: {', '.join(source_names)}"
-    #     else:
-    #         answer += "\nNo sources found"
+        if source_names:
+            trans_output += f"\nSources: {', '.join(source_names)}"
+        else:
+            trans_output += "\nNo sources found"
 
-    await cl.Message(content=trans_output,author="Tool 1").send()
+    await cl.Message(content=trans_output,author="Tool 1",elements=text_elements).send()
 
