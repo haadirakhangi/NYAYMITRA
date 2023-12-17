@@ -26,6 +26,7 @@ import iso639
 from deep_translator import GoogleTranslator
 import os
 import nltk
+import time
 
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -253,6 +254,28 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     print('OUTPUT JSON FOR CATEGORIZATION:\n',output_json)
     print('TYPE', type(output_json))
     return output_json
+
+def finetune_for_document_drafting(file_path):
+  client = OpenAI()
+  finetune_file = client.files.create(file=open(file_path, "rb"), purpose="fine-tune")
+  print('File uploaded: ', finetune_file)
+  file_id = finetune_file.id
+  fine_tuning_model = 'gpt-3.5-turbo-1106'
+  job = client.fine_tuning.jobs.create(
+    training_file= file_id,
+    model= fine_tuning_model
+  )
+  job_id =job.id
+  client.fine_tuning.jobs.retrieve(job_id)
+  while True:
+    status = client.fine_tuning.jobs.retrieve(job_id).status
+    time.sleep(0.5)
+    print('STATUS',status)
+    if status =='succeeded':
+      model_id = client.fine_tuning.jobs.retrieve(job_id).fine_tuned_model
+      return model_id
+    if status in ['failed', 'cancelled']:
+       return 'FINETUNING FAILED'
 
 
 # ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
