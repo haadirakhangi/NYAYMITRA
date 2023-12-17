@@ -33,7 +33,6 @@ def single_login_required(f):
 
 
 @advocate_bp.route('/register', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def advocate_register():
     data = request.json  # Assuming the data is in form format
     resume_file = request.files.get('resume')
@@ -113,7 +112,6 @@ def save_resume(resume_file):
 
 
 @advocate_bp.route('/login', methods=['POST'])
-@cross_origin(supports_credentials=True)
 @single_login_required
 def advocate_login():
     data = request.json
@@ -139,7 +137,7 @@ def advocate_login():
 
 
 @advocate_bp.route('/', methods=['GET'])
-@cross_origin(supports_credentials=True)
+@login_required
 def get_user():
     # check if user is logged in
     user_id = session.get("advocate_id", None)
@@ -156,7 +154,6 @@ def get_user():
 
 
 @advocate_bp.route('/logout', methods=['GET'])
-@cross_origin(supports_credentials=True)
 @login_required
 def advocate_logout():
     session.pop('advocate_id', None)  # Remove advocate ID from the session

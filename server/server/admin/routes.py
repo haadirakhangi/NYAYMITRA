@@ -23,7 +23,6 @@ def login_required(f):
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin_bp.route('/login', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def admin_login():
     data = request.json
     email = data.get("email")
@@ -39,7 +38,7 @@ def admin_login():
     return jsonify({"message": "Invalid credentials", "response": False}), 401
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@login_required
 def update_vectorb():
     try:
         # Create 'uploads' directory if it doesn't exist
@@ -79,7 +78,6 @@ def update_vectorb():
         return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
     
 @admin_bp.route('/register', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def admin_register():
     data = request.json
     email = data.get("email")

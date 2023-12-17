@@ -6,6 +6,7 @@ from server.config import config
 from flask_cors import CORS
 from flask_cors import cross_origin
 from bs4 import BeautifulSoup
+from datetime import timedelta
 import requests
 from flask_migrate import Migrate
 from server.category import get_response
@@ -19,9 +20,9 @@ url = "https://www.livelaw.in/"  # Replace with the actual URL you want to scrap
 
 def create_app(config_class=config):
     app = Flask(__name__)
-    CORS(app) 
+    CORS(app, supports_credentials=True,origins=['http://127.0.0.1:5174/'])
     app.config.from_object(config)
-
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     db.init_app(app)
     app.config["SESSION_SQLALCHEMY"] = db
     bcrypt.init_app(app)
