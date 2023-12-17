@@ -10,16 +10,44 @@ import {
 
 import './chat_widget.css'; // Import your styles
 
-const App: React.FC = () => {
+const ChatWidget: React.FC = () => {
   const [showChatbot, setShowChatbot] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; message: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
 
-  const handleSendMessage = () => {
-    // Add logic to send user message and receive a chatbot response
-    // Update chatHistory and setLoading accordingly
+  const handleSendMessage = async () => {
+    let newChatHistory = [];
+    let userdata = ""
+    newChatHistory = [...chatHistory, { role: "user", message: userMessage }];
+    setChatHistory(newChatHistory);
+    userdata = userMessage
+    setLoading(true);
+
+    try {
+      // Send userMessage to your chatbot backend and handle the response
+      const response = await fetch("/api/user/chatbot-route", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userdata }),
+      });
+
+      const data = await response.json();
+
+      const chatbotResponse = data.chatbotResponse;
+      const newChatHistoryWithResponse = [...newChatHistory, { role: "chatbot", message: chatbotResponse }];
+      setChatHistory(newChatHistoryWithResponse);
+      setLoading(false)
+
+    } catch (error) {
+      console.error("Error fetching chatbot response:", error);
+    }
+
+    // Clear the input field
+    setUserMessage("");
   };
 
   const handleStartVoiceInput = () => {
@@ -83,4 +111,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default ChatWidget;

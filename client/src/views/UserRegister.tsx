@@ -52,7 +52,7 @@ const UserRegister: React.FC = () => {
       ...formData,
       birthdate: new Date(formData.birthdate).toLocaleDateString(),
     };
-    console.log("Password send",formData)
+    console.log("Password send", formData)
     axios
       .post('http://127.0.0.1:5000/user/register', formattedData)
       .then((response) => {
@@ -67,7 +67,7 @@ const UserRegister: React.FC = () => {
     switch (step) {
       case 1:
         return (
-          
+
           <div>
             <h1 className='text-xl'>Personal Information</h1>
             <div className='flex gap-x-10'>
@@ -107,16 +107,19 @@ const UserRegister: React.FC = () => {
             />
             <label htmlFor='gender'>Gender:</label>
             <select
+              value={formData.gender}
               onChange={handleChange('gender')}
               id='gender'
               name='gender'
               className='outline-none border-b border-b-primary h-[30px] bg-transparent font-secondary w-full placeholder:text-[#757879]'
               required
             >
+              <option value=''>Select Gender</option>
               <option value='Male'>Male</option>
               <option value='Female'>Female</option>
               <option value='other'>Other</option>
             </select>
+
             <button type='button' onClick={() => setStep(2)}>
               Next
             </button>
@@ -153,14 +156,17 @@ const UserRegister: React.FC = () => {
             </div>
             <label htmlFor='state'>State:</label>
             <select
+              value={formData.state}
               onChange={handleChange('state')}
               id='state'
               name='state'
               className='outline-none border-b border-b-primary h-[30px] bg-transparent font-secondary w-full  placeholder:text-[#757879]'
               required
             >
+              <option value=''>Select State</option>
               <option value='Andhra Pradesh'>Andhra Pradesh</option>
             </select>
+
             <button onClick={handleBack}>Back</button>
             <button type='button' onClick={() => setStep(3)}>
               Next
