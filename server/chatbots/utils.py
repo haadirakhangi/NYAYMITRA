@@ -220,13 +220,14 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
 
     prompt_template = """
     You are a Legal Law agent, Understanding all laws and related jargon.  \
-    You will be a given some document and your task is to categorize it in to the following laws. \
+    You will be a given some document and your task is to categorize it in one of the following rights. \
     Format the output in json format using the context and question given below.
 
     QUESTION: {question}
     CONTEXT: {context}
 
-    Format the output as a JSON where the keys are category and beneficiary with their corresponding values
+    Format the output as a dictionary where the keys are "category" and "beneficiary" \
+    with their corresponding values. The values of category should be one string, and the beneficiary's value should be a list of strings
     """
 
     prompt = PromptTemplate(
@@ -254,6 +255,7 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     """
 
     response = qa_chain.run(query)
+    print('RESPONSE:', response)
     output_json = ast.literal_eval(response)
     print('OUTPUT JSON FOR CATEGORIZATION:\n',output_json)
     print('TYPE', type(output_json))
