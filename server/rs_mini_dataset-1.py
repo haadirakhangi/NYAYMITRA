@@ -71,8 +71,8 @@ data["court_type"] = [random.choice(indian_courts) for _ in range(500)]
 data["languages"] = [random.sample(["English", "Hindi", "Bengali", "Tamil", "Telugu", "Marathi", "Gujarati", "Kannada"], random.randint(1, 8)) for _ in range(500)]
 data["rating"] = [round(random.uniform(3.0, 5.0), 2) for _ in range(500)]
 data["date_joined"] = [datetime.utcnow()] * 500
-data["resume"] = [None] * 500
-data["verified"] = [False] * 500
+data["degree_doc"] = [None] * 500
+data["verified"] = [True] * 500
 
 # Create DataFrame
 advocate_df = pd.DataFrame(data)

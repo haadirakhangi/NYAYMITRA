@@ -53,7 +53,7 @@ class Advocate(db.Model):
     date_joined = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Add file field
-    resume = db.Column(db.LargeBinary, nullable=True)
+    degree_doc = db.Column(db.String(100), nullable=True)
     
     # Add boolean field
     verified = db.Column(db.Boolean, default=False)
