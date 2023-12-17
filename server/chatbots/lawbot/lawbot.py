@@ -15,7 +15,8 @@ vectordb = Pinecone.from_existing_index(PINECONE_INDEX_NAME, EMBEDDINGS, text_ke
 @cl.on_chat_start
 def start_chat():
     # chain = nyaymitra_kyr_chain(full_doc_retriever)
-    chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
+    # chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
+    chain = nyaymitra_kyr_chain(vectordb)
     cl.user_session.set("chain", chain)
 
 @cl.on_message
