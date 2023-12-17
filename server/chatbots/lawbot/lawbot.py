@@ -40,27 +40,33 @@ async def main(message: cl.Message):
     source_pdfs = [source_document.metadata['source'] for source_document in source_documents]
     print('RESPONSE:', final_answer)
     print('SOURCE DOCUMENTS:',source_pdfs)
+    filenames_without_path = [os.path.basename(filename) for filename in source_pdfs]
+    filename_counts = {}
+    for filename in filenames_without_path:
+        if filename in filename_counts:
+            filename_counts[filename] += 1
+        else:
+            filename_counts[filename] = 1
+
+    # Find the filename with the maximum count
+    most_common_filename = max(filename_counts, key=filename_counts.get)
+    print("Most repeating File:-",most_common_filename)
+    # Extract the most common filename into a variable
+    result_filename = most_common_filename
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
     else:
         trans_output = final_answer
     # Sql Database
-    # data = {}
+    data = {}
     # data['answer']=trans_output
-    # data['query']=trans_query
-    # response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
-    # if response.status_code == 200:
-    #     print('Response from Flask server:', response.text)
-    # else:
-    #     print('Error occurred:', response.status_code)
-  
-    # # Simulate typing animation
-    # for char in final_answer:
-    #     await cl.Message(content=char).send()
-    #     await asyncio.sleep(0.1)  # Adjust this value to change typing speed
-
-
-    # source_documents = res["source_documents"]
+    data['query']=trans_query
+    response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
+    if response.status_code == 200:
+        print('Response from Flask server:', response.text)
+    else:
+        print('Error occurred:', response.status_code)
+        
     text_elements = []
     if source_documents:
         for source_idx, source_doc in enumerate(source_documents):

@@ -32,14 +32,12 @@ def create_app(config_class=config):
     @cross_origin(supports_credentials=True)
     def category():
         query = request.json.get('query')
-        answer = request.json.get('answer')
         print("query",query)
         if not query:
             return jsonify({'error': 'Invalid request. Please provide query in JSON format.'}), 400
 
         try:
             json_answer = get_response(query)
-            print(json_answer)
             category = json_answer.get('Category')
             print(category)
             sub_category = json_answer.get('Sub-Category')
@@ -50,14 +48,8 @@ def create_app(config_class=config):
             user_id = 1
             advocate_id = None
             # Store in the database based on the category
-            if category == 'Common_Law':
-                entry = Common_Law(query=query, sub_category=sub_category, user_id=user_id, advocate_id=advocate_id,answer=answer)
-            elif category == 'Criminal_Law':
-                entry = Criminal_Law(query=query, sub_category=sub_category, user_id=user_id, advocate_id=advocate_id,answer=answer)
-            elif category == 'Civil_Law':
-                entry = Civil_Law(query=query, sub_category=sub_category, user_id=user_id, advocate_id=advocate_id,answer=answer)
-            else:
-                return jsonify({'error': 'Invalid category.'}), 400
+            entry = Common_Law(query=query,category=category,user_id=user_id, advocate_id=advocate_id)
+            return jsonify({'error': 'Invalid category.'}), 400
 
             # Commit to the database
             with app.app_context():
