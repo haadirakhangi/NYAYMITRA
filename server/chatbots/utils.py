@@ -25,7 +25,10 @@ from lingua import Language, LanguageDetectorBuilder
 import iso639
 from deep_translator import GoogleTranslator
 import os
+import json
 import nltk
+import time
+import spacy
 
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -56,6 +59,13 @@ EMBEDDINGS = HuggingFaceBgeEmbeddings(
     model_kwargs={'device': DEVICE_TYPE},
     encode_kwargs={'normalize_embeddings': True}# Set True to compute cosine similarity
 )
+
+# Load Glossary
+with open('glossary.json', 'r') as f:
+   glossary = f.read()
+GLOSSARY = json.loads(glossary)
+
+NLP = spacy.load("en_core_web_lg") 
 
 # Initialize Pinecone
 pinecone.init(
@@ -138,44 +148,40 @@ def nyaymitra_kyr_chain(vectordb):
     return chain
 
 def nyaymitra_kyr_chain_with_local_llm(vectordb):
-    # llm = HuggingFacePipeline.from_model_id(model_id="gpt2", task="text-generation", max_new_tokens=2000, max_tokens=2000, max_length=759)
-    model_id = 'gpt2'
-    model = AutoModelForCausalLM.from_pretrained(model_id)
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    pipe = pipeline(
-      'text-generation',
-      model = model, 
-      tokenizer = tokenizer,
-      max_length = 1000
-    )
+  llm = HuggingFacePipeline.from_model_id(
+      model_id="gpt2",
+      task="text-generation",
+      device = 0 if torch.cuda.is_available() else -1, 
+      pipeline_kwargs={"temperature":0.0, "max_new_tokens": 10, "max_length":1000},
+  )
 
-    llm = HuggingFacePipeline(pipe)
-    system_message_prompt = SystemMessagePromptTemplate.from_template(
-       """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
-        Important Instructions:
-        1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
-        2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
-        3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
-        LEGAL CONTEXT: \n{context}"""
-    )
-    human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
-    
-    prompt_template = ChatPromptTemplate.from_messages([
-            system_message_prompt,
-            human_message_prompt,
-        ])  
-    
-    retriever = vectordb.as_retriever()
-    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
+  system_message_prompt = SystemMessagePromptTemplate.from_template(
+        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
+          Important Instructions:
+          1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
+          2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
+          3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
+          LEGAL CONTEXT: \n{context}"""
+  )
+  human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
 
-    chain = ConversationalRetrievalChain.from_llm(
-      llm=llm,
-      retriever=retriever,
-      memory=memory,
-      return_source_documents=True,
-      # combine_docs_chain_kwargs={"prompt": prompt_template}
-    )
-    return chain
+  prompt_template = ChatPromptTemplate.from_messages([
+              system_message_prompt,
+              human_message_prompt,
+          ])
+
+  retriever = vectordb.as_retriever()
+  memory = ConversationBufferMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
+
+  chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=retriever,
+        memory=memory,
+        return_source_documents=True,
+        combine_docs_chain_kwargs={"prompt": prompt_template}
+      )
+  
+  return chain
 
 # vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS)
 
@@ -205,7 +211,6 @@ def create_faiss_vectordb_for_document_qna(user_data_directory,embeddings):
   vectordb.save_local(FAISS_INDEX_FILE_PATH)
 
   return vectordb
- 
 
 def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     loader = UnstructuredFileLoader(file_path=file_path)
@@ -220,13 +225,14 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
 
     prompt_template = """
     You are a Legal Law agent, Understanding all laws and related jargon.  \
-    You will be a given some document and your task is to categorize it in to the following laws. \
+    You will be a given some document and your task is to categorize it in one of the following rights. \
     Format the output in json format using the context and question given below.
 
     QUESTION: {question}
     CONTEXT: {context}
 
-    Format the output as a JSON where the keys are category and beneficiary with their corresponding values
+    Format the output as a dictionary where the keys are "category" and "beneficiary" \
+    with their corresponding values. The values of category should be one string, and the beneficiary's value should be a list of strings
     """
 
     prompt = PromptTemplate(
@@ -254,11 +260,43 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     """
 
     response = qa_chain.run(query)
+    print('RESPONSE:', response)
     output_json = ast.literal_eval(response)
     print('OUTPUT JSON FOR CATEGORIZATION:\n',output_json)
     print('TYPE', type(output_json))
     return output_json
 
+def finetune_for_document_drafting(file_path):
+  client = OpenAI()
+  finetune_file = client.files.create(file=open(file_path, "rb"), purpose="fine-tune")
+  print('File uploaded: ', finetune_file)
+  file_id = finetune_file.id
+  fine_tuning_model = 'gpt-3.5-turbo-1106'
+  job = client.fine_tuning.jobs.create(
+    training_file= file_id,
+    model= fine_tuning_model
+  )
+  job_id =job.id
+  client.fine_tuning.jobs.retrieve(job_id)
+  while True:
+    status = client.fine_tuning.jobs.retrieve(job_id).status
+    time.sleep(0.5)
+    print('STATUS',status)
+    if status =='succeeded':
+      model_id = client.fine_tuning.jobs.retrieve(job_id).fine_tuned_model
+      return model_id
+    if status in ['failed', 'cancelled']:
+       return 'FINETUNING FAILED'
+    
+def preprocess_text(text, nlp = NLP):
+  excluded_tags = {"NOUN", "PROPN"}
+  doc = nlp(text)
+  filtered_tokens = []
+  for token in doc:
+      if token.is_stop or token.is_punct or token.pos_ not in excluded_tags:
+          continue
+      filtered_tokens.append(token.lemma_)
+  return (filtered_tokens)
 
 # ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
  

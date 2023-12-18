@@ -6,67 +6,54 @@ from server.config import config
 from flask_cors import CORS
 from flask_cors import cross_origin
 from bs4 import BeautifulSoup
+from datetime import timedelta
 import requests
 from flask_migrate import Migrate
-
+from server.category import get_response
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+from server.models import LawCatgBenf,QueryStats
 
 url = "https://www.livelaw.in/"  # Replace with the actual URL you want to scrape
 
 
 def create_app(config_class=config):
     app = Flask(__name__)
-    CORS(app) 
+    CORS(app, supports_credentials=True,origins=['http://127.0.0.1:5174/'])
     app.config.from_object(config)
-
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
     db.init_app(app)
     app.config["SESSION_SQLALCHEMY"] = db
     bcrypt.init_app(app)
     migrate = Migrate(app, db)
 
-    from server.category import get_response
-    from server.models import Common_Law,Civil_Law,Criminal_Law
+    
+    
     @app.route('/category',methods=['POST'])
     @cross_origin(supports_credentials=True)
     def category():
         query = request.json.get('query')
-        answer = request.json.get('answer')
+        mostcommon = request.json.get('mostcommon')
         print("query",query)
         if not query:
             return jsonify({'error': 'Invalid request. Please provide query in JSON format.'}), 400
-
         try:
-            json_answer = get_response(query)
-            print(json_answer)
-            category = json_answer.get('Category')
-            print(category)
-            sub_category = json_answer.get('Sub-Category')
-
             # Extract user_id and advocate_id from the session
             # user_id = session.get('user_id')
             # advocate_id = session.get('advocate_id')
             user_id = 1
             advocate_id = None
+            query = db.session.query(LawCatgBenf.category).filter_by(doc_name=mostcommon)
+            all_values = query.first()
+            print("Entry 2",all_values)
             # Store in the database based on the category
-            if category == 'Common_Law':
-                entry = Common_Law(query=query, sub_category=sub_category, user_id=user_id, advocate_id=advocate_id,answer=answer)
-            elif category == 'Criminal_Law':
-                entry = Criminal_Law(query=query, sub_category=sub_category, user_id=user_id, advocate_id=advocate_id,answer=answer)
-            elif category == 'Civil_Law':
-                entry = Civil_Law(query=query, sub_category=sub_category, user_id=user_id, advocate_id=advocate_id,answer=answer)
-            else:
-                return jsonify({'error': 'Invalid category.'}), 400
-
-            # Commit to the database
-            with app.app_context():
-                db.session.add(entry)
-                db.session.commit()
-
-            return jsonify({'success': 'Data stored successfully.'})
-
+            entry = QueryStats(query=query,category=category,user_id=user_id, advocate_id=advocate_id)
+            db.session.add(entry)
+            db.session.commit()
+            return jsonify({'message': 'Data saved successfully', 'response': True}), 200
         except Exception as e:
+            print("Error: ",e)
             return jsonify({'error': str(e)}), 500
 
  
@@ -131,6 +118,6 @@ def create_app(config_class=config):
 
     # with app.app_context():
     #     db.create_all()
-    # with app.app_context():
-    #     db.session.commit()
+    with app.app_context():
+        db.session.commit()
     return app

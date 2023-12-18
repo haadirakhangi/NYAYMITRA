@@ -5,13 +5,21 @@ from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
 import os
+import json
 import sys
 import io
 from openai import OpenAI
 import openai
 import shutil
 import ast
+import time
 from faster_whisper import WhisperModel
+from langchain.vectorstores import FAISS
+
+FEATURE_DOCS_PATH = ''
+NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(FEATURE_DOCS_PATH)
+NYAYMITRA_FEATURES_VECTORSTORE.save_local('')
+VECTORDB = FAISS.load_local('')
 
 def login_required(f):
     @wraps(f)
@@ -35,7 +43,6 @@ def single_login_required(f):
 user_bp = Blueprint(name='users', import_name=__name__)
 
 @user_bp.route('/register', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def user_register():
     data = request.json
     name = data.get("fullName")
@@ -50,7 +57,7 @@ def user_register():
     pincode = data.get("pincode")
     state = data.get("state")
     password = data.get("password")
-    print("name: -----------------------",password)
+    print("password: -----------------------",gender)
     print("name: -----------------------",state)
 
     user_exists = User.query.filter_by(email=email).first() is not None
@@ -84,8 +91,28 @@ def user_register():
 
     return response
 
+tools = [
+    {
+        'type': 'function',
+        'function':{
+            'name': 'retrieval_augmented_generation',
+            'description': 'Fetches relevant information from the vector database and answers user\'s query',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'query': {
+                        'type': 'string',
+                        'description': 'The query to use for searching the vector database'
+                    },
+                },
+                'required': ['query']
+            }
+        }
+    },
+]
+
+
 @user_bp.route('/login', methods=['POST'])
-@cross_origin(supports_credentials=True)
 @single_login_required
 def user_login():
     data = request.get_json()
@@ -93,20 +120,29 @@ def user_login():
     password = data.get('password')
     print("password:--------------------",password)
     user = User.query.filter_by(email=email).first()
+    
 
     if user is None:
         return jsonify({"message": "Unregistered email id", "response": False}), 201
 
     if not bcrypt.check_password_hash(user.password, password.encode('utf-8')):
         return jsonify({"message": "Incorrect password", "response": False}), 201
-
+    client = OpenAI()
+    assistant = client.beta.assistants.create(
+        name="NYAYMITRA",
+        instructions="You are a helpful assistant. Please use the functions provided to you appropriately to help the user.",
+        model="gpt-3.5-turbo-0613",
+        tools =  tools
+    )
+    session['assistant_id'] = assistant.id
+    print("Assitant id is generated",session['assistant_id'])
     session["user_id"] = user.user_id
     print("user id is this:-", session.get('user_id'))
 
     return jsonify({"message": "User logged in successfully", "email": user.email, "response": True}), 200
 
 @user_bp.route('/voice-chat', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@login_required
 def voice_chat():
     try:
         model_size = "large-v3"
@@ -152,8 +188,6 @@ def voice_chat():
 
     
 @user_bp.route('/', methods=['GET'])
-@cross_origin(supports_credentials=True)
-@login_required
 def getuser():
     user_id = session.get("user_id", None)
     user = User.query.get(user_id)
@@ -165,7 +199,6 @@ def getuser():
     return jsonify(response), 200
 
 @user_bp.route('/logout', methods=['GET'])
-@cross_origin(supports_credentials=True)
 @login_required
 def user_logout():
     session.pop('user_id', None)
@@ -173,7 +206,7 @@ def user_logout():
 
 
 @user_bp.route('/document-summarization', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@login_required
 def document_summarization():
     directory = "chatbots/document_sum/user_data"
     directory_faiss = "chatbots/document_sum/faiss_index"
@@ -215,7 +248,7 @@ def get_specialization_from_text(user_input):
 
 
 @user_bp.route('/get-advocate', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@login_required
 def get_advocate():
     data = request.json
     search_value = data.get('search', '')
@@ -224,3 +257,88 @@ def get_advocate():
     advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter_by(specialization=spec).all()]
     print("Result",advocates_data)
     return jsonify({"message": "User logged in successfully","response": True}), 200
+
+
+def wait_on_run(run_id, thread_id):
+    client = OpenAI()
+    while True:
+        run = client.beta.threads.runs.retrieve(
+            thread_id=thread_id,
+            run_id=run_id,
+        )
+        print('RUN STATUS', run.status)
+        time.sleep(0.5)
+        if run.status in ['failed', 'completed', 'requires_action']:
+            return run
+
+client = OpenAI()
+def submit_tool_outputs(thread_id, run_id, tools_to_call):
+    tools_outputs = []
+    for tool in tools_to_call:
+        output = None
+        tool_call_id = tool.id
+        tool_name = tool.function.name
+        tool_args = tool.function.arguments
+        print('TOOL CALLED:',tool_name)
+        print('ARGUMENTS:', tool_args)
+        tool_to_use = available_tools.get(tool_name)
+        output = tool_to_use(**tool_args)
+        if output:
+            tools_outputs.append({'tool_call_id': tool_call_id, 'output': output})
+        
+    return client.beta.threads.runs.submit_tool_outputs(thread_id=thread_id, run_id=run_id, tool_outputs= tools_outputs)
+
+
+def retrieval_augmented_generation(query, vectordb = VECTORDB):
+    
+    relevant_docs = vectordb.similarity_search(query)
+    print(relevant_docs)
+    rel_docs = [doc.page_content for doc in relevant_docs]
+    return rel_docs
+
+available_tools = {
+    'generate_information': retrieval_augmented_generation,
+}
+
+@user_bp.route('/chatbot-route', methods=['POST'])
+@login_required
+def chatbot_route():
+    data = request.get_json()
+    print(data)
+    tool_check = []
+    query = data.get('userdata', '')
+    if query:         
+        assistant_id = session['assistant_id']
+        print('ASSISTANT ID',assistant_id)
+        thread = client.beta.threads.create()
+        print('THREAD ID', thread.id)
+        
+        message = client.beta.threads.messages.create(
+            thread_id= thread.id,
+            role="user",
+            content= query,
+        )
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=session['assistant_id'],
+        )
+        run = wait_on_run(run.id, thread.id)
+
+        if run.status == 'failed':
+            print(run.error)
+        elif run.status == 'requires_action':
+            run = submit_tool_outputs(thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
+            run = wait_on_run(thread.id, run.id)
+        messages = client.beta.threads.messages.list(thread_id=thread.id,order="asc")
+        print('message',messages)
+        content = None
+        for thread_message in messages.data:
+            content = thread_message.content
+        print("Content List",content)
+        if len(tool_check) == 0:
+            chatbot_reply = content[0].text.value
+            print("Chatbot reply",chatbot_reply)
+            response = {'chatbotResponse': chatbot_reply,'function_name': 'normal_search'}
+        return jsonify(response)
+    else:
+        return jsonify({'error': 'User message not provided'}), 400

@@ -25,7 +25,14 @@ const UserLogin: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/user/login', credentials);
+      const response = await axios.post('/api/user/login', credentials,
+        {
+          withCredentials: true,  // This is equivalent to credentials: 'include'
+          headers: {
+            'Content-Type': 'application/json',
+            // Add any other headers as needed
+          },
+        });
       console.log('Login successful:', response.data);
       // Redirect or perform any necessary actions upon successful login
     } catch (error) {
@@ -39,7 +46,7 @@ const UserLogin: React.FC = () => {
       <div className='w-full max-w-2xl p-12 bg-[#250E62] rounded shadow-2xl' style={{
         background: 'linear-gradient(to bottom, #f4c430, #fff, #138808)',
         color: '#250E62', // Text color
-        boxShadow: '0 6px 36px rgba(0, 0, 0, 0.8)', 
+        boxShadow: '0 6px 36px rgba(0, 0, 0, 0.8)',
       }}>
         <h2 className='text-2xl font-bold mb-4 text-center'>Login</h2>
         <div className='mb-4'>
@@ -66,9 +73,9 @@ const UserLogin: React.FC = () => {
                 <NavLink to='/user-register'>Register here</NavLink>
               </span>
             </h1>
-            <NavLink to='/userhome'><button className='btn mb-[10px] mx-auto lg:mx-0 self-center mt-5' type='submit'>
+            <button className='btn mb-[10px] mx-auto lg:mx-0 self-center mt-5' type='submit'>
               Submit
-            </button></NavLink>
+            </button>
           </form>
         </div>
       </div>

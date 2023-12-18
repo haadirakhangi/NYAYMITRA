@@ -52,9 +52,17 @@ const UserRegister: React.FC = () => {
       ...formData,
       birthdate: new Date(formData.birthdate).toLocaleDateString(),
     };
-    console.log("Password send",formData)
+    console.log("Password send", formData)
     axios
-      .post('http://127.0.0.1:5000/user/register', formattedData)
+      .post('/api/user/register', formattedData,
+      {
+        withCredentials: true,  // This is equivalent to credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers as needed
+        },
+      }
+      )
       .then((response) => {
         console.log('Data sent successfully:', response.data);
       })
@@ -67,7 +75,7 @@ const UserRegister: React.FC = () => {
     switch (step) {
       case 1:
         return (
-          
+
           <div>
             <h1 className='text-xl'>Personal Information</h1>
             <div className='flex gap-x-10'>
@@ -107,16 +115,19 @@ const UserRegister: React.FC = () => {
             />
             <label htmlFor='gender'>Gender:</label>
             <select
+              value={formData.gender}
               onChange={handleChange('gender')}
               id='gender'
               name='gender'
               className='outline-none border-b border-b-primary h-[30px] bg-transparent font-secondary w-full placeholder:text-[#757879]'
               required
             >
+              <option value=''>Select Gender</option>
               <option value='Male'>Male</option>
               <option value='Female'>Female</option>
               <option value='other'>Other</option>
             </select>
+
             <button type='button' onClick={() => setStep(2)}>
               Next
             </button>
@@ -153,14 +164,44 @@ const UserRegister: React.FC = () => {
             </div>
             <label htmlFor='state'>State:</label>
             <select
+              value={formData.state}
               onChange={handleChange('state')}
               id='state'
               name='state'
               className='outline-none border-b border-b-primary h-[30px] bg-transparent font-secondary w-full  placeholder:text-[#757879]'
               required
             >
+              <option value=''>Select State</option>
               <option value='Andhra Pradesh'>Andhra Pradesh</option>
+              <option value='Arunachal Pradesh'>Arunachal Pradesh</option>
+              <option value='Assam'>Assam</option>
+              <option value='Bihar'>Bihar</option>
+              <option value='Chhattisgarh'>Chhattisgarh</option>
+              <option value='Goa'>Goa</option>
+              <option value='Gujarat'>Gujarat</option>
+              <option value='Haryana'>Haryana</option>
+              <option value='Himachal Pradesh'>Himachal Pradesh</option>
+              <option value='Jharkhand'>Jharkhand</option>
+              <option value='Karnataka'>Karnataka</option>
+              <option value='Kerala'>Kerala</option>
+              <option value='Madhya Pradesh'>Madhya Pradesh</option>
+              <option value='Maharashtra'>Maharashtra</option>
+              <option value='Manipur'>Manipur</option>
+              <option value='Meghalaya'>Meghalaya</option>
+              <option value='Mizoram'>Mizoram</option>
+              <option value='Nagaland'>Nagaland</option>
+              <option value='Odisha'>Odisha</option>
+              <option value='Punjab'>Punjab</option>
+              <option value='Rajasthan'>Rajasthan</option>
+              <option value='Sikkim'>Sikkim</option>
+              <option value='Tamil Nadu'>Tamil Nadu</option>
+              <option value='Telangana'>Telangana</option>
+              <option value='Tripura'>Tripura</option>
+              <option value='Uttar Pradesh'>Uttar Pradesh</option>
+              <option value='Uttarakhand'>Uttarakhand</option>
+              <option value='West Bengal'>West Bengal</option>
             </select>
+
             <button onClick={handleBack}>Back</button>
             <button type='button' onClick={() => setStep(3)}>
               Next
