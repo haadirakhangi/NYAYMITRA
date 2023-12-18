@@ -1,11 +1,13 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import User,LawCatgBenf,Admin,Advocate
+from server.models import User,LawCatgBenf,Admin,Advocate,QueryStats
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
 import os
 import json
+from sqlalchemy.orm import aliased
+from collections import defaultdict
 
 import shutil
 from chatbots.utils import add_data_to_pinecone_vectorstore,autocategorize_law
@@ -99,65 +101,29 @@ def admin_register():
 
 
 @admin_bp.route('/dashboard')
-@login_required
+@login_required 
 def dashboard():
-    # Join the LawCatgBenf table with the User and Advocate tables using foreign keys
-    query = db.session.query(LawCatgBenf.category,
-                             User.city.label('location'),
-                             User.state,
-                             db.func.count().label('count'))
+    user_alias = aliased(User)
 
-    # Join with User table
-    query = query.join(User, LawCatgBenf.user_id == User.user_id)
+    query_results = (
+        db.session.query(QueryStats.user_id, User.state,User.city,QueryStats.category)
+        .join(user_alias,QueryStats.user_id==user_alias.user_id)
+        .all()
+    )
 
-    # Group by category, location, and state
-    query = query.group_by(LawCatgBenf.category, 'location', User.state)
+    user_data_dict = defaultdict(lambda: defaultdict(lambda: {'state': None, 'city': None, 'categories': defaultdict(int)}))
+    for state, city, category in query_results:
+        user_data_dict[state][city]['state'] = state
+        user_data_dict[state][city]['city'] = city
+        user_data_dict[state][city]['categories'][category] += 1
 
-    # Execute the query
-    user_results = query.all()
+    # Convert the nested dictionary to a list for easier access
+    result_list = []
+    for state, cities in user_data_dict.items():
+        for city, data in cities.items():
+            result_list.append(data)
+    return result_list
 
-    # Join the LawCatgBenf table with the Advocate table using foreign keys
-    query = db.session.query(LawCatgBenf.category,
-                             Advocate.city.label('location'),
-                             Advocate.state,
-                             db.func.count().label('count'))
-
-    # Join with Advocate table
-    query = query.join(Advocate, LawCatgBenf.advocate_id == Advocate.advocate_id)
-
-    # Group by category, location, and state
-    query = query.group_by(LawCatgBenf.category, 'location', Advocate.state)
-
-    # Execute the query
-    advocate_results = query.all()
-
-    # Combine user and advocate results into a single dictionary
-    insights = {}
-
-    for result in user_results:
-        category = result.category
-        location = result.location
-        state = result.state
-        count = result.count
-
-        key = (location, state)
-        if key not in insights:
-            insights[key] = {}
-        insights[key][category] = count
-
-    for result in advocate_results:
-        category = result.category
-        location = result.location
-        state = result.state
-        count = result.count
-
-        key = (location, state)
-        if key not in insights:
-            insights[key] = {}
-        insights[key][category] = count
-
-    return jsonify(insights)
-    
 @admin_bp.route('/advocate_details')
 @login_required
 def advocate_details():
