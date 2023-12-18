@@ -1,46 +1,29 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import Box from '@mui/material/Box';
 import Rating from '@mui/material/Rating';
-import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
-import advo1 from './advocates/advo1.jpg'
-import advo2 from './advocates/advo2.jpg'
-import advo3 from './advocates/advo3.jpg'
-import advo4 from './advocates/advo4.jpg'
-import advo5 from './advocates/advo5.jpg'
-import advo6 from './advocates/advo6.jpg'
-import advo7 from './advocates/advo7.jpg'
-import advo8 from './advocates/advo8.jpg'
-import advo9 from './advocates/advo9.jpg'
 import '../index.css'
 
 type Lawyer = {
   id: number;
-  name: string;
-  ratings: number;
-  location: string;
+  fname: string;
+  lname: string;
+  rating: number;
+  state: string;
+  city: string;
   experience: string;
-  practiceAreas: string[];
-  image: string;
+  specialization: string;
+  practiceAreas: string;
+  languages: string[];
 };
 
 type LawyerCardProps = Lawyer;
 
-let rows = 4;
-let cols = 163;
-
-const LawyerCard: React.FC<LawyerCardProps> = ({ id, name, ratings, location, experience, practiceAreas, image }) => {
-  const [value, setValue] = useState(ratings);
+const LawyerCard: React.FC<LawyerCardProps> = ({ id, fname, lname, rating, state, city, experience, specialization }) => {
+  const [value, setValue] = useState(rating);
 
   useEffect(() => {
-    setValue(ratings);
-  }, [ratings]);
-
-  const MAX_DISPLAYED_PRACTICE_AREAS = 2;
-
-  const displayedPracticeAreas = practiceAreas.slice(0, MAX_DISPLAYED_PRACTICE_AREAS);
-  const remainingPracticeAreas = practiceAreas.slice(MAX_DISPLAYED_PRACTICE_AREAS);
-  const morePracticeAreasCount = remainingPracticeAreas.length;
+    setValue(rating);
+  }, [rating]);
 
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 
@@ -52,96 +35,53 @@ const LawyerCard: React.FC<LawyerCardProps> = ({ id, name, ratings, location, ex
     setIsFormOpen(false);
   };
   return (
-    <div className=''>
-      {/* <div style={{ marginRight: '20px' }}>
-        <img
-          src={image}
-          alt={`Lawyer ${id}`}
-          style={{ width: '180px', height: '150px', objectFit: 'cover' }}
-        />
-      </div>
-      <div>
-        <h3>{name}</h3>
-        <Rating name="read-only" value={value} precision={0.5} readOnly />
-        <p>Location: {location}</p>
-        <p>Experience: {experience}</p>
-        <p>
-          Practice Areas: {displayedPracticeAreas.join(', ')}
-          {morePracticeAreasCount > 0 && (
-            <Tooltip title={remainingPracticeAreas.join(', ')} arrow>
-              <span style={{ cursor: 'pointer', color: 'blue', marginLeft: '5px' }}>
-                {`+${morePracticeAreasCount} more`}
-              </span>
-            </Tooltip>
-          )}
-        </p>
-      </div> */}
-      <div className="wrapper antialiased text-gray-900 w-[450px] mr-12 ml-5 mb-12">
-        <div>
-
-          <div className="relative px-4 -mt-16  ">
-            <div className="bg-white p-6 rounded-lg shadow-lg items-center">
-
-              <img src={image} alt=" random imgee" className="h-[100px] m-2 object-cover object-center shadow-md rounded-full" />
-
-              <div className="flex items-baseline">
-
-                <span className="bg-teal-200 text-teal-800 text-xs px-2 inline-block rounded-full  uppercase font-semibold tracking-wide">
+    <div className="wrapper antialiased text-gray-900 w-[450px]">
+      <div className="relative px-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg items-center">  
+            {/* <span className="bg-teal-200 text-teal-800 text-xs px-2 inline-block rounded-full  uppercase font-semibold tracking-wide">
                   New
-                </span>
-                <div className="ml-2 text-gray-600 uppercase text-xs font-semibold tracking-wider">
-                  {location}
-                </div>
-              </div>
+                </span> */}
+            <h4 className="mt-1 text-xl font-semibold uppercase leading-tight truncate">{fname} {lname}</h4>
+            
+            <div className=" text-gray-600 uppercase text-xs font-semibold tracking-wider">
+              {city},{state}
+          </div>
+          <div className="mt-1">
+            Practice Areas: {specialization}
+          </div>
+          <div className="mt-2">
+            <span className="text-md font-semibold">Experience: {experience}</span>
+            <br />
+            <span className="text-teal-600 text-md font-semibold flex flex-row items-center">Ratings : {rating}</span>
+          </div>
+          <div>
+            <div className="form-popup" id={`myForm${id}`} style={{ display: isFormOpen ? 'block' : 'none' }}>
+              <form action="/action_page.php" className="form-container">
+                <h1>Connect</h1>
 
-              <h4 className="mt-1 text-xl font-semibold uppercase leading-tight truncate">{name}</h4>
-
-              <div className="mt-1">
-                Practice Areas: {displayedPracticeAreas.join(', ')}
-                {morePracticeAreasCount > 0 && (
-                  <Tooltip title={remainingPracticeAreas.join(', ')} arrow>
-                    <span style={{ cursor: 'pointer', color: 'blue', marginLeft: '5px' }}>
-                      {`+${morePracticeAreasCount} more`}
-                    </span>
-                  </Tooltip>
-                )}
-              </div>
-              <div className="mt-4">
-                <span className="text-md font-semibold">{experience}</span>
+                <label><b>Date : </b></label><br />
+                <input type="date" placeholder="Enter Date" name="date" required />
                 <br />
-                <span className="text-teal-600 text-md font-semibold flex flex-row items-center">Ratings : <Rating name="read-only" value={value} precision={0.5} readOnly /></span>
-              </div>
-              <div>
-                <div className="form-popup" id={`myForm${id}`} style={{ display: isFormOpen ? 'block' : 'none' }}>
-                  <form action="/action_page.php" className="form-container">
-                    <h1>Connect</h1>
 
-                    <label><b>Date : </b></label><br />
-                    <input type="date" placeholder="Enter Date" name="date" required />
-                    <br />
+                <label>Time:</label> <br />
+                <input type="time" placeholder="Enter Time" id="time" name="time" required /><br />
 
-                    <label>Time:</label> <br />
-                    <input type="time" placeholder="Enter Time" id="time" name="time" required /><br />
+                <label><b>Subject</b></label>
+                <input type="text" placeholder="Enter Subject" name="subject" required />
 
-                    <label><b>Subject</b></label>
-                    <input type="text" placeholder="Enter Subject" name="subject" required />
-
-                    <label><b>Description</b></label><br />
-                    <textarea id="description" name="description" rows={rows} cols={cols} className='bg-gray-100' placeholder='Enter Description'>
-                    </textarea>
+                <label><b>Description</b></label><br />
+                <textarea id="description" name="description" className='bg-gray-100' placeholder='Enter Description'>
+                </textarea>
 
 
-                    <button type="submit" className="btn">Get Connected</button>
-                    <button type="button" className="btn cancel" onClick={closeForm}>Close</button>
-                  </form>
-                </div>
-              </div>
-              <a href="#" onClick={openForm} className="m-3 inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-black rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-                Get Connected
-              </a>
+                <button type="submit" className="btn">Get Connected</button>
+                <button type="button" className="btn cancel" onClick={closeForm}>Close</button>
+              </form>
             </div>
           </div>
-
+          <a href="#" onClick={openForm} className="m-3 inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-black rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+            Get Connected
+          </a>
         </div>
       </div>
     </div>
@@ -167,151 +107,39 @@ const Lawyers: React.FC = () => {
   const [filteredLawyers, setFilteredLawyers] = useState<Lawyer[]>([]);
   const [searchInput, setSearchInput] = useState<string>('');
 
-  useEffect(() => {
-    setLawyersData([
-
-      {
-        id: 1,
-        name: 'Advocate Sudershani Roy',
-        ratings: 2.6,
-        location: 'Kailash Hills, Delhi',
-        experience: '16 years Experience',
-        practiceAreas: [
-          'Arbitration', 'Cheque Bounce', 'Child Custody', 'Court Marriage', 'Criminal',
-          'Divorce', 'Documentation', 'Domestic Violence', 'Family', 'High Court',
-          'Muslim Law', 'Property, Recovery'
-        ],
-        image: advo1
-      },
-      {
-        id: 2,
-        name: 'Advocate Rajesh Kumar',
-        ratings: 3.2,
-        location: 'Lajpat Nagar, Delhi',
-        experience: '12 years Experience',
-        practiceAreas: [
-          'Arbitration', 'Cheque Bounce', 'Divorce', 'Documentation', 'Domestic Violence',
-          'Family', 'High Court', 'Property, Recovery'
-        ],
-        image: advo2
-      },
-      {
-        id: 3,
-        name: 'Advocate Priya Sharma',
-        ratings: 4.5,
-        location: 'Defence Colony, Delhi',
-        experience: '18 years Experience',
-        practiceAreas: [
-          'Arbitration', 'Child Custody', 'Court Marriage', 'Criminal', 'Divorce',
-          'Documentation', 'Domestic Violence', 'Family', 'High Court', 'Muslim Law'
-        ],
-        image: advo3
-      },
-      {
-        id: 4,
-        name: 'Advocate Arjun Singh',
-        ratings: 5.0,
-        location: 'Gurgaon, Haryana',
-        experience: '14 years Experience',
-        practiceAreas: [
-          'Arbitration', 'Cheque Bounce', 'Court Marriage', 'Criminal', 'Divorce',
-          'Documentation', 'Domestic Violence', 'Family', 'High Court', 'Property, Recovery'
-        ],
-        image: advo4
-      },
-      {
-        id: 5,
-        name: 'Advocate Ananya Gupta',
-        ratings: 2.0,
-        location: 'Noida Sector 15, Uttar Pradesh',
-        experience: '7 years Experience',
-        practiceAreas: [
-          'Real Estate Law', 'Consumer Protection', 'Immigration Law', 'Labor and Employment Law', 'Tax Law',
-        ],
-        image: advo5
-      },
-      {
-        id: 6,
-        name: 'Advocate Raj Gupta',
-        ratings: 3.7,
-        location: 'Noida Sector 62, Uttar Pradesh',
-        experience: '4 years Experience',
-        practiceAreas: [
-          'Intellectual Property Law', 'Environmental Law', 'Bankruptcy Law', 'Healthcare Law', 'Personal Injury Law',
-        ],
-        image: advo6
-      },
-      {
-        id: 7,
-        name: 'Advocate Shreya Rajpurohit',
-        ratings: 4.4,
-        location: 'Greater Noida, Uttar Pradesh',
-        experience: '5 years Experience',
-        practiceAreas: [
-          'Family Law', 'Estate Planning', 'Criminal Defense', 'Corporate Law', 'International Law',
-        ],
-        image: advo7
-      },
-      {
-        id: 8,
-        name: 'Advocate Simran Shah',
-        ratings: 4.9,
-        location: 'Faridabad, Haryana',
-        experience: '2 years Experience',
-        practiceAreas: [
-          'Banking Law', 'Insurance Law', 'Securities Law', 'Sports Law', 'Antitrust Law',
-        ],
-        image: advo8
-      },
-      {
-        id: 9,
-        name: 'Advocate Riya Jain',
-        ratings: 5.0,
-        location: 'Ghaziabad, Uttar Pradesh',
-        experience: '7 years Experience',
-        practiceAreas: [
-          'Civil Rights Law', 'Constitutional Law', 'Education Law', 'Energy Law', 'Privacy Law',
-        ],
-        image: advo9
-      },
-
-    ]);
-  }, []);
-
   const getLawyersDataFromServer = async (searchValue: string) => {
     try {
-      const response = await axios.post(
-        'http://127.0.0.1:5000/user/get-advocate',
-        { search: searchValue }
-      );
-      if (!response.data.response) {
-        throw new Error(`Failed to fetch data from the server`);
+      const response = await axios.post('/api/user/get-advocate', { search: searchValue });
+      if (response.data.response) {
+        setLawyersData(response.data.lawyers); // Assuming your server returns an array of lawyers
+      } else {
+        setLawyersData([]);
       }
-      setFilteredLawyers(response.data); // Assuming your server returns an array of lawyers
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
-
-
   const searchItems = (searchValue: string) => {
     setSearchInput(searchValue);
-    if (searchInput !== '') {
-      const filteredData = lawyersData.filter((lawyer) => {
-        return (
-          Object.values(lawyer)
-            .filter(value => Array.isArray(value) ? value.join('') : value)
-            .join('')
-            .toLowerCase()
-            .includes(searchInput.toLowerCase())
-        );
-      });
-      setFilteredLawyers(filteredData);
-    } else {
-      setFilteredLawyers(lawyersData);
-    }
   };
+
+  const showLawyerCards = () => {
+    if (lawyersData.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {lawyersData.map((lawyer) => (
+          <div key={lawyer.id} className="mb-4 mr-5">
+            <LawyerCard {...lawyer} />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
 
   return (
     <div className='main-new'>
@@ -342,23 +170,25 @@ const Lawyers: React.FC = () => {
       /> */}
       <div className="mb-6">
         <label className="block mb-2 text-xl font-medium text-gray-900 dark:text-white ml-6">Connect to Advocate</label>
+        <div style={{display:"flex"}}>
+        <input type="text" id="large-input" className="block ml-6 w-[85%] mr-4 p-2 text-gray-900  " placeholder='Just Ask' />
         <button
           onClick={() => getLawyersDataFromServer(searchInput)}
-          className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
+          className="inline-flex items-center justify-center text-base font-medium text-center p-3 text-white bg-purple-800 rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
         >
           Get Lawyers
           <svg className="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
           </svg>
         </button>
-        <input type="text" id="large-input" className="block ml-6 w-[95%] p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 " placeholder='Just Ask' />
+
+        </div>
+        
       </div>
-      <div style={{ display: 'flex', overflowX: 'auto', }}>
-        {searchInput.length > 1
-          ? filteredLawyers.map((lawyer) => <LawyerCard key={lawyer.id} {...lawyer} />)
-          : lawyersData.map((lawyer) => <LawyerCard key={lawyer.id} {...lawyer} />)
-        }
+      <div style={{marginRight:"20px"}}>
+      {showLawyerCards()}
       </div>
+      
     </div>
   );
 };

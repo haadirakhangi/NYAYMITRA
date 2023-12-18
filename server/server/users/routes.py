@@ -8,6 +8,7 @@ import os
 import json
 import sys
 import io
+from sqlalchemy import or_
 from openai import OpenAI
 import openai
 import shutil
@@ -230,7 +231,7 @@ def document_summarization():
     return jsonify({"message": "User logged in successfully","response": True}), 200
 
 
-prompt_summary = """As a legal assistant, your role is to determine the appropriate legal specialization based on user queries. The available specializations are: Criminal Court, Civil Court, Immigration Court, Family Law, Personal Injury Law, Real Estate Law, and Corporate Law. Focus on identifying one of these specializations. Given a user query related to legal matters, your task is to analyze the content and discern all the applicable legal specialization. The output should be in JSON format, with the key "specialization_name" and the corresponding values are a list of identified legal specializations.
+prompt_summary = """As a legal assistant, your role is to determine the appropriate legal specializations based on user queries. The available specializations are: Criminal Court, Civil Court, Immigration Court, Family Law, Personal Injury Law, Real Estate Law, and Corporate Law. Given a user query related to legal matters, your task is to analyze the content and discern all the applicable legal specializations. The output should be in JSON format, with the key "specializations" and the corresponding values are a list of identified legal specializations.
 
 User Query: {query}
 """
@@ -251,19 +252,20 @@ def get_specialization_from_text(user_input):
 
     # Extract the recognized specialization from the API response
     recognized_specialization = ast.literal_eval(response.choices[0].message.content)
-    return recognized_specialization["specialization_name"]
+    print("output",recognized_specialization)
+    return recognized_specialization["specializations"]
 
 
 @user_bp.route('/get-advocate', methods=['POST'])
-@login_required
 def get_advocate():
     data = request.json
+    print("I am here my friend")
     search_value = data.get('search', '')
     spec = get_specialization_from_text(user_input=search_value)
     print("Specualizaton:-----------------",spec)
-    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter_by(specialization=spec).all()]
-    print("Result",advocates_data)
-    return jsonify({"message": "User logged in successfully","response": True}), 200
+    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter(or_(*[Advocate.specialization == value for value in spec])).all()]
+    # print("Result",advocates_data)
+    return jsonify({"message": "User logged in successfully","response": True,"lawyers":advocates_data}), 200
 
 
 def wait_on_run(run_id, thread_id):
