@@ -62,6 +62,7 @@ async def main(message: cl.Message):
                 glossary_text +="<b>" + j + " : " + "</b>" + glossary[j] + "<br/> "
 
     print('GLOSSARY', glossary_text)
+    final_answer += glossary_text
     
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
@@ -93,7 +94,6 @@ async def main(message: cl.Message):
         else:
             trans_output += "\nNo sources found"
 
-    trans_output += glossary_text
 
 
     await cl.Message(content=trans_output,author="Tool 1",elements=text_elements).send()
