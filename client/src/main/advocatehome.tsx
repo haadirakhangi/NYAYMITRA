@@ -1,7 +1,7 @@
 import React from 'react';
 import './css/fontawesome-all.css';
 import './css/magnific-popup.css';
-import './css/styles.css';
+import './advocate.css';
 import './css/swiper.css';
 import lawyer from './features/lawyer.png';
 import donation from './features/donation.png';
@@ -15,44 +15,44 @@ import lawJargon from './assets/images/law jargon.jpg';
 import { NavLink } from 'react-router-dom';
 
 interface CardData {
-  imageUrl: string;
-  title: string;
-  description: string;
+    imageUrl: string;
+    title: string;
+    description: string;
 }
 
 const Home: React.FC = () => {
-  const cardsData: CardData[] = [
-    {
-      imageUrl: documentImg,
-      title: 'Document Drafting',
-      description: 'Effortlessly generate precise and efficient legal documents, including contracts, agreements, and legal notices, with our advanced document drafting AI.',
-    },
-    {
-      imageUrl: rights,
-      title: 'Know Your Rights',
-      description: 'Navigate the complexities of the legal landscape with our Know-Your-Rights framework. We simplify intricate laws into user-friendly insights, providing you with a legal compass for informed decision-making.',
-    },
-    {
-      imageUrl: lawyer,
-      title: 'Advo Connect',
-      description: 'Connect with legal experts in real-time through Advo Connect. Engage in conversations to seek advice and clarification on a wide range of legal matters with our interactive platform.',
-    },
-    {
-      imageUrl: forum,
-      title: 'Legal Consultancy Forums',
-      description: 'Participate in Legal Consultancy Forums to analyze legal cases, extract relevant information, and generate insightful reports. Collaborate with legal professionals to enhance your understanding of complex legal issues.',
-    },
-    {
-      imageUrl: donation,
-      title: 'Platform for Legal Aid Fund-Raising',
-      description: 'Contribute to the cause of justice by using our platform for Legal Aid Fund-Raising. Automatically review contracts, identify potential issues, and ensure compliance while supporting legal aid initiatives.',
-    },
-    {
-      imageUrl: documentImg,
-      title: 'Legal Compliance Checker',
-      description: 'Safeguard against legal risks with our Legal Compliance Checker. Leverage our AI-powered tool to ensure legal compliance by checking documents against the latest laws and regulations, providing you with peace of mind.',
-    },
-  ];
+    const cardsData: CardData[] = [
+        {
+            imageUrl: documentImg,
+            title: 'Document Drafting',
+            description: 'Effortlessly generate precise and efficient legal documents, including contracts, agreements, and legal notices, with our advanced document drafting AI.',
+        },
+        {
+            imageUrl: rights,
+            title: 'Know Your Rights',
+            description: 'Navigate the complexities of the legal landscape with our Know-Your-Rights framework. We simplify intricate laws into user-friendly insights, providing you with a legal compass for informed decision-making.',
+        },
+        {
+            imageUrl: lawyer,
+            title: 'Advo Connect',
+            description: 'Connect with legal experts in real-time through Advo Connect. Engage in conversations to seek advice and clarification on a wide range of legal matters with our interactive platform.',
+        },
+        {
+            imageUrl: forum,
+            title: 'Legal Consultancy Forums',
+            description: 'Participate in Legal Consultancy Forums to analyze legal cases, extract relevant information, and generate insightful reports. Collaborate with legal professionals to enhance your understanding of complex legal issues.',
+        },
+        {
+            imageUrl: donation,
+            title: 'Platform for Legal Aid Fund-Raising',
+            description: 'Contribute to the cause of justice by using our platform for Legal Aid Fund-Raising. Automatically review contracts, identify potential issues, and ensure compliance while supporting legal aid initiatives.',
+        },
+        {
+            imageUrl: documentImg,
+            title: 'Legal Compliance Checker',
+            description: 'Safeguard against legal risks with our Legal Compliance Checker. Leverage our AI-powered tool to ensure legal compliance by checking documents against the latest laws and regulations, providing you with peace of mind.',
+        },
+    ];
 
     return (
         <div>
@@ -60,7 +60,7 @@ const Home: React.FC = () => {
             <nav className="navbar fixed-top ">
                 <div className="container sm:px-4 lg:px-8 flex flex-wrap h-[50px] items-center justify-between lg:flex-nowrap">
 
-                    <a className="text-gray-800 font-semibold text-3xl leading-4 no-underline page-scroll" href="index.html">Logo</a>
+                    <a className="text-white font-semibold text-3xl leading-4 no-underline page-scroll" href="index.html">Logo</a>
 
                     <div className="navbar-collapse offcanvas-collapse lg:flex lg:flex-grow lg:items-center text-[1rem]" id="navbarsExampleDefault">
                         <ul className="pl-0  mb-2 ml-auto flex flex-col list-none lg:mt-0 lg:mb-0 lg:flex-row">
@@ -68,10 +68,10 @@ const Home: React.FC = () => {
                                 <a className="nav-link page-scroll active" href="#header">Home <span className="sr-only">(current)</span></a>
                             </li>
                             <li>
-                                <a className="nav-link page-scroll" href="#features"><NavLink to='/features'>Features</NavLink></a>
+                                <a className="nav-link text-white page-scroll" href="#features"><NavLink to='/features'>Features</NavLink></a>
                             </li>
                             <li>
-                                <a className="nav-link page-scroll" href="#details"><NavLink to='/advoconnect'>Notifications</NavLink></a>
+                                <a className="nav-link text-white page-scroll" href="#details"><NavLink to='/advoconnect'>Client Connect</NavLink></a>
                             </li>
                         </ul>
                     </div>
