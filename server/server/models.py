@@ -75,7 +75,7 @@ class Advocate(db.Model):
             'languages': self.languages,
             'rating': self.rating,
             'date_joined': self.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
-            'resume': self.resume.decode('utf-8') if self.resume else None,
+            'degree_doc': self.degree_doc,
             'verified': self.verified
         }
     

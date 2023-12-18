@@ -40,7 +40,6 @@ def admin_login():
     return jsonify({"message": "Invalid credentials", "response": False}), 401
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
-@login_required
 def update_vectorb():
     try:
         # Create 'uploads' directory if it doesn't exist
