@@ -94,7 +94,5 @@ async def main(message: cl.Message):
         else:
             trans_output += "\nNo sources found"
 
-
-
     await cl.Message(content=trans_output,author="Tool 1",elements=text_elements).send()
 
