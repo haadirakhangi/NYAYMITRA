@@ -14,6 +14,12 @@ import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
+from langchain.vectorstores import FAISS
+
+FEATURE_DOCS_PATH = ''
+NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(FEATURE_DOCS_PATH)
+NYAYMITRA_FEATURES_VECTORSTORE.save_local('')
+VECTORDB = FAISS.load_local('')
 
 def login_required(f):
     @wraps(f)
@@ -85,6 +91,27 @@ def user_register():
 
     return response
 
+tools = [
+    {
+        'type': 'function',
+        'function':{
+            'name': 'retrieval_augmented_generation',
+            'description': 'Fetches relevant information from the vector database and answers user\'s query',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'query': {
+                        'type': 'string',
+                        'description': 'The query to use for searching the vector database'
+                    },
+                },
+                'required': ['query']
+            }
+        }
+    },
+]
+
+
 @user_bp.route('/login', methods=['POST'])
 @single_login_required
 def user_login():
@@ -105,6 +132,7 @@ def user_login():
         name="NYAYMITRA",
         instructions="You are a helpful assistant. Please use the functions provided to you appropriately to help the user.",
         model="gpt-3.5-turbo-0613",
+        tools =  tools
     )
     session['assistant_id'] = assistant.id
     print("Assitant id is generated",session['assistant_id'])
@@ -230,6 +258,7 @@ def get_advocate():
     print("Result",advocates_data)
     return jsonify({"message": "User logged in successfully","response": True}), 200
 
+
 def wait_on_run(run_id, thread_id):
     client = OpenAI()
     while True:
@@ -242,10 +271,9 @@ def wait_on_run(run_id, thread_id):
         if run.status in ['failed', 'completed', 'requires_action']:
             return run
 
- 
-def get_tool_result(thread_id, run_id, tools_to_call):
+client = OpenAI()
+def submit_tool_outputs(thread_id, run_id, tools_to_call):
     tools_outputs = []
-    all_tool_name = []
     for tool in tools_to_call:
         output = None
         tool_call_id = tool.id
@@ -253,20 +281,33 @@ def get_tool_result(thread_id, run_id, tools_to_call):
         tool_args = tool.function.arguments
         print('TOOL CALLED:',tool_name)
         print('ARGUMENTS:', tool_args)
-        all_tool_name.append(tool_name)
+        tool_to_use = available_tools.get(tool_name)
+        output = tool_to_use(**tool_args)
+        if output:
+            tools_outputs.append({'tool_call_id': tool_call_id, 'output': output})
         
-    return tools_outputs,all_tool_name
+    return client.beta.threads.runs.submit_tool_outputs(thread_id=thread_id, run_id=run_id, tool_outputs= tools_outputs)
+
+
+def retrieval_augmented_generation(query, vectordb = VECTORDB):
+    
+    relevant_docs = vectordb.similarity_search(query)
+    print(relevant_docs)
+    rel_docs = [doc.page_content for doc in relevant_docs]
+    return rel_docs
+
+available_tools = {
+    'generate_information': retrieval_augmented_generation,
+}
 
 @user_bp.route('/chatbot-route', methods=['POST'])
 @login_required
 def chatbot_route():
-    
     data = request.get_json()
     print(data)
     tool_check = []
     query = data.get('userdata', '')
     if query:         
-        client = OpenAI()
         assistant_id = session['assistant_id']
         print('ASSISTANT ID',assistant_id)
         thread = client.beta.threads.create()
@@ -281,15 +322,13 @@ def chatbot_route():
             thread_id=thread.id,
             assistant_id=session['assistant_id'],
         )
-        
-
         run = wait_on_run(run.id, thread.id)
 
         if run.status == 'failed':
             print(run.error)
         elif run.status == 'requires_action':
-            all_output,tool = get_tool_result(thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
-            tool_check = tool
+            run = submit_tool_outputs(thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
+            run = wait_on_run(thread.id, run.id)
         messages = client.beta.threads.messages.list(thread_id=thread.id,order="asc")
         print('message',messages)
         content = None
