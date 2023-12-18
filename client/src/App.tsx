@@ -15,6 +15,7 @@ import Features from "./main/features";
 import Advocate_home from "./main/advocatehome";
 // import Document from "./main/documentdraft";
 import Connect from "./main/connect";
+import Community from "./main/community";
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/advohome" element={<Advocate_home />} />
         <Route path="/connect" element={<Connect />} />
+        <Route path="/community" element={<Community />} />
         {/* <Route path="/documentdraft" element={<Document />} /> */}
       </Routes>
     </Router>
