@@ -8,18 +8,26 @@ import os
 import json
 import sys
 import io
+from sqlalchemy import or_
 from openai import OpenAI
 import openai
 import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
+from chatbots.utils import EMBEDDINGS
 from langchain.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader
 
-FEATURE_DOCS_PATH = ''
-NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(FEATURE_DOCS_PATH)
-NYAYMITRA_FEATURES_VECTORSTORE.save_local('')
-VECTORDB = FAISS.load_local('')
+FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
+loader = PyPDFLoader(FEATURE_DOCS_PATH)
+docs = loader.load()
+docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+split_docs = docs_splitter.split_documents(docs)
+NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(split_docs,EMBEDDINGS)
+NYAYMITRA_FEATURES_VECTORSTORE.save_local('nyaymitra_data/faiz_index_assistant')
+VECTORDB = FAISS.load_local('nyaymitra_data/faiz_index_assistant', EMBEDDINGS)
 
 def login_required(f):
     @wraps(f)
@@ -96,7 +104,7 @@ tools = [
         'type': 'function',
         'function':{
             'name': 'retrieval_augmented_generation',
-            'description': 'Fetches relevant information from the vector database and answers user\'s query',
+            'description': 'Fetches information about Nyaymitra\'s platform to answer user\'s query',
             'parameters': {
                 'type': 'object',
                 'properties': {
@@ -130,8 +138,8 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant. Please use the functions provided to you appropriately to help the user.",
-        model="gpt-3.5-turbo-0613",
+        instructions="You are a helpful assistant for the website Nyaymitra. Always use the functions provided to you to answer user's question about the nyaymitra platform",
+        model="gpt-3.5-turbo-1106",
         tools =  tools
     )
     session['assistant_id'] = assistant.id
@@ -223,7 +231,7 @@ def document_summarization():
     return jsonify({"message": "User logged in successfully","response": True}), 200
 
 
-prompt_summary = """As a legal assistant, your role is to determine the appropriate legal specialization based on user queries. The available specializations are: Criminal Court, Civil Court, Immigration Court, Family Law, Personal Injury Law, Real Estate Law, and Corporate Law. Focus on identifying one of these specializations. Given a user query related to legal matters, your task is to analyze the content and discern all the applicable legal specialization. The output should be in JSON format, with the key "specialization_name" and the corresponding values are a list of identified legal specializations.
+prompt_summary = """As a legal assistant, your role is to determine the appropriate legal specializations based on user queries. The available specializations are: Criminal Court, Civil Court, Immigration Court, Family Law, Personal Injury Law, Real Estate Law, and Corporate Law. Given a user query related to legal matters, your task is to analyze the content and discern all the applicable legal specializations. The output should be in JSON format, with the key "specializations" and the corresponding values are a list of identified legal specializations.
 
 User Query: {query}
 """
@@ -244,19 +252,20 @@ def get_specialization_from_text(user_input):
 
     # Extract the recognized specialization from the API response
     recognized_specialization = ast.literal_eval(response.choices[0].message.content)
-    return recognized_specialization["specialization_name"]
+    print("output",recognized_specialization)
+    return recognized_specialization["specializations"]
 
 
 @user_bp.route('/get-advocate', methods=['POST'])
-@login_required
 def get_advocate():
     data = request.json
+    print("I am here my friend")
     search_value = data.get('search', '')
     spec = get_specialization_from_text(user_input=search_value)
     print("Specualizaton:-----------------",spec)
-    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter_by(specialization=spec).all()]
-    print("Result",advocates_data)
-    return jsonify({"message": "User logged in successfully","response": True}), 200
+    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter(or_(*[Advocate.specialization == value for value in spec])).all()]
+    # print("Result",advocates_data)
+    return jsonify({"message": "User logged in successfully","response": True,"lawyers":advocates_data}), 200
 
 
 def wait_on_run(run_id, thread_id):
@@ -297,7 +306,7 @@ def retrieval_augmented_generation(query, vectordb = VECTORDB):
     return rel_docs
 
 available_tools = {
-    'generate_information': retrieval_augmented_generation,
+    'retrieval_augmented_generation': retrieval_augmented_generation,
 }
 
 @user_bp.route('/chatbot-route', methods=['POST'])

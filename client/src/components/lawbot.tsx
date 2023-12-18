@@ -5,6 +5,12 @@ import { useEffect } from "react";
 import axios from "axios";
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
+import * as React from 'react';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import {
   useChatInteract,
   useChatMessages,
@@ -16,6 +22,11 @@ const CHAINLIT_SERVER = "http://localhost:8000";
 const userEnv = {};
 
 export function Lawbot() {
+  const [age, setAge] = React.useState('');
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setAge(event.target.value);
+  };
   const { connect } = useChatSession();
   const [inputValue, setInputValue] = useState("");
   const { sendMessage } = useChatInteract();
@@ -141,6 +152,26 @@ export function Lawbot() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+      <div className="absolute top-4 right-4 z-10">
+        <FormControl sx={{ m: 1, minWidth: 100 }}>
+          <InputLabel id="demo-simple-select-helper-label">Languages</InputLabel>
+          <Select
+            labelId="demo-simple-select-helper-label"
+            id="demo-simple-select-helper"
+            value={age}
+            label="Languages"
+            onChange={handleChange}
+          >
+            <MenuItem value="English">
+              <em>English</em>
+            </MenuItem>
+            <MenuItem value={'Hindi'}>Hindi</MenuItem>
+            <MenuItem value={'Marathi'}>Marathi</MenuItem>
+            <MenuItem value={'Gujrati'}>Gujrati</MenuItem>
+          </Select>
+          <FormHelperText>Select Language of Response</FormHelperText>
+        </FormControl>
+      </div>
       <div className="flex-1 overflow-auto p-6">
         <div className="space-y-4">
           {messages.map((message) => renderMessage(message))}

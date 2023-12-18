@@ -31,7 +31,6 @@ import time
 import spacy
 
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
-
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY_FOR_LAWBOT")
@@ -52,6 +51,11 @@ DETECTOR = LanguageDetectorBuilder.from_all_languages().with_preloaded_language_
 
 DEVICE_TYPE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# Download the spaCy model
+# model_name = 'en_core_web_lg'
+# spacy.cli.download(model_name)
+# nlp = spacy.load(model_name)
+
 # Loading BGE Embeddings From HuggingFace
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 EMBEDDINGS = HuggingFaceBgeEmbeddings(
@@ -61,7 +65,7 @@ EMBEDDINGS = HuggingFaceBgeEmbeddings(
 )
 
 # Load Glossary
-with open('glossary.json', 'r') as f:
+with open( os.path.abspath(os.path.join(current_script_directory,'lawbot/glossary.json')), 'r') as f:
    glossary = f.read()
 GLOSSARY = json.loads(glossary)
 
@@ -72,6 +76,7 @@ pinecone.init(
     api_key= PINECONE_API_KEY,  
     environment= PINECONE_ENV,  
 )
+
 
 # Download Punkt Package
 # nltk.download('punkt')
