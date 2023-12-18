@@ -259,7 +259,8 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     Property Rights:Laws related to ownership, transfer, and use of property\n
     Family Rights:Laws governing marriage, divorce, child custody, and adoption\n
     Civil Rights:Laws protecting individuals from discrimination, ensuring freedom of speech, etc.\n
-    Criminal Rights:Laws related to criminal procedures, rights of the accused, etc.\n
+    Criminal Rights:Laws related to criminal procedures, rights of the 
+    accused, etc.\n
     Health and Safety Rights:Laws related to public health, safety regulations, etc.\n
     Environmental Rights:Laws addressing environmental protection and conservation\n
     """
@@ -280,8 +281,7 @@ def finetune_for_document_drafting(file_path):
   job = client.fine_tuning.jobs.create(
     training_file= file_id,
     model= fine_tuning_model
-  )
-  job_id =job.id
+  )+  job_id =job.id
   client.fine_tuning.jobs.retrieve(job_id)
   while True:
     status = client.fine_tuning.jobs.retrieve(job_id).status
