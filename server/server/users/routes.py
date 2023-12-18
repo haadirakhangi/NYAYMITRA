@@ -14,12 +14,19 @@ import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
+from chatbots.utils import EMBEDDINGS
 from langchain.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader
 
-FEATURE_DOCS_PATH = ''
-NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(FEATURE_DOCS_PATH)
-NYAYMITRA_FEATURES_VECTORSTORE.save_local('')
-VECTORDB = FAISS.load_local('')
+FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
+loader = PyPDFLoader(FEATURE_DOCS_PATH)
+docs = loader.load()
+docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+split_docs = docs_splitter.split_documents(docs)
+NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(split_docs,EMBEDDINGS)
+NYAYMITRA_FEATURES_VECTORSTORE.save_local('nyaymitra_data/faiz_index_assistant')
+VECTORDB = FAISS.load_local('nyaymitra_data/faiz_index_assistant', EMBEDDINGS)
 
 def login_required(f):
     @wraps(f)
@@ -96,7 +103,7 @@ tools = [
         'type': 'function',
         'function':{
             'name': 'retrieval_augmented_generation',
-            'description': 'Fetches relevant information from the vector database and answers user\'s query',
+            'description': 'Fetches information about Nyaymitra\'s platform to answer user\'s query',
             'parameters': {
                 'type': 'object',
                 'properties': {
@@ -130,8 +137,8 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant. Please use the functions provided to you appropriately to help the user.",
-        model="gpt-3.5-turbo-0613",
+        instructions="You are a helpful assistant for the website Nyaymitra. Always use the functions provided to you to answer user's question about the nyaymitra platform",
+        model="gpt-3.5-turbo-1106",
         tools =  tools
     )
     session['assistant_id'] = assistant.id
@@ -297,7 +304,7 @@ def retrieval_augmented_generation(query, vectordb = VECTORDB):
     return rel_docs
 
 available_tools = {
-    'generate_information': retrieval_augmented_generation,
+    'retrieval_augmented_generation': retrieval_augmented_generation,
 }
 
 @user_bp.route('/chatbot-route', methods=['POST'])

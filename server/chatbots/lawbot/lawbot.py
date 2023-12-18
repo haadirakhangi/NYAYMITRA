@@ -55,14 +55,17 @@ async def main(message: cl.Message):
     result_filename = most_common_filename
     # Extracting Glossary
     glossary_text = ''
-    preprocessed_text = set(preprocess_text(final_answer))
+    preprocessed_text = list(set(preprocess_text(final_answer)))
+    print('PREPROCESSED_TEXT', preprocessed_text)
+    glossary =  [value.lower() for value in list(GLOSSARY.keys())]
+    print("Glossary",glossary)
     for i in preprocessed_text:
-        for j in glossary.keys():
-            if i in j:
-                glossary_text +="<b>" + j + " : " + "</b>" + glossary[j] + "<br/> "
-
-    print('GLOSSARY', glossary_text)
-    final_answer += glossary_text
+        if i.lower()+" " in glossary:
+            print('YE I HAI', i)
+            print('YE I KA TYPE HAI', type(i))
+            glossary_text +="<b>" + i.title() + " : " + "</b>" + GLOSSARY[i.title()+" "] + "<br/> "
+        else:
+            print("Not here bc",i)
     
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
@@ -71,13 +74,13 @@ async def main(message: cl.Message):
     # Sql Database
     data = {}
     # data['answer']=trans_output
-    data['query']=trans_query
-    data['mostcommon']=most_common_filename
-    response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
-    if response.status_code == 200:
-        print('Response from Flask server:', response.text)
-    else:
-        print('Error occurred:', response.status_code)
+    # data['query']=trans_query
+    # data['mostcommon']=most_common_filename
+    # response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
+    # if response.status_code == 200:
+    #     print('Response from Flask server:', response.text)
+    # else:
+    #     print('Error occurred:', response.status_code)
 
     text_elements = []
     if source_documents:
@@ -93,6 +96,9 @@ async def main(message: cl.Message):
             trans_output += f"\nSources: {', '.join(source_names)}"
         else:
             trans_output += "\nNo sources found"
+
+    trans_output = trans_output+ '\n\n' + glossary_text
+
 
     await cl.Message(content=trans_output,author="Tool 1",elements=text_elements).send()
 

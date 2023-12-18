@@ -120,10 +120,12 @@ class QueryStats(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+    
+
 
     def to_dict(self):
         return {
-            'query_id':self.id,
+            'query_id':self.id, 
             'category':self.category,
             'beneficiaries':self.beneficiaries
         }
