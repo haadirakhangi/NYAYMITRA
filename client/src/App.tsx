@@ -13,7 +13,6 @@ import Rights from "./main/rights"
 import Home from "./main/userhome";
 import Features from "./main/features";
 import Advocate_home from "./main/advocatehome";
-import Document from "./main/documentdraft";
 
 function App() {
 
@@ -35,7 +34,6 @@ function App() {
         <Route path="/userhome" element={<Home />} />
         <Route path="/features" element={<Features />} />
         <Route path="/advohome" element={<Advocate_home />} />
-        <Route path="/documentdraft" element={<Document />} />
       </Routes>
     </Router>
   );

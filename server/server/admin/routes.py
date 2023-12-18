@@ -5,6 +5,8 @@ from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
 import os
+import json
+
 import shutil
 from chatbots.utils import add_data_to_pinecone_vectorstore,autocategorize_law
 
@@ -21,7 +23,6 @@ def login_required(f):
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin_bp.route('/login', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def admin_login():
     data = request.json
     email = data.get("email")
@@ -37,7 +38,7 @@ def admin_login():
     return jsonify({"message": "Invalid credentials", "response": False}), 401
     
 @admin_bp.route('/update-vectordb', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@login_required
 def update_vectorb():
     try:
         # Create 'uploads' directory if it doesn't exist
@@ -50,11 +51,26 @@ def update_vectorb():
             filename = file.filename
             filepath = os.path.join(upload_dir, filename)
             file.save(filepath)
-            vectordb = add_data_to_pinecone_vectorstore(upload_dir)
-            json = autocategorize_law(filepath)
+            # vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+            json_data = autocategorize_law(filepath)
             print("the output json received",json)
-            # real_filepath = os.path.join(real_dir,json.category ,filename)
-            # file.save(real_dir)
+            beneficiary = json_data['beneficiary']
+            if isinstance(beneficiary, list):
+                beneficiary_list = beneficiary
+            else:
+                beneficiary_list = beneficiary.split(",")
+
+            beneficiary_json = json.dumps(beneficiary_list)
+            new_admin = LawCatgBenf(doc_name=filename,category=json_data['category'],beneficiaries=beneficiary_json)
+            # Add the new admin to the database
+            db.session.add(new_admin)
+            db.session.commit()
+            real_filepath = os.path.join(real_dir,json_data['category'] ,filename)
+            if os.path.exists(os.path.join(real_dir,json_data['category'])):
+                file.save(real_filepath)
+            else:
+                os.makedirs(os.path.join(real_dir,json_data['category']), exist_ok=True)
+                file.save(real_filepath)
             shutil.rmtree(upload_dir)
         return jsonify({"message": "Documents saved successfully", "response": True}), 200
     except Exception as e:
@@ -62,7 +78,6 @@ def update_vectorb():
         return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
     
 @admin_bp.route('/register', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def admin_register():
     data = request.json
     email = data.get("email")

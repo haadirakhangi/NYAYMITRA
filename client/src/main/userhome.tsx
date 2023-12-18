@@ -13,6 +13,7 @@ import documentDraft from './assets/images/document draft.png';
 import humanRights from './assets/images/human rights.jpg';
 import lawJargon from './assets/images/law jargon.jpg';
 import { NavLink } from 'react-router-dom';
+import ChatWidget from "../components/ChatWidget"
 
 interface CardData {
   imageUrl: string;
@@ -56,7 +57,7 @@ const Home: React.FC = () => {
 
     return (
         <div>
-
+            <ChatWidget/>
             <nav className="navbar fixed-top ">
                 <div className="container sm:px-4 lg:px-8 flex flex-wrap h-[50px] items-center justify-between lg:flex-nowrap">
 

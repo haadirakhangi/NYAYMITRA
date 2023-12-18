@@ -33,27 +33,27 @@ def single_login_required(f):
 
 
 @advocate_bp.route('/register', methods=['POST'])
-@cross_origin(supports_credentials=True)
 def advocate_register():
-    data = request.json  # Assuming the data is in form format
-    resume_file = request.files.get('resume')
-
+    data = request.form  # Assuming the data is in form format
+    
     # Extract data from the form
     fname = data.get("firstName")
     lname = data.get("lastName")
     email = data.get("email")
+    mobile = data.get("mobile")
     password = data.get("password")
     office_address = data.get("officeAddress")
     pincode = data.get("pincode")
     state = data.get("state")
     city = data.get("city")
+    gender = data.get("gender")
     experience = data.get("experience")
     specialization = data.get("specialization")
-    court_type = data.get("courtType")
-    languages = data.get("languages")
-
-    languages_str = data.get("languages")
-    languages = languages_str.split(",") if languages_str else []
+    court_type = data.get("typeCourt")
+    languages = data.getlist("languages")
+    resume_file = request.files['llbDocument']
+    print("Languages:- ",languages)
+    # languages = languages_str.split(",") if languages_str else []
 
     languages_json = json.dumps(languages)
 
@@ -72,16 +72,18 @@ def advocate_register():
         fname=fname,
         lname=lname,
         email=email,
+        phone_number=mobile,
         password=hash_pass,  # You should hash the password before saving it
         office_address=office_address,
         pincode=pincode,
         state=state,
+        gender=gender,
         city=city,
         experience=experience,
         specialization=specialization,
         court_type=court_type,
         languages=languages_json,
-        resume=resume_filename  # Save the filename in the database
+        degree_doc=resume_filename  # Save the filename in the database
     )
 
     # Add and commit to the database
@@ -94,7 +96,7 @@ def advocate_register():
         "id": new_advocate.advocate_id,
         "email": new_advocate.email,
         "response": True
-    }), 201
+    }), 200
 
     return response
 
@@ -102,7 +104,12 @@ def save_resume(resume_file):
     if resume_file:
         # Save the file to the uploads folder
         filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}_{resume_file.filename}"
-        resume_file.save(os.path.join('uploads', filename))
+        if os.path.exists('advocate_docs'):
+            resume_file.save(os.path.join('advocate_docs', filename))
+        else:
+            os.makedirs('advocate_docs')
+            resume_file.save(os.path.join('advocate_docs', filename))
+
         return filename
     return None
 
@@ -113,7 +120,6 @@ def save_resume(resume_file):
 
 
 @advocate_bp.route('/login', methods=['POST'])
-@cross_origin(supports_credentials=True)
 @single_login_required
 def advocate_login():
     data = request.json
@@ -139,7 +145,7 @@ def advocate_login():
 
 
 @advocate_bp.route('/', methods=['GET'])
-@cross_origin(supports_credentials=True)
+@login_required
 def get_user():
     # check if user is logged in
     user_id = session.get("advocate_id", None)
@@ -156,7 +162,6 @@ def get_user():
 
 
 @advocate_bp.route('/logout', methods=['GET'])
-@cross_origin(supports_credentials=True)
 @login_required
 def advocate_logout():
     session.pop('advocate_id', None)  # Remove advocate ID from the session

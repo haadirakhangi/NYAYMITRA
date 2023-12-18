@@ -25,7 +25,10 @@ from lingua import Language, LanguageDetectorBuilder
 import iso639
 from deep_translator import GoogleTranslator
 import os
+import json
 import nltk
+import time
+import spacy
 
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -56,6 +59,13 @@ EMBEDDINGS = HuggingFaceBgeEmbeddings(
     model_kwargs={'device': DEVICE_TYPE},
     encode_kwargs={'normalize_embeddings': True}# Set True to compute cosine similarity
 )
+
+# Load Glossary
+with open('glossary.json', 'r') as f:
+   glossary = f.read()
+GLOSSARY = json.loads(glossary)
+
+NLP = spacy.load("en_core_web_lg") 
 
 # Initialize Pinecone
 pinecone.init(
@@ -215,13 +225,14 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
 
     prompt_template = """
     You are a Legal Law agent, Understanding all laws and related jargon.  \
-    You will be a given some document and your task is to categorize it in to the following laws. \
+    You will be a given some document and your task is to categorize it in one of the following rights. \
     Format the output in json format using the context and question given below.
 
     QUESTION: {question}
     CONTEXT: {context}
 
-  Format the output as a JSON where the keys are category and beneficiary with their corresponding values. The values of the beneficiary key should be a list.
+    Format the output as a dictionary where the keys are "category" and "beneficiary" \
+    with their corresponding values. The values of category should be one string, and the beneficiary's value should be a list of strings
     """
 
     prompt = PromptTemplate(
@@ -249,11 +260,43 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     """
 
     response = qa_chain.run(query)
+    print('RESPONSE:', response)
     output_json = ast.literal_eval(response)
     print('OUTPUT JSON FOR CATEGORIZATION:\n',output_json)
     print('TYPE', type(output_json))
     return output_json
 
+def finetune_for_document_drafting(file_path):
+  client = OpenAI()
+  finetune_file = client.files.create(file=open(file_path, "rb"), purpose="fine-tune")
+  print('File uploaded: ', finetune_file)
+  file_id = finetune_file.id
+  fine_tuning_model = 'gpt-3.5-turbo-1106'
+  job = client.fine_tuning.jobs.create(
+    training_file= file_id,
+    model= fine_tuning_model
+  )
+  job_id =job.id
+  client.fine_tuning.jobs.retrieve(job_id)
+  while True:
+    status = client.fine_tuning.jobs.retrieve(job_id).status
+    time.sleep(0.5)
+    print('STATUS',status)
+    if status =='succeeded':
+      model_id = client.fine_tuning.jobs.retrieve(job_id).fine_tuned_model
+      return model_id
+    if status in ['failed', 'cancelled']:
+       return 'FINETUNING FAILED'
+    
+def preprocess_text(text, nlp = NLP):
+  excluded_tags = {"NOUN", "PROPN"}
+  doc = nlp(text)
+  filtered_tokens = []
+  for token in doc:
+      if token.is_stop or token.is_punct or token.pos_ not in excluded_tags:
+          continue
+      filtered_tokens.append(token.lemma_)
+  return (filtered_tokens)
 
 # ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
  

@@ -90,15 +90,19 @@ const AdvoRegister = () => {
         typeCourt: "",
         languages: [],
         email: "",
+        mobile: "",
+        gender: "",
         password: "",
         llbDocument: null,
     });
 
     const handleChange = (name: keyof State) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { value: unknown }>) => {
         if (name === "languages") {
+            const selectedLanguages = Array.isArray(e.target.value) ? e.target.value : [e.target.value as string];
+
             setState({
                 ...state,
-                [name]: Array.isArray(e.target.value) ? e.target.value : [e.target.value as string],
+                [name]: selectedLanguages,
             });
         } else {
             setState({
@@ -118,23 +122,35 @@ const AdvoRegister = () => {
     const submitRegistration = (e: FormEvent) => {
         e.preventDefault();
 
-        const newUserCredentials = {
-            officeAddress: state.officeAddress,
-            pincode: state.pincode,
-            state: state.state,
-            city: state.city,
-            firstName: state.firstName,
-            lastName: state.lastName,
-            experience: state.experience,
-            specialization: state.specialization,
-            typeCourt: state.typeCourt,
-            languages: state.languages,
-            email: state.email,
-            password: state.password,
-        };
+        const formData = new FormData();
 
+        // Append LLB document to form data
+        if (state.llbDocument) {
+            formData.append("llbDocument", state.llbDocument);
+        }
+
+        // Append other user credentials to form data
+        formData.append("officeAddress", state.officeAddress);
+        formData.append("pincode", state.pincode);
+        formData.append("state", state.state);
+        formData.append("city", state.city);
+        formData.append("mobile", state.mobile);
+        formData.append("gender", state.gender);
+        formData.append("firstName", state.firstName);
+        formData.append("lastName", state.lastName);
+        formData.append("experience", state.experience);
+        formData.append("specialization", state.specialization);
+        formData.append("typeCourt", state.typeCourt);
+        state.languages.forEach((language) => formData.append("languages", language));
+        formData.append("email", state.email);
+        formData.append("password", state.password);
+        console.log("languages",state.languages)
         axios
-            .post("http://127.0.0.1:5000/advocate/register", newUserCredentials)
+            .post("/api/advocate/register", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            })
             .then((response) => {
                 console.log(response.data);
             })
@@ -166,7 +182,6 @@ const AdvoRegister = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Navbar/>
             <div style={{ margin: "auto", marginTop: "20px", padding: "10px", width: "100vh", backgroundColor: "#26c6da", borderRadius: "10px" }}>
                 <Paper style={{ padding: "20px", marginTop: "50px", textAlign: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", marginBottom: "20px", justifyContent: "center" }}>
@@ -197,6 +212,33 @@ const AdvoRegister = () => {
                                             name="lastName"
                                             autoComplete="lastName"
                                             onChange={handleChange("lastName")}
+                                        />
+                                    </FormControl>
+                                </div>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {/* Group 5 */}
+                                <div style={{ display: "flex", gap: "20px" }}>
+                                    <FormControl required fullWidth margin="normal">
+                                        <InputLabel htmlFor="gender">Gender</InputLabel>
+                                        <Select
+                                            value={state.gender}
+                                            onChange={handleChange("gender")}
+                                            input={<Input />}
+                                        >
+                                            <MenuItem value="">Select Gender</MenuItem>
+                                            <MenuItem value="Male">Male</MenuItem>
+                                            <MenuItem value="Female">Female</MenuItem>
+                                            <MenuItem value="Other">Other</MenuItem>
+                                        </Select>
+                                    </FormControl>
+
+                                    <FormControl required fullWidth margin="normal">
+                                        <InputLabel htmlFor="mobile">Phone Number</InputLabel>
+                                        <Input
+                                            name="mobile"
+                                            autoComplete="mobile"
+                                            onChange={handleChange("mobile")}
                                         />
                                     </FormControl>
                                 </div>
@@ -284,7 +326,15 @@ const AdvoRegister = () => {
                                             onChange={handleChange("specialization")}
                                             input={<Input />}
                                         >
-                                            {/* Add MenuItem components for each specialization */}
+                                            <MenuItem value="">Select Specialization</MenuItem>
+                                            <MenuItem value="Criminal Law">Criminal Law</MenuItem>
+                                            <MenuItem value="Civil Law">Civil Law</MenuItem>
+                                            <MenuItem value="Family Law">Family Law</MenuItem>
+                                            <MenuItem value="Corporate Law">Corporate Law</MenuItem>
+                                            <MenuItem value="Immigration Law">Immigration Law</MenuItem>
+                                            <MenuItem value="Labor Law">Labor Law</MenuItem>
+                                            <MenuItem value="Intellectual Property Law">Intellectual Property Law</MenuItem>
+                                            <MenuItem value="Environmental Law">Environmental Law</MenuItem>
                                         </Select>
                                     </FormControl>
 
@@ -308,8 +358,17 @@ const AdvoRegister = () => {
                                             onChange={handleChange("typeCourt")}
                                             input={<Input />}
                                         >
-                                            {/* Add MenuItem components for each type of court */}
+                                            <MenuItem value="">Select Type of Court</MenuItem>
+                                            <MenuItem value="Supreme Court">Supreme Court</MenuItem>
+                                            <MenuItem value="High Court">High Court</MenuItem>
+                                            <MenuItem value="District Court">District Court</MenuItem>
+                                            <MenuItem value="Family Court">Family Court</MenuItem>
+                                            <MenuItem value="Civil Court">Civil Court</MenuItem>
+                                            <MenuItem value="Criminal Court">Criminal Court</MenuItem>
+                                            <MenuItem value="Consumer Court">Consumer Court</MenuItem>
+                                            {/* Add more types of courts as needed */}
                                         </Select>
+
                                     </FormControl>
 
                                     <FormControl fullWidth required margin="normal">
@@ -335,7 +394,7 @@ const AdvoRegister = () => {
                                     <label><b>Upload LLB Degree Document</b></label>
                                     <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
                                         Upload file
-                                        <VisuallyHiddenInput type="file" />
+                                        <VisuallyHiddenInput type="file" onChange={handleFileChange} />
                                     </Button>
                                     {/* <FormHelperText>Upload a PDF or Word document (.pdf, .doc, .docx)</FormHelperText> */}
                                 </FormControl>
