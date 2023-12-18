@@ -103,7 +103,7 @@ tools = [
         'type': 'function',
         'function':{
             'name': 'retrieval_augmented_generation',
-            'description': 'Fetches relevant information from the vector database and answers user\'s query',
+            'description': 'Fetches information about Nyaymitra\'s platform to answer user\'s query',
             'parameters': {
                 'type': 'object',
                 'properties': {
@@ -137,8 +137,8 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant. Please use the functions provided to you appropriately to help the user.",
-        model="gpt-3.5-turbo-0613",
+        instructions="You are a helpful assistant for the website Nyaymitra. Always use the functions provided to you to answer user's question about the nyaymitra platform",
+        model="gpt-3.5-turbo-1106",
         tools =  tools
     )
     session['assistant_id'] = assistant.id
@@ -304,7 +304,7 @@ def retrieval_augmented_generation(query, vectordb = VECTORDB):
     return rel_docs
 
 available_tools = {
-    'generate_information': retrieval_augmented_generation,
+    'retrieval_augmented_generation': retrieval_augmented_generation,
 }
 
 @user_bp.route('/chatbot-route', methods=['POST'])
