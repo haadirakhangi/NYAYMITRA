@@ -14,12 +14,19 @@ import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
+from chatbots.utils import EMBEDDINGS
 from langchain.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader
 
-FEATURE_DOCS_PATH = ''
-NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(FEATURE_DOCS_PATH)
-NYAYMITRA_FEATURES_VECTORSTORE.save_local('')
-VECTORDB = FAISS.load_local('')
+FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
+loader = PyPDFLoader(FEATURE_DOCS_PATH)
+docs = loader.load()
+docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+split_docs = docs_splitter.split_documents(docs)
+NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(split_docs,EMBEDDINGS)
+NYAYMITRA_FEATURES_VECTORSTORE.save_local('nyaymitra_data/faiz_index_assistant')
+VECTORDB = FAISS.load_local('nyaymitra_data/faiz_index_assistant', EMBEDDINGS)
 
 def login_required(f):
     @wraps(f)

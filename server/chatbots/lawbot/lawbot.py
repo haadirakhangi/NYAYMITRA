@@ -57,9 +57,9 @@ async def main(message: cl.Message):
     glossary_text = ''
     preprocessed_text = set(preprocess_text(final_answer))
     for i in preprocessed_text:
-        for j in glossary.keys():
+        for j in GLOSSARY.keys():
             if i in j:
-                glossary_text +="<b>" + j + " : " + "</b>" + glossary[j] + "<br/> "
+                glossary_text +="<b>" + j + " : " + "</b>" + GLOSSARY[j] + "<br/> "
 
     print('GLOSSARY', glossary_text)
     
