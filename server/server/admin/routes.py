@@ -78,6 +78,28 @@ def update_vectorb():
         print("Printing error",e)
         return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
     
+@admin_bp.route('/update-drafting', methods=['POST'])
+def update_drafting():
+    try:
+        # Create 'uploads' directory if it doesn't exist
+        upload_dir = 'nyaymitra_data/drafting_docs'
+        print("Update drafting")
+        question = request.form.get('question')
+        # Iterate over each file in the request
+        # for file in request.files.getlist('documents'):
+        #     if os.path.exists(os.path.join(upload_dir)):
+        #         file.save(real_filepath)
+        #     else:
+        #         os.makedirs(os.path.join(real_dir,json_data['category']), exist_ok=True)
+        #         file.save(real_filepath)
+        #     os.makedirs(upload_dir, exist_ok=True)
+        #     shutil.rmtree(upload_dir)
+        return jsonify({"message": "Documents saved successfully", "response": True}), 200
+    except Exception as e:
+        print("Printing error",e)
+        return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
+
+
 @admin_bp.route('/register', methods=['POST'])
 def admin_register():
     data = request.json
