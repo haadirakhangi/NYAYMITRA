@@ -1,6 +1,6 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import Advocate
+from server.models import Advocate,AdvoConnect
 from server import db, bcrypt
 import json
 from functools import wraps
@@ -166,3 +166,16 @@ def get_user():
 def advocate_logout():
     session.pop('advocate_id', None)  # Remove advocate ID from the session
     return jsonify({'message': 'Advocate logged out successfully'})
+
+@advocate_bp.route('/get', methods=['GET'])
+@login_required
+def get_advocate_connects():
+    advocate_id = session.get("advocate_id", None)
+    if advocate_id is None:
+        return jsonify({"message": "Advocate not logged in", "response": False}), 401
+
+    advo_connects = AdvoConnect.query.filter_by(advocate_id=advocate_id).all()
+
+    advo_connects_data = [connect.to_dict() for connect in advo_connects]
+
+    return jsonify({"advo_connects": advo_connects_data, "response": True}), 200

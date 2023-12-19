@@ -129,3 +129,25 @@ class QueryStats(db.Model):
             'category':self.category,
             'beneficiaries':self.beneficiaries
         }
+
+class AdvoConnect(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
+    advocate_id = db.Column(db.Integer, db.ForeignKey('advocate.advocate_id'), nullable=True)
+    accepted = db.Column(db.Boolean, default=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'connect_id': self.id,
+            'subject': self.subject,
+            'description': self.description,
+            'date': self.date,
+            'time': self.time.strftime('%H:%M'),  # Format time as HH:MM
+            'user_id': self.user_id,
+            'advocate_id': self.advocate_id
+        }
