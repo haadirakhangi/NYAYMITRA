@@ -16,6 +16,7 @@ import Advocate_home from "./main/advocatehome";
 // import Document from "./main/documentdraft";
 import Connect from "./main/connect";
 import Community from "./main/community";
+import AdminLogin from "./views/AdminLogin";
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
         <Route path="/advohome" element={<Advocate_home />} />
         <Route path="/connect" element={<Connect />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         {/* <Route path="/documentdraft" element={<Document />} /> */}
       </Routes>
     </Router>
