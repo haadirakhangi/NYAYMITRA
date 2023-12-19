@@ -13,6 +13,7 @@ type CardData = {
   imageUrl: string;
   title: string;
   description: string;
+  url: string;
 };
 
 type Props = {};
@@ -22,36 +23,42 @@ const Features = (props: Props) => {
     {
       imageUrl: documentImg,
       title: 'Document Drafting',
+      url: 'http://localhost:8001/',
       description:
         'Effortlessly generate precise and efficient legal documents, including contracts, agreements, and legal notices, with our advanced document drafting AI.',
     },
     {
       imageUrl: rights,
       title: 'Know Your Rights',
+      url: '/chatbot-lawbot',
       description:
         'Navigate the complexities of the legal landscape with our Know-Your-Rights framework. We simplify intricate laws into user-friendly insights, providing you with a legal compass for informed decision-making.',
     },
     {
       imageUrl: lawyer,
       title: 'Advo Connect',
+      url: '/advoconnect',
       description:
         'Connect with legal experts in real-time through Advo Connect. Engage in conversations to seek advice and clarification on a wide range of legal matters with our interactive platform.',
     },
     {
       imageUrl: forum,
       title: 'Communtiy Forums',
+      url: 'http://localhost:8004/',
       description:
         'Immerse yourself in the NyayMitra Community, a digital sanctuary for legal enthusiasts and inquisitive minds alike. Engage in thought-provoking discussions, seek advice, and explore an abundance of legal resources within a supportive network.',
     },
     {
       imageUrl: donation,
       title: 'Document Summary & QnA',
+      url: 'http://localhost:8003/',
       description:
         'Nyaymitra leverages advanced artificial intelligence to provide comprehensive support for legal research, case management, and documentation. Whether youre a law student, or someone seeking legal guidance.',
     },
     {
       imageUrl: documentImg,
       title: 'Narrative Legalism',
+      url: 'http://localhost:8004/',
       description:
         'Embark on a captivating journey through Narrative Legalism, an innovative chatbot that transforms the learning of laws into playful and enjoyable narratives. Dive into engaging stories that unravel legal complexities in a accessible manner. ',
     },
@@ -84,6 +91,7 @@ const Features = (props: Props) => {
             imageUrl={card.imageUrl}
             title={card.title}
             description={card.description}
+            url={card.url}
           />
         ))}
       </div>

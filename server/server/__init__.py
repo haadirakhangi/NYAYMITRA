@@ -43,12 +43,11 @@ def create_app(config_class=config):
             # user_id = session.get('user_id')
             # advocate_id = session.get('advocate_id')
             user_id = 1
-            advocate_id = None
             query = db.session.query(LawCatgBenf.category).filter_by(doc_name=mostcommon)
             all_values = query.first()
             print("Entry 2",all_values)
             # Store in the database based on the category
-            entry = QueryStats(query=query,category=category,user_id=user_id, advocate_id=advocate_id)
+            entry = QueryStats(query=query,category=category,user_id=user_id)
             db.session.add(entry)
             db.session.commit()
             return jsonify({'message': 'Data saved successfully', 'response': True}), 200

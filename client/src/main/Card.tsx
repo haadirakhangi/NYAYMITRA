@@ -4,6 +4,7 @@ interface CardProps {
   imageUrl: string;
   title: string;
   description: string;
+  url: string;
 }
 
 const Card: React.FC<CardProps> = (props) => {
@@ -21,8 +22,9 @@ const Card: React.FC<CardProps> = (props) => {
           </a>
           <p className="mb-3 font-normal text-gray-400">{props.description}</p>
           <a
-            href="#"
-            className="bg-[#eb427e] w-44 items-center pl-8 pr-8 flex pt-3 pb-3 rounded-xl hover:bg-transparent hover:border border-white hover:text-black hover:no-underline"
+            href={props.url}
+            target="_blank"
+            className="bg-[#eb427e] w-44 items-center pl-8 pr-8 flex pt-3 pb-3 rounded-xl hover:bg-white hover:border border-white hover:text-black hover:no-underline"
           >
             Get Started
             <svg

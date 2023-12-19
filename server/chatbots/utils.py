@@ -80,7 +80,7 @@ pinecone.init(
 
 
 # Download Punkt Package
-nltk.download('punkt')
+# nltk.download('punkt')
 
 # FUNCTION FOR CREATING INTIAL PINECONE INDEX FROM DIRECTORY
 def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
@@ -418,5 +418,25 @@ def nyaymitra_kyr_chain_with_parent_docs(full_doc_retriever):
       # return_source_documents=True,
       memory=memory,
       combine_docs_chain_kwargs={"prompt": prompt_template}
+    )
+    return chain
+
+def document_drafting_chain():
+    llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY_DOCUMENT_DRAFTING'),model_name="ft:gpt-3.5-turbo-1106:codeomega::8VJA3OGz",temperature=0.0,max_tokens=4096)
+    system_message_prompt = SystemMessagePromptTemplate.from_template(
+       """LawYantra is a factual chatbot which generates the complete legal document according to the user query."""
+    )
+    human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
+    
+    prompt_template = ChatPromptTemplate.from_messages([
+            system_message_prompt,
+            human_message_prompt,
+        ])  
+    memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", return_messages=True)
+
+    chain = LLMChain(
+      prompt=prompt_template,
+      llm=llm,
+      memory=memory,
     )
     return chain

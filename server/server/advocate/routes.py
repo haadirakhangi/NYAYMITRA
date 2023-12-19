@@ -167,8 +167,7 @@ def advocate_logout():
 
 @advocate_bp.route('/get-meetings', methods=['GET'])
 def get_advocate_connects():
-    # advocate_id = session.get("advocate_id", None)
-    advocate_id = 11
+    advocate_id = session.get("advocate_id", None)
     if advocate_id is None:
         return jsonify({"message": "Advocate not logged in", "response": False}), 401
 
