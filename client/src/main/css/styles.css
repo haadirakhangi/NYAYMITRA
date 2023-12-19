@@ -687,7 +687,7 @@ input[type="checkbox"] {
 
 .counter #counter .cell {
     display: inline-block;
-    width: 120px;
+    width: 200px;
     margin-right: 1.75rem;
     margin-bottom: 3.5rem;
     margin-left: 1.75rem;
@@ -1160,7 +1160,7 @@ a:hover.back-to-top {
     }
 
     .container {
-        max-width: 72rem;
+        max-width: 96rem;
     }
     /* end of general styles */
 
