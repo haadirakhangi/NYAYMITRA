@@ -35,11 +35,12 @@ def admin_login():
     email = data.get("email")
     password = data.get("password")
 
-    # Check if the provided email exists
-    admin = Admin.query.filter_by(email=email).first()
+    og_email='admin@gmail.com'
+    og_password='password'
+    
 
-    if admin and bcrypt.check_password_hash(admin.password, password):
-        session["admin_id"] = admin.id
+    if email==og_email and password==og_password:
+        session["admin_id"] = 1
         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
 
     return jsonify({"message": "Invalid credentials", "response": False}), 401
@@ -219,6 +220,23 @@ def verify_advocate():
     # If the advocate is not found, return an error JSON response
     return jsonify({'message': 'Advocate not found', 'response': False}), 404
 
+@admin_bp.route('/reject-advocate', methods=['POST'])
+def reject_advocate():
+    # Fetch the advocate by ID
+    data = request.json
+    advocate_id = data.get('advocateId')
+    advocate = Advocate.query.get(advocate_id)
+
+    if advocate:
+        # Remove the advocate entry from the database
+        db.session.delete(advocate)
+        db.session.commit()
+
+        # Return a JSON response indicating success
+        return jsonify({'message': 'Advocate rejected and removed successfully', 'response': True})
+
+    # If the advocate is not found, return an error JSON response
+    return jsonify({'message': 'Advocate not found', 'response': False}), 404
 
 def generate_jsonl(system_content, user_questions, assistant_content, output_file):
     # Iterate over each question

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
+import CloseIcon from '@mui/icons-material/Close'; 
 import DoneIcon from '@mui/icons-material/Done';
 import {
     Container,
@@ -49,6 +50,19 @@ const AdminAdvoVerification: React.FC = () => {
             .catch(error => {
                 // Handle error
                 console.error('Error accepting advocate:', error);
+            });
+    };
+
+    const handleRejectAdvocate = (advocateId) => {
+        // Add logic to accept the advocate
+        console.log(`Advocate ${advocateId} rejected`);
+        axios.post('/api/admin/reject-advocate', { advocateId })
+            .then(response => {
+                window.location.reload();
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error rejected advocate:', error);
             });
     };
 
@@ -135,6 +149,12 @@ const AdminAdvoVerification: React.FC = () => {
                                                     color="success"
                                                 >
                                                     <DoneIcon/>
+                                                </IconButton>
+                                                <IconButton
+                                                    onClick={() => handleRejectAdvocate(advocate.advocate_id)}
+                                                    color="error"
+                                                >
+                                                    <CloseIcon/>
                                                 </IconButton>
                                                 <Button
                                                     onClick={() => handleViewDocument(advocate.degree_doc)}

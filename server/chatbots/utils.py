@@ -155,6 +155,38 @@ def nyaymitra_kyr_chain(vectordb):
     )
     return chain
 
+# from langchain.llms import GPT4All
+# def nyaymitra_kyr_chain_with_gpt4all(vectordb):
+#     llm = GPT4All(
+#     model=r"C:\Users\Hastansh\Downloads\mistral-7b-instruct-v0.1.Q4_0.gguf"
+# )
+#     system_message_prompt = SystemMessagePromptTemplate.from_template(
+#        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
+#         Important Instructions:
+#         1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
+#         2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
+#         3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
+#         LEGAL CONTEXT: \n{context}"""
+#     )
+#     human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
+    
+#     prompt_template = ChatPromptTemplate.from_messages([
+#             system_message_prompt,
+#             human_message_prompt,
+#         ])  
+    
+#     retriever = vectordb.as_retriever()
+#     memory = ConversationBufferWindowMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
+
+#     chain = ConversationalRetrievalChain.from_llm(
+#       llm=llm,
+#       retriever=retriever,
+#       memory=memory,
+#       return_source_documents=True,
+#       combine_docs_chain_kwargs={"prompt": prompt_template}
+#     )
+#     return chain
+
 # from transformers import pipeline, set_hf_api_key
 # from getpass import getpass
 
