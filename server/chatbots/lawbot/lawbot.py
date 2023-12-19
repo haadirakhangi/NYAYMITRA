@@ -15,8 +15,8 @@ vectordb = Pinecone.from_existing_index(PINECONE_INDEX_NAME, EMBEDDINGS, text_ke
 @cl.on_chat_start
 def start_chat():
     # chain = nyaymitra_kyr_chain(full_doc_retriever)
-    chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
-    # chain = nyaymitra_kyr_chain(vectordb)
+    # chain = nyaymitra_kyr_chain_with_local_llm(vectordb)
+    chain = nyaymitra_kyr_chain(vectordb)
     cl.user_session.set("chain", chain)
 
 @cl.on_message
@@ -73,10 +73,9 @@ async def main(message: cl.Message):
         trans_output = final_answer
     # Sql Database
     data = {}
-    # data['answer']=trans_output
-    # data['query']=trans_query
-    # data['mostcommon']=most_common_filename
-    # response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
+    data['query']=trans_query
+    data['mostcommon']=most_common_filename
+    response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
     # if response.status_code == 200:
     #     print('Response from Flask server:', response.text)
     # else:

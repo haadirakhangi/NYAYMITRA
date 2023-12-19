@@ -46,7 +46,6 @@ const LawyerCard: React.FC<LawyerCardProps> = ({
 
   // ------------------------------------------------------------------
 
-  // Code for handling on submit values , when from values are submitted(User enters the date day and description)
   const handleSubmit = async (event) => {
     console.log("hello");
     event.preventDefault();
@@ -99,12 +98,7 @@ const LawyerCard: React.FC<LawyerCardProps> = ({
               style={{ display: isFormOpen ? "block" : "none" }}
             >
               <form className='form-container' onSubmit={handleSubmit}>
-                <input
-                  type='string'
-                  name='id'
-                  value={advocate_id}
-                  style={{ display: "none" }}
-                />
+                <input type='string' name='id' value={advocate_id} />
                 <h1>Connect</h1>
                 <label>
                   <b>Date : </b>

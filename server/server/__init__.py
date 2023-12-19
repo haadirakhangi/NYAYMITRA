@@ -119,5 +119,6 @@ def create_app(config_class=config):
     # with app.app_context():
     #     db.create_all()
     with app.app_context():
+        # db.session.query(LawCatgBenf).delete()
         db.session.commit()
     return app

@@ -5,6 +5,8 @@ import donation from './features/donation.png';
 import forum from './features/forum.png';
 import documentImg from './features/document.png';
 import rights from './features/rights.png';
+import Navbar from '@/navbar';
+import Footer from '@/footer';
 
 // Assuming CardData type definition
 type CardData = {
@@ -37,39 +39,40 @@ const Features = (props: Props) => {
     },
     {
       imageUrl: forum,
-      title: 'Legal Consultancy Forums',
+      title: 'Communtiy Forums',
       description:
-        'Participate in Legal Consultancy Forums to analyze legal cases, extract relevant information, and generate insightful reports. Collaborate with legal professionals to enhance your understanding of complex legal issues.',
+        'Immerse yourself in the NyayMitra Community, a digital sanctuary for legal enthusiasts and inquisitive minds alike. Engage in thought-provoking discussions, seek advice, and explore an abundance of legal resources within a supportive network.',
     },
     {
       imageUrl: donation,
-      title: 'Platform for Legal Aid Fund-Raising',
+      title: 'Document Summary & QnA',
       description:
-        'Contribute to the cause of justice by using our platform for Legal Aid Fund-Raising. Automatically review contracts, identify potential issues, and ensure compliance while supporting legal aid initiatives.',
+        'Nyaymitra leverages advanced artificial intelligence to provide comprehensive support for legal research, case management, and documentation. Whether youre a law student, or someone seeking legal guidance.',
     },
     {
       imageUrl: documentImg,
-      title: 'Legal Compliance Checker',
+      title: 'Narrative Legalism',
       description:
-        'Safeguard against legal risks with our Legal Compliance Checker. Leverage our AI-powered tool to ensure legal compliance by checking documents against the latest laws and regulations, providing you with peace of mind.',
+        'Embark on a captivating journey through Narrative Legalism, an innovative chatbot that transforms the learning of laws into playful and enjoyable narratives. Dive into engaging stories that unravel legal complexities in a accessible manner. ',
     },
   ];
 
   return (
     <div>
+      <Navbar/>
         <div style={{ padding: '20px', overflow: 'hidden' }}>
         <section className="bg-white dark:bg-gray-900">
           <div className="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
             <div className="mr-auto place-self-center lg:col-span-7">
               <h1 className="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white">Features</h1>
               <p className="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">From checkout to global sales tax compliance, companies around the world use Flowbite to simplify their payment stack.</p>
-              <a href="#" className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900">
+              <a href="#" className="bg-[#eb427e] flex w-44 pl-8 pr-8 pt-3 pb-3 rounded-xl hover:bg-transparent hover:border border-white hover:text-black hover:no-underline">
                 Get started
                 <svg className="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
               </a>
             </div>
             <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-              <img src="https://img.freepik.com/free-vector/mobile-testing-concept-illustration_114360-1564.jpg?w=996&t=st=1702734521~exp=1702735121~hmac=6bc46c2cb18f5bc2f8b953f096045a6744dc4f6276c7fac6a80cbef659a65177" alt="mockup" />
+              <img src="https://img.freepik.com/free-vector/development-concept-illustration_114360-463.jpg?w=740&t=st=1702983802~exp=1702984402~hmac=7bdf4b075161fd53acde8997a106e7629dd784287e731b8f8f730fc1ed3c7f11" alt="mockup" />
             </div>
           </div>
         </section>
@@ -84,6 +87,7 @@ const Features = (props: Props) => {
           />
         ))}
       </div>
+      <Footer/>
     </div>
   );
 };
