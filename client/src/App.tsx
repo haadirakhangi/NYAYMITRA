@@ -36,7 +36,7 @@ function App() {
         <Route path="/admin-home" element={<AdminDashboard />} />
         <Route path="/landing" element={<Landing />} />
         <Route path="/advoconnect" element={<Lawyers />} />
-        <Route path="/rights" element={<Rights />} />
+        <Route path="/rights" element={<Rights />} /> 
         <Route path="/userhome" element={<Home />} />
         <Route path="/features" element={<Features />} />
         <Route path="/advohome" element={<Advocate_home />} />
