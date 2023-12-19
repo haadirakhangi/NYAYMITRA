@@ -51,11 +51,12 @@ def update_vectorb():
         print("Update vectordb")
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
+            print()
             os.makedirs(upload_dir, exist_ok=True)
             filename = file.filename
             filepath = os.path.join(upload_dir, filename)
             file.save(filepath)
-            # vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+            vectordb = add_data_to_pinecone_vectorstore(upload_dir)
             json_data = autocategorize_law(filepath)
             print("the output json received",json)
             beneficiary = json_data['beneficiary']

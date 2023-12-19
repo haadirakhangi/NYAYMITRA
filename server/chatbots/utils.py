@@ -103,23 +103,25 @@ def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
 def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_NAME, embeddings=EMBEDDINGS):
     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
     data = loader.load()
-
+    print("Its indide the pinecode data")
     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
     docs = text_splitter.split_documents(data)
-
+    print("Docs",docs)
     if index_name not in pinecone.list_indexes():
-       pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
-
-    index = pinecone.Index(index_name)
-    vectorstore = Pinecone(
-      index = index,
-      embedding = embeddings,
-      text_key = 'key'    
-    )
-
-    vectorstore.add_documents(docs)
-    print("Vector Embedding Updated")
-    return vectorstore
+      print("index not present")
+      pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
+      vectordb = Pinecone.from_documents(documents = docs,index_name = index_name, embedding =embeddings)
+      return vectordb
+    else:
+      index = pinecone.Index(index_name)
+      vectorstore = Pinecone(
+        index = index,
+        embedding = embeddings, 
+        text_key = 'key'    
+      )
+      vectorstore.add_documents(docs)
+      print("Vector Embedding Updated")
+      return vectorstore
 
 # vectordb = add_data_to_pinecone_vectorstore(NEW_DATA_DIRECTORY, PINECONE_INDEX_NAME, EMBEDDINGS)
 
