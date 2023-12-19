@@ -52,9 +52,9 @@ DETECTOR = LanguageDetectorBuilder.from_all_languages().with_preloaded_language_
 DEVICE_TYPE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Download the spaCy model
-# model_name = 'en_core_web_lg'
-# spacy.cli.download(model_name)
-# nlp = spacy.load(model_name)
+model_name = 'en_core_web_lg'
+spacy.cli.download(model_name)
+nlp = spacy.load(model_name)
 
 # Loading BGE Embeddings From HuggingFace
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
