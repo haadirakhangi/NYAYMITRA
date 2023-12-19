@@ -8,9 +8,12 @@ import os
 import json
 from sqlalchemy.orm import aliased
 from collections import defaultdict
+from openai import OpenAI
+import ast
+import fitz
 
 import shutil
-from chatbots.utils import add_data_to_pinecone_vectorstore,autocategorize_law
+from chatbots.utils import add_data_to_pinecone_vectorstore,autocategorize_law,finetune_for_document_drafting
 
 def login_required(f):
     @wraps(f)
@@ -48,11 +51,12 @@ def update_vectorb():
         print("Update vectordb")
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
+            print()
             os.makedirs(upload_dir, exist_ok=True)
             filename = file.filename
             filepath = os.path.join(upload_dir, filename)
             file.save(filepath)
-            # vectordb = add_data_to_pinecone_vectorstore(upload_dir)
+            vectordb = add_data_to_pinecone_vectorstore(upload_dir)
             json_data = autocategorize_law(filepath)
             print("the output json received",json)
             beneficiary = json_data['beneficiary']
@@ -77,28 +81,64 @@ def update_vectorb():
     except Exception as e:
         print("Printing error",e)
         return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
-    
+
+@admin_bp.route('/generate-questions', methods=['POST'])
+def generate_questions():
+    try:
+        question = request.form.get('question')
+        phrases = paraphrase_text(question)
+        print("Phrases--------------------",phrases)
+        return jsonify({"message": "Questions generated successfully",'questions': phrases["questions"] ,"response": True}), 200
+    except Exception as e:
+        print("Printing error",e)
+        return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
+        
 @admin_bp.route('/update-drafting', methods=['POST'])
 def update_drafting():
     try:
+        data = request.form
+        questions = data.getlist('questions')
         # Create 'uploads' directory if it doesn't exist
-        upload_dir = 'nyaymitra_data/drafting_docs'
+        upload_dir = 'nyaymitra_data/drafting_doc'
+        output_directory = "nyaymitra_data/drafting_json"
+        output_file = "nyaymitra_data/drafting_json/output.jsonl"
         print("Update drafting")
-        question = request.form.get('question')
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory, exist_ok=True)
         # Iterate over each file in the request
-        # for file in request.files.getlist('documents'):
-        #     if os.path.exists(os.path.join(upload_dir)):
-        #         file.save(real_filepath)
-        #     else:
-        #         os.makedirs(os.path.join(real_dir,json_data['category']), exist_ok=True)
-        #         file.save(real_filepath)
-        #     os.makedirs(upload_dir, exist_ok=True)
-        #     shutil.rmtree(upload_dir)
+        system_content = "NyayMitra is a factual chatbot which generates the complete legal document according to the user query."
+        for file in request.files.getlist('documents'):
+            filename = file.filename
+            file_path = os.path.join(upload_dir, filename)
+            if os.path.exists(upload_dir):
+                file.save(file_path)
+            else:
+                os.makedirs(upload_dir, exist_ok=True)
+                file.save(file_path)
+            text = extract_text_from_pdf(os.path.join(upload_dir,file.filename))
+            generate_jsonl(system_content, questions, text, output_file)
+        finetune_for_document_drafting(output_file)
         return jsonify({"message": "Documents saved successfully", "response": True}), 200
     except Exception as e:
         print("Printing error",e)
         return jsonify({"message": f"Error: {str(e)}", "response": False}), 500
 
+def paraphrase_text(admin_query):
+    module_generation_prompt = """Paraphrase the given query and return it in a json format where the key is 'questions' and the value is a list of ten paraphrased questions.
+    QUERY: {query}"""
+
+    client = OpenAI()
+    completion = client.chat.completions.create(
+            model = 'gpt-3.5-turbo-1106',
+            messages = [
+                {'role':'user', 'content': module_generation_prompt.format(query= admin_query)},
+            ],
+            response_format = {'type':'json_object'},
+            seed = 42,
+    )
+    output = ast.literal_eval(completion.choices[0].message.content)
+
+    return output
 
 @admin_bp.route('/register', methods=['POST'])
 def admin_register():
@@ -181,3 +221,34 @@ def verify_advocate(advocate_id):
 
     # If the advocate is not found, return an error JSON response
     return jsonify({'message': 'Advocate not found', 'response': False}), 404
+
+
+def generate_jsonl(system_content, user_questions, assistant_content, output_file):
+    # Iterate over each question
+    for question in user_questions:
+        messages = []
+        messages.append({"role": "system", "content": system_content})
+        messages.append({"role": "user", "content": question})
+        messages.append({"role": "assistant", "content": assistant_content})
+
+        # Write the messages for the current question to the output file
+        with open(output_file, 'a') as f:
+            json.dump({"messages": messages}, f)
+            f.write('\n')
+
+
+
+
+
+
+def extract_text_from_pdf(pdf_file):
+    text = ""
+    try:
+        with fitz.open(pdf_file) as pdf_document:
+            for page_number in range(pdf_document.page_count):
+                page = pdf_document[page_number]
+                text += page.get_text()
+    except Exception as e:
+        print(f"Error extracting text from PDF: {e}")
+
+    return text

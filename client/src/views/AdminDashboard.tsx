@@ -82,6 +82,7 @@ const AdminDashboard: React.FC = () => {
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
     const [fineSelectedFiles, setFineSelectedFiles] = useState<FileList | null>(null);
     const [inputQuestion, setInputQuestion] = useState<string>('');
+    const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
 
 
 
@@ -136,11 +137,6 @@ const AdminDashboard: React.FC = () => {
     const handleFineSubmit = async () => {
         console.log("I am sending stuff");
 
-        if (!fineSelectedFiles) {
-            console.error('No file selected.');
-            return;
-        }
-
         if (!inputQuestion) {
             console.error('No question input provided.');
             return;
@@ -148,17 +144,49 @@ const AdminDashboard: React.FC = () => {
 
         const formData = new FormData();
 
-        // Append files to FormData
-        for (let i = 0; i < fineSelectedFiles.length; i++) {
-            formData.append('documents', fineSelectedFiles[i]);
-        }
-
         // Append input question to FormData
         formData.append('question', inputQuestion);
 
         try {
             const response = await axios.post(
-                'http://127.0.0.1:5000/admin/update-drafting',
+                '/api/admin/generate-questions',
+                formData
+            );
+            setGeneratedQuestions(response.data.questions)
+            console.log('Files and question sent successfully', response.data);
+            // Handle the response as needed
+        } catch (error) {
+            console.error('Error sending files and question:', error);
+        }
+    };
+
+    const handleQuestionChangeAtIndex = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        index: number
+    ) => {
+        console.log(generatedQuestions)        
+        const updatedQuestions = [...generatedQuestions];
+        updatedQuestions[index] = event.target.value;
+        setGeneratedQuestions(updatedQuestions);
+    };
+    
+    const handleDrafting = async () => {
+        console.log("I am drafting stuff");
+        if (!fineSelectedFiles) {
+            console.error('No file selected.');
+            return;
+        }
+        const formData = new FormData();
+        // Append files to FormData
+        for (let i = 0; i < fineSelectedFiles.length; i++) {
+            formData.append('documents', fineSelectedFiles[i]);
+
+        // Append input question to FormData
+        generatedQuestions.forEach((question) => formData.append("questions", question));
+
+        try {
+            const response = await axios.post(
+                '/api/admin/update-drafting',
                 formData
             );
             console.log('Files and question sent successfully', response.data);
@@ -167,6 +195,9 @@ const AdminDashboard: React.FC = () => {
             console.error('Error sending files and question:', error);
         }
     };
+}
+
+    
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
             {/* Sidebar (20%) */}
@@ -232,7 +263,7 @@ const AdminDashboard: React.FC = () => {
 
 
                     </Box>
-                    <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px',marginBottom: '20px' }}>
+                    <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
                         <Typography variant='h5' style={{ marginTop: '16px', marginBottom: '16px' }}>
                             Upload Documents to Update The chatbots
                         </Typography>
@@ -258,23 +289,6 @@ const AdminDashboard: React.FC = () => {
                         </Button>
                     </Box>
                     <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px' }}>
-                        <Typography variant='h5' style={{ marginTop: '16px', marginBottom: '16px' }}>
-                            Upload Documents for document drafting
-                        </Typography>
-                        <Button
-                            component='label'
-                            variant='contained'
-                            startIcon={<CloudUploadIcon />}
-                        >
-                            Upload file
-                            <VisuallyHiddenInput
-                                type='file'
-                                multiple
-                                onChange={handleFineFileChange}
-                            />
-                        </Button>
-
-
                         <Typography variant='h5' style={{ marginTop: '30px', marginBottom: '16px' }}>
                             Input Question
                         </Typography>
@@ -292,6 +306,42 @@ const AdminDashboard: React.FC = () => {
                             color='primary'
                             style={{ marginLeft: '10px' }}
                             onClick={handleFineSubmit}
+                        >
+                            Genrate Questions
+                        </Button>
+                        {generatedQuestions.map((question, index) => (
+                            <FormControl key={index} fullWidth margin="normal">
+                                <InputLabel htmlFor={`question-${index}`}>{`Question ${index + 1}`}</InputLabel>
+                                <Input
+                                    id={`question-${index}`}
+                                    name={`question-${index}`}
+                                    autoComplete={`Question ${index + 1}`}
+                                    value={question}
+                                    onChange={(e) => handleQuestionChangeAtIndex(e, index)}
+                                />
+                            </FormControl>
+                        ))}
+                        <Typography variant='h5' style={{ marginTop: '16px', marginBottom: '16px' }}>
+                            Upload Documents for document drafting
+                        </Typography>
+                        <Button
+                            component='label'
+                            variant='contained'
+                            startIcon={<CloudUploadIcon />}
+                        >
+                            Upload file
+                            <VisuallyHiddenInput
+                                type='file'
+                                multiple
+                                onChange={handleFineFileChange}
+                            />
+                        </Button>
+
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            style={{ marginLeft: '10px' }}
+                            onClick={handleDrafting}
                         >
                             Update Data
                         </Button>
