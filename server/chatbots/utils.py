@@ -154,7 +154,7 @@ def nyaymitra_kyr_chain(vectordb):
 
 def nyaymitra_kyr_chain_with_local_llm(vectordb):
   llm = HuggingFacePipeline.from_model_id(
-      model_id="gpt2",
+      model_id="meta-llama/Llama-2-7b",
       task="text-generation",
       device = 0 if torch.cuda.is_available() else -1, 
       pipeline_kwargs={"temperature":0.0, "max_new_tokens": 10, "max_length":1000},
@@ -281,7 +281,11 @@ def finetune_for_document_drafting(file_path):
   job = client.fine_tuning.jobs.create(
     training_file= file_id,
     model= fine_tuning_model
+<<<<<<< HEAD
   )
+=======
+  ) 
+>>>>>>> 931c6028f2173d8caa44524d3a8cc49ad2c24a8c
   job_id =job.id
   client.fine_tuning.jobs.retrieve(job_id)
   while True:
