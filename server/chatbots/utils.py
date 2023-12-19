@@ -281,11 +281,7 @@ def finetune_for_document_drafting(file_path):
   job = client.fine_tuning.jobs.create(
     training_file= file_id,
     model= fine_tuning_model
-<<<<<<< HEAD
-  )
-=======
   ) 
->>>>>>> 931c6028f2173d8caa44524d3a8cc49ad2c24a8c
   job_id =job.id
   client.fine_tuning.jobs.retrieve(job_id)
   while True:
