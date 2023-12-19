@@ -50,6 +50,7 @@ class Advocate(db.Model):
     court_type = db.Column(db.String(50), nullable=True)
     languages = db.Column(db.String(255), nullable=True)
     rating = db.Column(db.Float(precision=2), nullable=True)
+    min_cost_per_hr=db.Column(db.Integer,nullable=False)
     date_joined = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Add file field

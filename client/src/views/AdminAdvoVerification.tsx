@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
+<<<<<<< HEAD
+=======
+import CloseIcon from '@mui/icons-material/Close'; 
+>>>>>>> 17cd7b2f67be62f03c34ef0b94151491e713b502
 import DoneIcon from '@mui/icons-material/Done';
 import {
     Container,
@@ -52,6 +56,22 @@ const AdminAdvoVerification: React.FC = () => {
             });
     };
 
+<<<<<<< HEAD
+=======
+    const handleRejectAdvocate = (advocateId) => {
+        // Add logic to accept the advocate
+        console.log(`Advocate ${advocateId} rejected`);
+        axios.post('/api/admin/reject-advocate', { advocateId })
+            .then(response => {
+                window.location.reload();
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error rejected advocate:', error);
+            });
+    };
+
+>>>>>>> 17cd7b2f67be62f03c34ef0b94151491e713b502
     const handleViewDocument = (documentUrl) => {
         if (documentUrl) {
             axios.post('/api/admin/get-doc', { documentUrl }, { responseType: 'arraybuffer' })
@@ -136,6 +156,15 @@ const AdminAdvoVerification: React.FC = () => {
                                                 >
                                                     <DoneIcon/>
                                                 </IconButton>
+<<<<<<< HEAD
+=======
+                                                <IconButton
+                                                    onClick={() => handleRejectAdvocate(advocate.advocate_id)}
+                                                    color="error"
+                                                >
+                                                    <CloseIcon/>
+                                                </IconButton>
+>>>>>>> 17cd7b2f67be62f03c34ef0b94151491e713b502
                                                 <Button
                                                     onClick={() => handleViewDocument(advocate.degree_doc)}
                                                     color="primary"

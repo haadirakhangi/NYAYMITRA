@@ -14,10 +14,12 @@ import Features from "./main/features";
 import Advocate_home from "./main/advocatehome";
 import VideoCall from "./views/VideoCall"
 import RoomPage from "./views/RoomPage";
+import AdminAdvoVerification from "./views/AdminAdvoVerification";
 // import Document from "./main/documentdraft";
 import Connect from "./main/connect";
 import Community from "./main/community";
 import AdminLogin from "./views/AdminLogin";
+import NewsComponent from './views/News'
 
 function App() {
 
@@ -43,7 +45,8 @@ function App() {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/video-call" element={<VideoCall />} />
         <Route path="/room-page" element={<RoomPage />} />
-
+        <Route path="/admin-advocate-verified" element={<AdminAdvoVerification />} />
+        <Route path="/news" element={<NewsComponent />} />
         {/* <Route path="/documentdraft" element={<Document />} /> */}
       </Routes>
     </Router>
