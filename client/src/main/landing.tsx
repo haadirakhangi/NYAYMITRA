@@ -14,7 +14,7 @@ const ComingSoonPage: React.FC = () => {
                 </div>
                 <div className='maintain'>
                     <NavLink to='/advo-login'><button className='nav'>Advocate</button></NavLink>
-                    <NavLink to=''><button className='nav'>Admin</button></NavLink>
+                    <NavLink to='/admin-login'><button className='nav'>Admin</button></NavLink>
                     <NavLink to='/user-login'><button className='nav'>User</button></NavLink>
                 </div>
             </header>
@@ -32,7 +32,7 @@ const ComingSoonPage: React.FC = () => {
                                 <div className="form-group">
                                     <input type="email" name="email" id="email" className="form-control" placeholder="email address" />
                                 </div>
-                                <button type="submit" className="btn subscribe-btn">Notify Me</button>
+                                <NavLink to='/user-login'><button type="submit" className="btn subscribe-btn">Notify Me</button></NavLink>
                             </form>
                         </div>
 

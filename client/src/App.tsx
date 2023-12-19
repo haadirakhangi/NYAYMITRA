@@ -9,7 +9,6 @@ import Landing from "./main/landing";
 import Lawyers from "./main/advoconnect";
 import { NarrativeLegalism } from "./views/NarrativeLegal";
 import { DocumentSummarization } from "./views/DocumentSummarization";
-import Rights from "./main/rights"
 import Home from "./main/userhome";
 import Features from "./main/features";
 import Advocate_home from "./main/advocatehome";
@@ -36,7 +35,6 @@ function App() {
         <Route path="/admin-home" element={<AdminDashboard />} />
         <Route path="/landing" element={<Landing />} />
         <Route path="/advoconnect" element={<Lawyers />} />
-        <Route path="/rights" element={<Rights />} />
         <Route path="/userhome" element={<Home />} />
         <Route path="/features" element={<Features />} />
         <Route path="/advohome" element={<Advocate_home />} />

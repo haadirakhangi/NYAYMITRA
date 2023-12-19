@@ -1,6 +1,6 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import Advocate,AdvoConnect
+from server.models import Advocate, AdvoConnect
 from server import db, bcrypt
 import json
 from functools import wraps
@@ -35,7 +35,7 @@ def single_login_required(f):
 @advocate_bp.route('/register', methods=['POST'])
 def advocate_register():
     data = request.form  # Assuming the data is in form format
-    
+
     # Extract data from the form
     fname = data.get("firstName")
     lname = data.get("lastName")
@@ -52,7 +52,7 @@ def advocate_register():
     court_type = data.get("typeCourt")
     languages = data.getlist("languages")
     resume_file = request.files['llbDocument']
-    print("Languages:- ",languages)
+    print("Languages:- ", languages)
     # languages = languages_str.split(",") if languages_str else []
 
     languages_json = json.dumps(languages)
@@ -100,6 +100,7 @@ def advocate_register():
 
     return response
 
+
 def save_resume(resume_file):
     if resume_file:
         # Save the file to the uploads folder
@@ -112,11 +113,6 @@ def save_resume(resume_file):
 
         return filename
     return None
-
-   
-
-
-    
 
 
 @advocate_bp.route('/login', methods=['POST'])
@@ -157,7 +153,8 @@ def get_user():
     if user is None:
         return jsonify({"message": "Advocate not found", "response": False}), 404
 
-    response = {"message": "User found", "advocate_id": user.advocate_id, "email": user.email, "response": True}
+    response = {"message": "User found", "advocate_id": user.advocate_id,
+                "email": user.email, "response": True}
     return jsonify(response), 200
 
 
@@ -167,14 +164,16 @@ def advocate_logout():
     session.pop('advocate_id', None)  # Remove advocate ID from the session
     return jsonify({'message': 'Advocate logged out successfully'})
 
-@advocate_bp.route('/get', methods=['GET'])
-@login_required
+
+@advocate_bp.route('/get-meetings', methods=['GET'])
 def get_advocate_connects():
-    advocate_id = session.get("advocate_id", None)
+    # advocate_id = session.get("advocate_id", None)
+    advocate_id = 11
     if advocate_id is None:
         return jsonify({"message": "Advocate not logged in", "response": False}), 401
 
-    advo_connects = AdvoConnect.query.filter_by(advocate_id=advocate_id).all()
+    advo_connects = AdvoConnect.query.filter_by(
+        advocate_id=advocate_id, accepted=False).all()
 
     advo_connects_data = [connect.to_dict() for connect in advo_connects]
 

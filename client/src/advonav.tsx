@@ -4,7 +4,7 @@ import logo from './img/logo-wbag.png'
 
 type Props = {};
 
-const Navbar = (props: Props) => {
+const AdvoNav = (props: Props) => {
     return (
         <div>
             <nav className="navbar fixed-top " style={{ background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) , rgba(0, 0, 0, 0) ' }}>
@@ -22,7 +22,7 @@ const Navbar = (props: Props) => {
                                 <a className="nav-link page-scroll" href="#features"><NavLink to='/features'>Features</NavLink></a>
                             </li>
                             <li>
-                                <a className="nav-link page-scroll" href="#details"><NavLink to='/advoconnect'>AdvoConnect</NavLink></a>
+                                <a className="nav-link page-scroll" href="#details"><NavLink to='/connect'>Clients</NavLink></a>
                             </li>
                         </ul>
                     </div>
@@ -33,4 +33,4 @@ const Navbar = (props: Props) => {
     );
 }
 
-export default Navbar;
+export default AdvoNav;
