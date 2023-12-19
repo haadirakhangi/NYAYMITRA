@@ -29,6 +29,7 @@ import json
 import nltk
 import time
 import spacy
+from transformers import  AutoTokenizer
 
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 load_dotenv()
@@ -152,14 +153,21 @@ def nyaymitra_kyr_chain(vectordb):
     )
     return chain
 
+# from transformers import pipeline, set_hf_api_key
+# from getpass import getpass
+
+# # Set your Hugging Face API token
+# api_token = getpass("Enter your Hugging Face API token: ")
+# set_hf_api_key(api_token)
+hf_api_token = os.getenv("HUGGINGFACE_API_KEY")
 def nyaymitra_kyr_chain_with_local_llm(vectordb):
   llm = HuggingFacePipeline.from_model_id(
-      model_id="meta-llama/Llama-2-7b",
+      model_id="mistralai/Mistral-7B-Instruct-v0.2",
       task="text-generation",
-      device = 0 if torch.cuda.is_available() else -1, 
+      token=hf_api_token,
+      # device = 0 if torch.cuda.is_available() else -1, 
       pipeline_kwargs={"temperature":0.0, "max_new_tokens": 10, "max_length":1000},
   )
-
   system_message_prompt = SystemMessagePromptTemplate.from_template(
         """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
           Important Instructions:
