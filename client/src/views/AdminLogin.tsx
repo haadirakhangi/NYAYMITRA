@@ -82,8 +82,8 @@ const AdminLogin = (props: Props) => {
             <div
               className="shrink-1 mb-12 grow-0 basis-auto md:mb-0 md:w-9/12 md:shrink-0 lg:w-6/12 xl:w-6/12">
               <img
-                src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-                className="w-full"
+                src="https://img.freepik.com/free-vector/dashboard-concept-illustration_114360-1447.jpg?w=740&t=st=1702962062~exp=1702962662~hmac=449df5cb94ae60668c6ceef638a4b7bacaae1c5223ddfbe6fa81fc63e690dd12"
+                className="h-1/2"
                 alt="Sample image" />
             </div>
 
@@ -150,12 +150,6 @@ const AdminLogin = (props: Props) => {
                     Login
                   </button>
 
-                  <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
-                    Don't have an account?
-                    <a
-                      className="text-danger transition duration-150 ease-in-out hover:text-danger-600 focus:text-danger-600 active:text-danger-700"
-                    > Register </a>
-                  </p>
                 </div>
                 {state.error ? (
                   <Snackbar

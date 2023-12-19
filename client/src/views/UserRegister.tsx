@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import {
+  Paper,
+  Avatar,
+  FormControl,
+  Input,
+  InputLabel,
+  Button,
+  Select,
+  MenuItem,
+  Snackbar,
+  createTheme,
+  IconButton,
+  ThemeProvider,
+  FormHelperText,
+} from "@mui/material";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 interface FormDataStep1 {
   fullName: string;
   phoneNo: string;
@@ -20,6 +35,7 @@ interface FormDataStep3 {
   password: string;
   confirmPassword: string;
 }
+
 
 const UserRegister: React.FC = () => {
   const [formData, setFormData] = useState<FormDataStep1 & FormDataStep2 & FormDataStep3>({
@@ -45,6 +61,7 @@ const UserRegister: React.FC = () => {
     setStep(step - 1);
   };
 
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -55,13 +72,13 @@ const UserRegister: React.FC = () => {
     console.log("Password send", formData)
     axios
       .post('/api/user/register', formattedData,
-      {
-        withCredentials: true,  // This is equivalent to credentials: 'include'
-        headers: {
-          'Content-Type': 'application/json',
-          // Add any other headers as needed
-        },
-      }
+        {
+          withCredentials: true,  // This is equivalent to credentials: 'include'
+          headers: {
+            'Content-Type': 'application/json',
+            // Add any other headers as needed
+          },
+        }
       )
       .then((response) => {
         console.log('Data sent successfully:', response.data);
@@ -69,6 +86,18 @@ const UserRegister: React.FC = () => {
       .catch((error) => {
         console.error('Error sending data:', error);
       });
+  };
+  const isStepDisabled = () => {
+    switch (step) {
+      case 1:
+        return !formData.fullName || !formData.phoneNo || !formData.email || !formData.birthdate || !formData.gender;
+      case 2:
+        return !formData.address || !formData.city || !formData.pincode || !formData.state;
+      case 3:
+        return !formData.password || !formData.confirmPassword;
+      default:
+        return false;
+    }
   };
 
   const renderFormStep = () => {
@@ -128,7 +157,17 @@ const UserRegister: React.FC = () => {
               <option value='other'>Other</option>
             </select>
 
-            <button type='button' onClick={() => setStep(2)}>
+            <button type='button' onClick={() => setStep(step + 1)}
+              disabled={isStepDisabled()}  // Disable the button if any field is empty
+              style={{
+                marginTop: '20px',
+                paddingLeft: '20px',
+                paddingRight: '20px',
+                paddingTop: '10px',
+                paddingBottom: '10px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+              }} >
               Next
             </button>
           </div>
@@ -201,11 +240,22 @@ const UserRegister: React.FC = () => {
               <option value='Uttarakhand'>Uttarakhand</option>
               <option value='West Bengal'>West Bengal</option>
             </select>
-
-            <button onClick={handleBack}>Back</button>
-            <button type='button' onClick={() => setStep(3)}>
-              Next
-            </button>
+            <div className='flex justify-between'>
+              <button onClick={handleBack} style={{ marginTop: "20px", paddingLeft: '20px', paddingRight: '20px', paddingTop: '10px', paddingBottom: '10px', backgroundColor: "black", color: "white" }}>Back</button>
+              <button type='button' onClick={() => setStep(step + 1)}
+                disabled={isStepDisabled()}  // Disable the button if any field is empty
+                style={{
+                  marginTop: '20px',
+                  paddingLeft: '20px',
+                  paddingRight: '20px',
+                  paddingTop: '10px',
+                  paddingBottom: '10px',
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                }}>
+                Next
+              </button>
+            </div>
           </div>
         );
       case 3:
@@ -229,10 +279,22 @@ const UserRegister: React.FC = () => {
               placeholder='Confirm Password'
               required
             />
-            <button onClick={handleBack}>Back</button>
-            <button type='submit' onClick={handleSubmit}>
-              Submit
-            </button>
+            <div className='flex justify-between'>
+              <button onClick={handleBack} style={{ marginTop: "20px", paddingLeft: '20px', paddingRight: '20px', paddingTop: '10px', paddingBottom: '10px', backgroundColor: "black", color: "white" }}>Back</button>
+              <button type='button'
+                disabled={isStepDisabled()}  // Disable the button if any field is empty
+                style={{
+                  marginTop: '20px',
+                  paddingLeft: '20px',
+                  paddingRight: '20px',
+                  paddingTop: '10px',
+                  paddingBottom: '10px',
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                }}>
+                Submit
+              </button>
+            </div>
 
           </div>
         );
@@ -243,15 +305,19 @@ const UserRegister: React.FC = () => {
 
   return (
     <div style={{ background: '#ffff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className='w-full max-w-2xl p-12 bg-[#250E62] rounded shadow-2xl' style={{
-        background: 'linear-gradient(to bottom, #f4c430, #fff, #138808)',
-        color: '#250E62', // Text color
-        boxShadow: '0 6px 36px rgba(0, 0, 0, 0.8)'
-      }}>
-        <h1 className='flex justify-center items-center text-xl'>
-          <strong>Registration Form</strong>
-        </h1>
-        <div className='mt-4'>{renderFormStep()}</div>
+      <div style={{ background: '#26c6da', padding: '25px' }}>
+        <div className='w-full max-w-2xl p-12  rounded ' style={{
+          background: '#ffff',
+          color: '#250E62', // Text color
+        }}>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "20px", justifyContent: "center" }}>
+            <Avatar style={{ fontSize: "20px", backgroundColor: "#2196F3" }} sx={{ width: 50, height: 50 }}>
+              <PeopleAltIcon />
+            </Avatar>
+            <div style={{ marginLeft: "10px", fontSize: "20px" }}>User Registration</div>
+          </div>
+          <div className='mt-4'>{renderFormStep()}</div>
+        </div>
       </div>
     </div>
   );
