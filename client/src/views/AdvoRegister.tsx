@@ -129,6 +129,8 @@ const AdvoRegister = () => {
             formData.append("llbDocument", state.llbDocument);
         }
 
+        
+
         // Append other user credentials to form data
         formData.append("officeAddress", state.officeAddress);
         formData.append("pincode", state.pincode);
