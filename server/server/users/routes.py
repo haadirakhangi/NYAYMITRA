@@ -102,6 +102,7 @@ tools = [
     {
         'type': 'function',
         'function':{
+            
             'name': 'retrieval_augmented_generation',
             'description': 'Fetches information about Nyaymitra\'s platform to answer user\'s query',
             'parameters': {
