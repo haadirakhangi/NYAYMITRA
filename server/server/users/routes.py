@@ -1,6 +1,6 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import User,Advocate
+from server.models import User,Advocate,AdvoConnect
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
@@ -42,8 +42,7 @@ def single_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         user_id = session.get("user_id", None)
-        advocate_id=session.get("advocate_id",None)
-        if user_id is not None or advocate_id is not None:
+        if user_id is not None:
             return jsonify({"message": "Another user is already logged in", "response": False}), 403
         return f(*args, **kwargs)
     return decorated_function
@@ -352,3 +351,38 @@ def chatbot_route():
         return jsonify(response)
     else:
         return jsonify({'error': 'User message not provided'}), 400
+    
+@user_bp.route('/add-meeting', methods=['POST'])
+@login_required
+def add_advo_connect():
+    user_id = session.get("user_id", None)
+    if user_id is None:
+        return jsonify({"message": "User not logged in", "response": False}), 401
+
+    data = request.json
+    subject = data.get("subject")
+    description = data.get("description")
+    date_str = data.get("date")
+    time_str = data.get("time")
+    advocate_id = data.get("advocate_id")
+
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        time_obj = datetime.strptime(time_str, '%H:%M').time()
+
+        new_advo_connect = AdvoConnect(
+            subject=subject,
+            description=description,
+            date=date,
+            time=time_obj,
+            user_id=user_id,
+            advocate_id=advocate_id
+        )
+
+        db.session.add(new_advo_connect)
+        db.session.commit()
+
+        return jsonify({"message": "AdvoConnect added successfully", "response": True}), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e), "response": False}), 500

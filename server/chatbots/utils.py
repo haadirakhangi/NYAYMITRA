@@ -154,7 +154,7 @@ def nyaymitra_kyr_chain(vectordb):
 
 def nyaymitra_kyr_chain_with_local_llm(vectordb):
   llm = HuggingFacePipeline.from_model_id(
-      model_id="gpt2",
+      model_id="meta-llama/Llama-2-7b",
       task="text-generation",
       device = 0 if torch.cuda.is_available() else -1, 
       pipeline_kwargs={"temperature":0.0, "max_new_tokens": 10, "max_length":1000},
@@ -259,7 +259,8 @@ def autocategorize_law(file_path, embeddings= EMBEDDINGS):
     Property Rights:Laws related to ownership, transfer, and use of property\n
     Family Rights:Laws governing marriage, divorce, child custody, and adoption\n
     Civil Rights:Laws protecting individuals from discrimination, ensuring freedom of speech, etc.\n
-    Criminal Rights:Laws related to criminal procedures, rights of the accused, etc.\n
+    Criminal Rights:Laws related to criminal procedures, rights of the 
+    accused, etc.\n
     Health and Safety Rights:Laws related to public health, safety regulations, etc.\n
     Environmental Rights:Laws addressing environmental protection and conservation\n
     """
@@ -280,7 +281,7 @@ def finetune_for_document_drafting(file_path):
   job = client.fine_tuning.jobs.create(
     training_file= file_id,
     model= fine_tuning_model
-  )
+  ) 
   job_id =job.id
   client.fine_tuning.jobs.retrieve(job_id)
   while True:
@@ -306,44 +307,44 @@ def preprocess_text(text, nlp = NLP):
 # ------------------------------------------------------ FULL DOCS RETRIEVER -----------------------------------------------
  
 # FUNCTION TO CREATE VECTOR DATABASE WITH PARENTS DOCS RETRIEVER
-def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings, local_file_store_path, child_splitter):
-    """
-    Function to create embeddings for Pinecone database and creating a Parent Document Retriever using a local docstore.
-    Returns: vectorstore: instance of the pinecone vector database
-             store: The instance of LocalFileStore that contains the index which maps the Parent Document to the child document.
-    """
-    loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
-    data = loader.load()
+# def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings, local_file_store_path, child_splitter):
+#     """
+#     Function to create embeddings for Pinecone database and creating a Parent Document Retriever using a local docstore.
+#     Returns: vectorstore: instance of the pinecone vector database
+#              store: The instance of LocalFileStore that contains the index which maps the Parent Document to the child document.
+#     """
+#     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
+#     data = loader.load()
 
-    text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
-    docs = text_splitter.split_documents(data)
+#     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+#     docs = text_splitter.split_documents(data)
 
-    if index_name in pinecone.list_indexes():
-      pinecone.delete_index(index_name)
+#     if index_name in pinecone.list_indexes():
+#       pinecone.delete_index(index_name)
 
-    pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
+#     pinecone.create_index(name=index_name, dimension=1024, metric="cosine")
 
-    index = pinecone.Index(index_name)
-    vectorstore = Pinecone(
-      index = index,
-      embedding = embeddings,
-      text_key = 'key'
-    )
+#     index = pinecone.Index(index_name)
+#     vectorstore = Pinecone(
+#       index = index,
+#       embedding = embeddings,
+#       text_key = 'key'
+#     )
 
-    file_store = LocalFileStore(local_file_store_path)
-    store = create_kv_docstore(file_store)
+#     file_store = LocalFileStore(local_file_store_path)
+#     store = create_kv_docstore(file_store)
 
-    full_doc_retriever = ParentDocumentRetriever(
-      vectorstore=vectorstore,
-      docstore=store,
-      child_splitter=child_splitter,
-    )
+#     full_doc_retriever = ParentDocumentRetriever(
+#       vectorstore=vectorstore,
+#       docstore=store,
+#       child_splitter=child_splitter,
+#     )
 
-    print('Creating Embeddings')
-    full_doc_retriever.add_documents(docs, ids=None)
-    print("Vector Database Created")
+#     print('Creating Embeddings')
+#     full_doc_retriever.add_documents(docs, ids=None)
+#     print("Vector Database Created")
 
-    return vectorstore, store
+#     return vectorstore, store
 
 # vectorstore, store = load_data_to_pinecone_vectorstore(DATA_DIRECTORY, INDEX_NAME, EMBEDDINGS, LOCAL_FILE_STORE_PATH, CHILD_SPLITTER)
 
