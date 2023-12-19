@@ -60,7 +60,7 @@ const AdminLogin = (props: Props) => {
     };
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/advocate/login", newUserCredentials);
+      const response = await axios.post("/api/advocate/login", newUserCredentials);
       console.log(response.data);
       // Handle success, you can log the response or perform additional actions
     } catch (error) {
@@ -143,7 +143,7 @@ const AdminLogin = (props: Props) => {
                 <div className="text-center lg:text-left">
                   <button
                     disabled={!isValid()}
-                    type="submit"
+                    onClick={submitRegistration}
                     className="inline-block rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
                     data-te-ripple-init
                     data-te-ripple-color="light">
@@ -153,7 +153,6 @@ const AdminLogin = (props: Props) => {
                   <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
                     Don't have an account?
                     <a
-                      href="#!"
                       className="text-danger transition duration-150 ease-in-out hover:text-danger-600 focus:text-danger-600 active:text-danger-700"
                     > Register </a>
                   </p>
