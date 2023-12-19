@@ -82,13 +82,13 @@ const AdminLogin = (props: Props) => {
             <div
               className="shrink-1 mb-12 grow-0 basis-auto md:mb-0 md:w-9/12 md:shrink-0 lg:w-6/12 xl:w-6/12">
               <img
-                src="https://img.freepik.com/free-vector/graduated-lawyer-concept-illustration_114360-16442.jpg?w=740&t=st=1702961393~exp=1702961993~hmac=56139a333a74f7a3cb8111918bcccbecd461fecc3798fe18055b5e3948826e5e"
+                src="https://img.freepik.com/free-vector/personal-settings-concept-illustration_114360-2251.jpg?w=740&t=st=1702961856~exp=1702962456~hmac=9c01f8043d681adaeccd272863c7864c5e40113e65bdf35826deb4578de94ac0"
                 className="h-1/2"
                 alt="Sample image" />
             </div>
 
             <div className="mb-16 border border-2 pt-20 pb-20 pl-8 pr-8 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12 mr-12">
-              <h1>Advocate Login</h1>
+              <h1>User Login</h1>
               <form className='border p-12'>
                 <div className="relative mb-6" data-te-input-wrapper-init>
                   <Input
@@ -152,10 +152,10 @@ const AdminLogin = (props: Props) => {
 
                   <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
                     Don't have an account?
-                    <a
+                    <NavLink to='/user-register'><a
                       href="#!"
                       className="text-danger transition duration-150 ease-in-out hover:text-danger-600 focus:text-danger-600 active:text-danger-700"
-                    > Register </a>
+                    > Register </a></NavLink>
                   </p>
                 </div>
                 {state.error ? (
