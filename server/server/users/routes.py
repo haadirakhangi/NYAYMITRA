@@ -159,9 +159,9 @@ def user_login():
 
 
 @user_bp.route('/voice-chat', methods=['POST'])
-@login_required
 def voice_chat():
     try:
+        print("Hello i m here")
         model_size = "large-v3"
         model = WhisperModel(model_size, device="cpu", compute_type="int8")
         # Run on GPU with FP16
@@ -197,7 +197,7 @@ def voice_chat():
             print("Text", text)
             print("Text2", text2)
             shutil.rmtree('upload_voice')
-            return jsonify({"message": text, "email": "email", "response": True}), 200
+            return jsonify({"message": text2, "email": "email", "response": True}), 200
 
         return 'Invalid file type', 400
 
@@ -336,7 +336,6 @@ available_tools = {
 
 
 @user_bp.route('/chatbot-route', methods=['POST'])
-@login_required
 def chatbot_route():
     data = request.get_json()
     print(data)

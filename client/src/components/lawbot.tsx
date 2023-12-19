@@ -56,12 +56,17 @@ export function Lawbot() {
 
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
-
+  useEffect(() => {
+    return () => {
+      // Cleanup when component unmounts
+      stopRecording();
+    };
+  }, []);
   const startRecording = async () => {
     try {
       // Access user's microphone
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
+      console.log("i am recording")
       // Use MediaRecorder to record voice
       const recorder = new MediaRecorder(stream);
       setMediaRecorder(recorder);
@@ -84,7 +89,7 @@ export function Lawbot() {
 
         try {
           console.log("Sended the voice op")
-          const response = await axios.post("http://127.0.0.1:5000/user/voice-chat", formData);
+          const response = await axios.post("/api/user/voice-chat", formData);
           console.log('Voice sent successfully', response.data);
 
           // Resolve the promise with the response
@@ -104,17 +109,23 @@ export function Lawbot() {
   };
 
   const stopRecording = () => {
-    // Stop recording
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
+    // Stop the MediaRecorder
+    if (mediaRecorder) {
       mediaRecorder.stop();
+      setMediaRecorder(null); // Clear the mediaRecorder state
     }
-
-    // Stop the microphone stream
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => stream.getTracks().forEach((track) => track.stop()));
+  
+    // Reset the microphone stream
+    const stream = mediaRecorder?.stream;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setMediaRecorder(null);
+    }
+  
+    console.log('Recording stopped');
   };
-
-  const handleRecordClick = () => {
+  
+  const handleRecordClick = async () => {
     if (isRecording) {
       // If already recording, stop recording
       setIsRecording(false);
@@ -122,9 +133,10 @@ export function Lawbot() {
     } else {
       // If not recording, start recording
       setIsRecording(true);
-      startRecording();
+      await startRecording();
     }
   };
+  
   const defaultQuestions = [
     "Tell me about yourself.",
     "What are your strengths and weaknesses?",
@@ -221,7 +233,7 @@ export function Lawbot() {
             autoFocus
             className="flex-1"
             id="message-input "
-            placeholder="Type a message pl-28 pr-28"
+            placeholder="Type a message"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyUp={(e) => {
