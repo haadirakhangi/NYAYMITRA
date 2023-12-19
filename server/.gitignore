@@ -3,3 +3,4 @@ client/
 .ipynb_checkpoints/
 .env
 venv
+.db

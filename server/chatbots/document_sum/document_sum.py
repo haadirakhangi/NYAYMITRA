@@ -17,7 +17,7 @@ import chainlit as cl
 load_dotenv()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-full_doc_retriever = get_parent_docs_retriever(PINECONE_INDEX_NAME, EMBEDDINGS, LOCAL_FILE_STORE_PATH, CHILD_SPLITTER)
+# full_doc_retriever = get_parent_docs_retriever(PINECONE_INDEX_NAME, EMBEDDINGS, LOCAL_FILE_STORE_PATH, CHILD_SPLITTER)
 
 @cl.on_chat_start
 async def on_chat_start():
@@ -59,6 +59,7 @@ async def on_chat_start():
             time.sleep(1)
 
     faiss_vectordb = create_faiss_vectordb_for_document_qna()
+    pinecone_vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS, text_key = 'text')
 
     if os.path.exists(directory):
         shutil.rmtree(directory)
@@ -76,7 +77,7 @@ async def on_chat_start():
     memory = ConversationBufferMemory(memory_key='chat_history',input_key='human_input', return_messages=True)
     chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
-            retriever=full_doc_retriever,
+            retriever=pinecone_vectordb.as_retriever(),
             memory=memory,
             combine_docs_chain_kwargs={
                 "prompt": ChatPromptTemplate.from_messages([
@@ -85,7 +86,7 @@ async def on_chat_start():
                 ]),
             },
         )
-    await msg.send()
+    
     print("now ask question")
     # Let the user know that the system is ready
     msg.content = f"Processing Completed. You can now ask questions!"

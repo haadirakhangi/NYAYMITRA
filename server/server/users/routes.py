@@ -15,10 +15,12 @@ import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
-from chatbots.utils import EMBEDDINGS
+from chatbots.utils import EMBEDDINGS, detect_source_langauge
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
+from deep_translator import GoogleTranslator
+
 
 FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
@@ -110,7 +112,7 @@ tools = [
                 'properties': {
                     'query': {
                         'type': 'string',
-                        'description': 'The query to use for searching the vector database'
+                        'description': 'The query to use for searching the vector database of Nyaymitra'
                     },
                 },
                 'required': ['query']
@@ -138,7 +140,7 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant for the website Nyaymitra. Always use the functions provided to you to answer user's question about the nyaymitra platform",
+        instructions="You are a helpful assistant for the website Nyaymitra. Use the functions provided to you to answer user's question about the Nyaymitra platform. Help the user with navigating and getting information about the Nyaymitra website.",
         model="gpt-3.5-turbo-1106",
         tools =  tools
     )
@@ -291,7 +293,10 @@ def submit_tool_outputs(thread_id, run_id, tools_to_call):
         print('TOOL CALLED:',tool_name)
         print('ARGUMENTS:', tool_args)
         tool_to_use = available_tools.get(tool_name)
-        output = tool_to_use(**tool_args)
+        if tool_name =='retrieval_augmented_generation':
+            tool_args_dict = ast.literal_eval(tool_args)
+            query = tool_args_dict['query']
+            output = tool_to_use(query)
         if output:
             tools_outputs.append({'tool_call_id': tool_call_id, 'output': output})
         
@@ -301,9 +306,10 @@ def submit_tool_outputs(thread_id, run_id, tools_to_call):
 def retrieval_augmented_generation(query, vectordb = VECTORDB):
     
     relevant_docs = vectordb.similarity_search(query)
-    print(relevant_docs)
     rel_docs = [doc.page_content for doc in relevant_docs]
-    return rel_docs
+    output = '\n'.join(rel_docs)
+    print(output)
+    return output
 
 available_tools = {
     'retrieval_augmented_generation': retrieval_augmented_generation,
@@ -316,16 +322,21 @@ def chatbot_route():
     print(data)
     tool_check = []
     query = data.get('userdata', '')
-    if query:         
+    if query:
+        source_language = detect_source_langauge(query)
+        if source_language != 'en':
+            trans_query = GoogleTranslator(source=source_language, target='en').translate(query)
+        else:
+            trans_query = query
         assistant_id = session['assistant_id']
         print('ASSISTANT ID',assistant_id)
         thread = client.beta.threads.create()
         print('THREAD ID', thread.id)
-        
+        print(trans_query)
         message = client.beta.threads.messages.create(
             thread_id= thread.id,
             role="user",
-            content= query,
+            content= trans_query,
         )
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -337,7 +348,7 @@ def chatbot_route():
             print(run.error)
         elif run.status == 'requires_action':
             run = submit_tool_outputs(thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
-            run = wait_on_run(thread.id, run.id)
+            run = wait_on_run(run.id,thread.id)
         messages = client.beta.threads.messages.list(thread_id=thread.id,order="asc")
         print('message',messages)
         content = None
@@ -347,7 +358,11 @@ def chatbot_route():
         if len(tool_check) == 0:
             chatbot_reply = content[0].text.value
             print("Chatbot reply",chatbot_reply)
-            response = {'chatbotResponse': chatbot_reply,'function_name': 'normal_search'}
+            if source_language != 'en':
+                trans_output = GoogleTranslator(source='auto', target=source_language).translate(chatbot_reply)
+            else:
+                trans_output = chatbot_reply
+            response = {'chatbotResponse': trans_output,'function_name': 'normal_search'}
         return jsonify(response)
     else:
         return jsonify({'error': 'User message not provided'}), 400

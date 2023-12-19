@@ -9,6 +9,7 @@ import {
   Snackbar,
   IconButton,
 } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import ErrorIcon from "@mui/icons-material/Error";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
@@ -21,6 +22,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 type Props = {}
 
 const AdminLogin = (props: Props) => {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -62,6 +64,7 @@ const AdminLogin = (props: Props) => {
     try {
       const response = await axios.post("/api/user/login", newUserCredentials);
       console.log(response.data);
+      navigate('/userhome');
       // Handle success, you can log the response or perform additional actions
     } catch (error) {
       // Handle error, you can log the error or show a user-friendly message
@@ -88,7 +91,7 @@ const AdminLogin = (props: Props) => {
             </div>
 
             <div className="mb-16 border border-2 pt-20 pb-20 pl-8 pr-8 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12 mr-12">
-              <h1>Advocate Login</h1>
+              <h1>User Login</h1>
               <form className='border p-12'>
                 <div className="relative mb-6" data-te-input-wrapper-init>
                   <Input
@@ -143,7 +146,7 @@ const AdminLogin = (props: Props) => {
                 <div className="text-center lg:text-left">
                   <button
                     disabled={!isValid()}
-                    type="submit"
+                    onClick={submitRegistration}
                     className="inline-block rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
                     data-te-ripple-init
                     data-te-ripple-color="light">
