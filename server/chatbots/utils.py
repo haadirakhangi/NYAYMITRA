@@ -185,10 +185,23 @@ hf_api_token = os.getenv("HUGGINGFACE_API_KEY")
 #               system_message_prompt,
 #               human_message_prompt,
 #           ])
+#   prompt_template = ChatPromptTemplate.from_messages([
+#               system_message_prompt,
+#               human_message_prompt,
+#           ])
 
 #   retriever = vectordb.as_retriever()
 #   memory = ConversationBufferMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
+#   retriever = vectordb.as_retriever()
+#   memory = ConversationBufferMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
 
+#   chain = ConversationalRetrievalChain.from_llm(
+#         llm=llm,
+#         retriever=retriever,
+#         memory=memory,
+#         return_source_documents=True,
+#         combine_docs_chain_kwargs={"prompt": prompt_template}
+#       )
 #   chain = ConversationalRetrievalChain.from_llm(
 #         llm=llm,
 #         retriever=retriever,
