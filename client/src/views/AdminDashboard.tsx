@@ -232,7 +232,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Main Content (80%) */}
-            <div style={{ flex: '1', padding: '16px' }}>
+            <div style={{ flex: '1', padding: '10px' }}>
                 <Container>
                     <AppBar position='static' className='rounded'>
                         <Toolbar>
@@ -288,11 +288,11 @@ const AdminDashboard: React.FC = () => {
                             Update Data
                         </Button>
                     </Box>
-                    <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px' }}>
+                    <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px' ,flex:'auto'}}>
                         <Typography variant='h5' style={{ marginTop: '30px', marginBottom: '16px' }}>
                             Input Question
                         </Typography>
-                        <FormControl required fullWidth margin="normal">
+                        <FormControl required fullWidth margin="normal" style={{flex:'auto'}}>
                             <InputLabel htmlFor="question">Question</InputLabel>
                             <Input
                                 name="question"

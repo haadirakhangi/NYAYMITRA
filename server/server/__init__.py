@@ -13,7 +13,7 @@ from server.category import get_response
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
-from server.models import LawCatgBenf,QueryStats
+from server.models import LawCatgBenf,QueryStats,Advocate
 
 url = "https://www.livelaw.in/"  # Replace with the actual URL you want to scrape
 
@@ -119,6 +119,6 @@ def create_app(config_class=config):
     # with app.app_context():
     #     db.create_all()
     with app.app_context():
-        # db.session.query(LawCatgBenf).delete()
+        # db.session.query(Advocate).delete()
         db.session.commit()
     return app

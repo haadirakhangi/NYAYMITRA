@@ -8,7 +8,7 @@ app = create_app()  # Call your create_app function to get the Flask app instanc
 # Use app.app_context() to ensure the code runs within the application context
 with app.app_context():
     engine = db.get_engine()
-    csv_file_path = r'C:\SIH\NEW SIH\Smart-India-hackathon-2023\server\data_with_columns_states_pins_corrected.csv'
+    csv_file_path = r'C:\Users\Hastansh\OneDrive\Desktop\Smart-India-hackathon-2023\server\data_with_columns_states_pins_corrected.csv'
 
     with open(csv_file_path, 'r') as file:
         df = pd.read_csv(file,index_col=False)

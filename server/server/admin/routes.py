@@ -35,11 +35,12 @@ def admin_login():
     email = data.get("email")
     password = data.get("password")
 
-    # Check if the provided email exists
-    admin = Admin.query.filter_by(email=email).first()
+    og_email='admin@gmail.com'
+    og_password='password'
+    
 
-    if admin and bcrypt.check_password_hash(admin.password, password):
-        session["admin_id"] = admin.id
+    if email==og_email and password==og_password:
+        session["admin_id"] = 1
         return jsonify({"message": "Admin logged in successfully", "response": True}), 200
 
     return jsonify({"message": "Invalid credentials", "response": False}), 401

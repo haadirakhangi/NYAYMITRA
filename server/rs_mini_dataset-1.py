@@ -73,6 +73,7 @@ data["rating"] = [round(random.uniform(3.0, 5.0), 2) for _ in range(500)]
 data["date_joined"] = [datetime.utcnow()] * 500
 data["degree_doc"] = [None] * 500
 data["verified"] = [True] * 500
+data["min_cost_per_hr"] = [random.randint(2000, 7000) for _ in range(500)]
 
 # Create DataFrame
 advocate_df = pd.DataFrame(data)

@@ -7,18 +7,18 @@ interface RoomParams {
 }
 
 const RoomPage: React.FC = () => {
-  const { roomId } = useParams<RoomParams>();
+  // const { roomId } = useParams<RoomParams>();
   const meetingRef = useRef<HTMLDivElement>(null);
-
+  const roomId ="24567";
   useEffect(() => {
     const myMeeting = async() => {
       const appID = 1845851736;
       const serverSecret = "bcb9b6f0593f862350b06b36c554d9e1";
-      const roomID="24345"
+      
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
         appID,
         serverSecret,
-        roomId, 
+        roomId,
         Date.now().toString(),
         "Mihir Panchal"
       );
