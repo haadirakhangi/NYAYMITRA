@@ -55,7 +55,6 @@ DEVICE_TYPE = 'cuda' if torch.cuda.is_available() else 'cpu'
 # Download the spaCy model
 model_name = 'en_core_web_lg'
 # spacy.cli.download(model_name)
-nlp = spacy.load(model_name)
 
 # Loading BGE Embeddings From HuggingFace
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
@@ -192,89 +191,89 @@ def nyaymitra_kyr_chain_with_local_llm(vectordb):
   
   return chain
 
-HF_MODEL_ID = 'meta-llama/Llama-2-7b-chat-hf'
-device = f'cuda:{torch.cuda.current_device()}' if torch.cuda.is_available() else 'cpu'
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type='nf4',
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_compute_dtype= torch.bfloat16
-)
-# begin initializing HF items, you need an access token
-hf_auth = HUGGINGFACE_API_KEY
-model_config = AutoConfig.from_pretrained(
-    HF_MODEL_ID,
-    use_auth_token=hf_auth
-)
+# HF_MODEL_ID = 'meta-llama/Llama-2-7b-chat-hf'
+# device = f'cuda:{torch.cuda.current_device()}' if torch.cuda.is_available() else 'cpu'
+# bnb_config = BitsAndBytesConfig(
+#     load_in_4bit=True,
+#     bnb_4bit_quant_type='nf4',
+#     bnb_4bit_use_double_quant=True,
+#     bnb_4bit_compute_dtype= torch.bfloat16
+# )
+# # begin initializing HF items, you need an access token
+# hf_auth = HUGGINGFACE_API_KEY
+# model_config = AutoConfig.from_pretrained(
+#     HF_MODEL_ID,
+#     use_auth_token=hf_auth
+# )
 
-model = AutoModelForCausalLM.from_pretrained(
-    HF_MODEL_ID,
-    trust_remote_code=True,
-    config=model_config,
-    quantization_config=bnb_config,
-    device_map='auto',
-    use_auth_token=hf_auth
-)
-# enable evaluation mode to allow model inference
-model.eval()
-print(f"Model loaded on {device}")
-tokenizer = AutoTokenizer.from_pretrained(
-  HF_MODEL_ID,
-  use_auth_token=hf_auth
-)
-stop_list = ['\nHuman:', '\n```\n']
-stop_token_ids = [tokenizer(x)['input_ids'] for x in stop_list]
-stop_token_ids = [torch.LongTensor(x).to(device) for x in stop_token_ids]
+# model = AutoModelForCausalLM.from_pretrained(
+#     HF_MODEL_ID,
+#     trust_remote_code=True,
+#     config=model_config,
+#     quantization_config=bnb_config,
+#     device_map='auto',
+#     use_auth_token=hf_auth
+# )
+# # enable evaluation mode to allow model inference
+# model.eval()
+# print(f"Model loaded on {device}")
+# tokenizer = AutoTokenizer.from_pretrained(
+#   HF_MODEL_ID,
+#   use_auth_token=hf_auth
+# )
+# stop_list = ['\nHuman:', '\n```\n']
+# stop_token_ids = [tokenizer(x)['input_ids'] for x in stop_list]
+# stop_token_ids = [torch.LongTensor(x).to(device) for x in stop_token_ids]
 
-class StopOnTokens(StoppingCriteria):
-  def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
-      for stop_ids in stop_token_ids:
-          if torch.eq(input_ids[0][-len(stop_ids):], stop_ids).all():
-              return True
-      return False
+# class StopOnTokens(StoppingCriteria):
+#   def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs) -> bool:
+#       for stop_ids in stop_token_ids:
+#           if torch.eq(input_ids[0][-len(stop_ids):], stop_ids).all():
+#               return True
+#       return False
   
-stopping_criteria = StoppingCriteriaList([StopOnTokens()])
-LOCAL_LLM = pipeline(
-  model=model, 
-  tokenizer=tokenizer,
-  return_full_text=True,  # langchain expects the full text
-  task='text-generation',
-  stopping_criteria=stopping_criteria,  # without this model rambles during chat
-  temperature=0.0,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
-  max_new_tokens=512,  # max number of tokens to generate in the output
-  repetition_penalty=1.1,  # without this output begins repeating
-  max_length = 1024
-)
+# stopping_criteria = StoppingCriteriaList([StopOnTokens()])
+# LOCAL_LLM = pipeline(
+#   model=model, 
+#   tokenizer=tokenizer,
+#   return_full_text=True,  # langchain expects the full text
+#   task='text-generation',
+#   stopping_criteria=stopping_criteria,  # without this model rambles during chat
+#   temperature=0.0,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
+#   max_new_tokens=512,  # max number of tokens to generate in the output
+#   repetition_penalty=1.1,  # without this output begins repeating
+#   max_length = 1024
+# )
 
-def nyaymitra_kyr_chain_with_local_llm(vectordb, local_llm = LOCAL_LLM):
-  llm = HuggingFacePipeline(pipeline= local_llm)
-  system_message_prompt = SystemMessagePromptTemplate.from_template(
-        """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
-          Important Instructions:
-          1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
-          2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
-          3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
-          LEGAL CONTEXT: \n{context}"""
-  )
-  human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
+# def nyaymitra_kyr_chain_with_local_llm(vectordb, local_llm = LOCAL_LLM):
+#   llm = HuggingFacePipeline(pipeline= local_llm)
+#   system_message_prompt = SystemMessagePromptTemplate.from_template(
+#         """You are a law expert in India, and your role is to assist users in understanding their rights based on queries related to the provided legal context from Indian documents. Utilize the context to offer detailed responses, citing the most relevant laws and articles. If a law or article isn't pertinent to the query, exclude it. Recognize that users may not comprehend legal jargon, so after stating the legal terms, provide simplified explanations for better user understanding.
+#           Important Instructions:
+#           1. Context and Precision: Tailor your response to the user's query using the specific details provided in the legal context from India. Use only the most relevant laws and articles from the context.
+#           2. Comprehensive and Simplified Responses: Offer thorough responses by incorporating all relevant laws and articles. For each legal term, provide a user-friendly explanation to enhance comprehension.
+#           3. User-Friendly Language: Aim for simplicity in your explanations, considering that users may not have a legal background. Break down complex terms or phrases to make them more accessible to the user. Provide examples on how the law is relevant and useful to the user's query.
+#           LEGAL CONTEXT: \n{context}"""
+#   )
+#   human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
 
-  prompt_template = ChatPromptTemplate.from_messages([
-              system_message_prompt,
-              human_message_prompt,
-          ])
+#   prompt_template = ChatPromptTemplate.from_messages([
+#               system_message_prompt,
+#               human_message_prompt,
+#           ])
 
-  retriever = vectordb.as_retriever()
-  memory = ConversationBufferMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
+#   retriever = vectordb.as_retriever()
+#   memory = ConversationBufferMemory(k=15, memory_key="chat_history", output_key='answer', return_messages=True)
 
-  chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=retriever,
-        memory=memory,
-        return_source_documents=True,
-        combine_docs_chain_kwargs={"prompt": prompt_template}
-      )
+#   chain = ConversationalRetrievalChain.from_llm(
+#         llm=llm,
+#         retriever=retriever,
+#         memory=memory,
+#         return_source_documents=True,
+#         combine_docs_chain_kwargs={"prompt": prompt_template}
+#       )
   
-  return chain
+#   return chain
 
 # vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS)
 
