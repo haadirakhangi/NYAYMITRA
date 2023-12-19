@@ -9,6 +9,7 @@ import {
   Snackbar,
   IconButton,
 } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import ErrorIcon from "@mui/icons-material/Error";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
@@ -21,6 +22,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 type Props = {};
 
 const AdminLogin = (props: Props) => {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -65,6 +67,7 @@ const AdminLogin = (props: Props) => {
     try {
       const response = await axios.post("/api/user/login", newUserCredentials);
       console.log(response.data);
+      navigate('/userhome');
       // Handle success, you can log the response or perform additional actions
     } catch (error) {
       // Handle error, you can log the error or show a user-friendly message

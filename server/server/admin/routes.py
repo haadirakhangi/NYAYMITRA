@@ -1,4 +1,4 @@
-from flask import session, request, jsonify, Blueprint
+from flask import session, request, jsonify, Blueprint,send_file
 from flask_cors import cross_origin
 from server.models import User,LawCatgBenf,Admin,Advocate,QueryStats
 from server import db, bcrypt
@@ -14,6 +14,8 @@ import fitz
 
 import shutil
 from chatbots.utils import add_data_to_pinecone_vectorstore,autocategorize_law,finetune_for_document_drafting
+import sys 
+import os
 
 def login_required(f):
     @wraps(f)
@@ -185,30 +187,25 @@ def dashboard():
             result_list.append(data)
     return result_list
 
-@admin_bp.route('/advocate_details')
-@login_required
+@admin_bp.route('/advocate-details')
+# @login_required
 def advocate_details():
     # Fetch all advocate details for verification
-    advocates = Advocate.query.all()
+    advocates = Advocate.query.filter_by(verified=False).all()
 
     # Prepare the data in JSON format
-    advocate_data = []
-    for advocate in advocates:
-        advocate_info = {
-            'id': advocate.advocate_id,
-            'name': f'{advocate.fname} {advocate.lname}',
-            'email': advocate.email,
-            'resume': advocate.resume if advocate.resume else None,
-            'verified': advocate.verified,
-        }
-        advocate_data.append(advocate_info)
+    advocate_details = [connect.to_dict() for connect in advocates]
+    for advocate in advocate_details:
+        advocate['languages'] = json.loads(advocate['languages'])
+        advocate['languages'] = ', '.join(advocate['languages'])
+    return jsonify({'advocates': advocate_details})
 
-    return jsonify({'advocates': advocate_data})
-
-@admin_bp.route('/verify_advocate/<int:advocate_id>')
-@login_required
-def verify_advocate(advocate_id):
+@admin_bp.route('/verify-advocate',methods=['POST'])
+# @login_required
+def verify_advocate():
     # Fetch the advocate by ID
+    data = request.json
+    advocate_id = data.get('advocateId')
     advocate = Advocate.query.get(advocate_id)
 
     if advocate:
@@ -236,7 +233,19 @@ def generate_jsonl(system_content, user_questions, assistant_content, output_fil
             json.dump({"messages": messages}, f)
             f.write('\n')
 
+@admin_bp.route('/get-doc', methods=['POST'])
+def view_document():
+    data = request.json
+    document_url = data.get('documentUrl')
+    current_script_directory = os.path.dirname(os.path.abspath(__file__))
+    chatbots_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
+    server_side_directory = os.path.abspath(os.path.join(chatbots_directory, '..'))
+    sys.path.append(server_side_directory)
+    pdf_file_path = os.path.join(server_side_directory,'advocate_docs', document_url)
+    pdf_file_path = os.path.normpath(pdf_file_path)
 
+
+    return send_file(pdf_file_path, mimetype='application/pdf')
 
 
 

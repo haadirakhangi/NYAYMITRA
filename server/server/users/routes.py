@@ -15,10 +15,12 @@ import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
-from chatbots.utils import EMBEDDINGS
+from chatbots.utils import EMBEDDINGS, detect_source_langauge
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
+from deep_translator import GoogleTranslator
+
 
 FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
@@ -117,7 +119,7 @@ tools = [
                 'properties': {
                     'query': {
                         'type': 'string',
-                        'description': 'The query to use for searching the vector database'
+                        'description': 'The query to use for searching the vector database of Nyaymitra'
                     },
                 },
                 'required': ['query']
@@ -144,7 +146,7 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant for the website Nyaymitra. Always use the functions provided to you to answer user's question about the nyaymitra platform",
+        instructions="You are a helpful assistant for the website Nyaymitra. Use the functions provided to you to answer user's question about the Nyaymitra platform. Help the user with navigating and getting information about the Nyaymitra website.",
         model="gpt-3.5-turbo-1106",
         tools=tools
     )
@@ -157,9 +159,9 @@ def user_login():
 
 
 @user_bp.route('/voice-chat', methods=['POST'])
-@login_required
 def voice_chat():
     try:
+        print("Hello i m here")
         model_size = "large-v3"
         model = WhisperModel(model_size, device="cpu", compute_type="int8")
         # Run on GPU with FP16
@@ -195,7 +197,7 @@ def voice_chat():
             print("Text", text)
             print("Text2", text2)
             shutil.rmtree('upload_voice')
-            return jsonify({"message": text, "email": "email", "response": True}), 200
+            return jsonify({"message": text2, "email": "email", "response": True}), 200
 
         return 'Invalid file type', 400
 
@@ -308,7 +310,10 @@ def submit_tool_outputs(thread_id, run_id, tools_to_call):
         print('TOOL CALLED:', tool_name)
         print('ARGUMENTS:', tool_args)
         tool_to_use = available_tools.get(tool_name)
-        output = tool_to_use(**tool_args)
+        if tool_name =='retrieval_augmented_generation':
+            tool_args_dict = ast.literal_eval(tool_args)
+            query = tool_args_dict['query']
+            output = tool_to_use(query)
         if output:
             tools_outputs.append(
                 {'tool_call_id': tool_call_id, 'output': output})
@@ -319,9 +324,10 @@ def submit_tool_outputs(thread_id, run_id, tools_to_call):
 def retrieval_augmented_generation(query, vectordb=VECTORDB):
 
     relevant_docs = vectordb.similarity_search(query)
-    print(relevant_docs)
     rel_docs = [doc.page_content for doc in relevant_docs]
-    return rel_docs
+    output = '\n'.join(rel_docs)
+    print(output)
+    return output
 
 
 available_tools = {
@@ -330,22 +336,26 @@ available_tools = {
 
 
 @user_bp.route('/chatbot-route', methods=['POST'])
-@login_required
 def chatbot_route():
     data = request.get_json()
     print(data)
     tool_check = []
     query = data.get('userdata', '')
     if query:
+        source_language = detect_source_langauge(query)
+        if source_language != 'en':
+            trans_query = GoogleTranslator(source=source_language, target='en').translate(query)
+        else:
+            trans_query = query
         assistant_id = session['assistant_id']
         print('ASSISTANT ID', assistant_id)
         thread = client.beta.threads.create()
         print('THREAD ID', thread.id)
-
+        print(trans_query)
         message = client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=query,
+            content= trans_query,
         )
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -356,21 +366,22 @@ def chatbot_route():
         if run.status == 'failed':
             print(run.error)
         elif run.status == 'requires_action':
-            run = submit_tool_outputs(
-                thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
-            run = wait_on_run(thread.id, run.id)
-        messages = client.beta.threads.messages.list(
-            thread_id=thread.id, order="asc")
-        print('message', messages)
+            run = submit_tool_outputs(thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
+            run = wait_on_run(run.id,thread.id)
+        messages = client.beta.threads.messages.list(thread_id=thread.id,order="asc")
+        print('message',messages)
         content = None
         for thread_message in messages.data:
             content = thread_message.content
         print("Content List", content)
         if len(tool_check) == 0:
             chatbot_reply = content[0].text.value
-            print("Chatbot reply", chatbot_reply)
-            response = {'chatbotResponse': chatbot_reply,
-                        'function_name': 'normal_search'}
+            print("Chatbot reply",chatbot_reply)
+            if source_language != 'en':
+                trans_output = GoogleTranslator(source='auto', target=source_language).translate(chatbot_reply)
+            else:
+                trans_output = chatbot_reply
+            response = {'chatbotResponse': trans_output,'function_name': 'normal_search'}
         return jsonify(response)
     else:
         return jsonify({'error': 'User message not provided'}), 400
