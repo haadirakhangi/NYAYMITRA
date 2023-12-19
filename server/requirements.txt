@@ -24,3 +24,4 @@ unstructured[docx]
 unstructured[pdf]
 faster-whisper
 spacy
+pymupdf

@@ -17,6 +17,8 @@ import VideoCall from "./views/VideoCall"
 import RoomPage from "./views/RoomPage";
 // import Document from "./main/documentdraft";
 import Connect from "./main/connect";
+import Community from "./main/community";
+import AdminLogin from "./views/AdminLogin";
 
 function App() {
 
@@ -39,6 +41,8 @@ function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/advohome" element={<Advocate_home />} />
         <Route path="/connect" element={<Connect />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/video-call" element={<VideoCall />} />
         <Route path="/room-page" element={<RoomPage />} />
 

@@ -12,8 +12,9 @@ import rights from './features/rights.png';
 import documentDraft from './assets/images/document draft.png';
 import humanRights from './assets/images/human rights.jpg';
 import lawJargon from './assets/images/law jargon.jpg';
-import { NavLink } from 'react-router-dom';
 import ChatWidget from "../components/ChatWidget"
+import Navbar from '@/navbar';
+import Footer from '@/footer';
 
 interface CardData {
   imageUrl: string;
@@ -57,29 +58,16 @@ const Home: React.FC = () => {
 
     return (
         <div>
+            <Navbar/>
             <ChatWidget/>
-            <nav className="navbar fixed-top ">
-                <div className="container sm:px-4 lg:px-8 flex flex-wrap h-[50px] items-center justify-between lg:flex-nowrap">
+        
 
-                    <a className="text-gray-800 font-semibold text-3xl leading-4 no-underline page-scroll" href="index.html">Logo</a>
-
-                    <div className="navbar-collapse offcanvas-collapse lg:flex lg:flex-grow lg:items-center text-[1rem]" id="navbarsExampleDefault">
-                        <ul className="pl-0  mb-2 ml-auto flex flex-col list-none lg:mt-0 lg:mb-0 lg:flex-row">
-                            <li>
-                                <a className="nav-link page-scroll active" href="#header">Home <span className="sr-only">(current)</span></a>
-                            </li>
-                            <li>
-                                <a className="nav-link page-scroll" href="#features"><NavLink to='/features'>Features</NavLink></a>
-                            </li>
-                            <li>
-                                <a className="nav-link page-scroll" href="#details"><NavLink to='/advoconnect'>AdvoConnect</NavLink></a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-
-            <header id="header" className="header py-28 text-center md:pt-36 lg:text-left xl:pt-44 xl:pb-32">
+            <header id="header_new" style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")', // Replace with the actual path to your image
+        backgroundSize: 'cover', // Adjust as needed
+        // backgroundPosition: 'center', // Adjust as needed
+        height : "100vh",
+      }} className="header py-28 text-center md:pt-36 lg:text-left xl:pt-44 xl:pb-32">
                 <div className="container px-4 sm:px-8 lg:grid lg:grid-cols-2 lg:gap-x-8">
                     <div className="mb-16 lg:mt-32 xl:mt-40 xl:mr-12">
                         <h1 className="h1-large mb-5">Team management mobile application</h1>
@@ -413,7 +401,7 @@ const Home: React.FC = () => {
 
 
 
-            <div className="footer">
+            {/* <div className="footer">
                 <div className="container px-4 sm:px-8">
                     <h4 className="mb-8 lg:max-w-3xl lg:mx-auto">Pavo is a mobile application for marketing automation and you can reach the team at <a className="text-indigo-600 hover:text-gray-500" href="mailto:email@domain.com">email@domain.com</a></h4>
                     <div className="social-container">
@@ -449,11 +437,11 @@ const Home: React.FC = () => {
                         </span>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
 
 
-            <div className="copyright">
+            {/* <div className="copyright">
                 <div className="container px-4 sm:px-8 lg:grid lg:grid-cols-3">
                     <ul className="mb-4 list-unstyled p-small">
                         <li className="mb-2"><a href="article.html">Article Details</a></li>
@@ -465,7 +453,8 @@ const Home: React.FC = () => {
                     <p className="pb-2 p-small statement">Distributed by :<a href="https://themewagon.com/" className="no-underline">Themewagon</a></p>
                 </div>
 
-            </div>
+            </div> */}
+            <Footer/>
         </div>
     )
 }
