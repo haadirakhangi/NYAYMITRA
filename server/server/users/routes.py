@@ -22,6 +22,8 @@ from langchain.document_loaders import PyPDFLoader
 from deep_translator import GoogleTranslator
 
 
+model_size = "large-v3"
+model = WhisperModel(model_size, device="cpu", compute_type="int8")
 FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
 docs = loader.load()
@@ -161,9 +163,7 @@ def user_login():
 @user_bp.route('/voice-chat', methods=['POST'])
 def voice_chat():
     try:
-        print("Hello i m here")
-        model_size = "large-v3"
-        model = WhisperModel(model_size, device="cpu", compute_type="int8")
+        print("Analyzing")
         # Run on GPU with FP16
         # model = WhisperModel(model_size, device="cuda", compute_type="float16")
 

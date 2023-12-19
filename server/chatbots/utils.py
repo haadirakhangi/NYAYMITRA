@@ -80,7 +80,7 @@ pinecone.init(
 
 
 # Download Punkt Package
-# nltk.download('punkt')
+nltk.download('punkt')
 
 # FUNCTION FOR CREATING INTIAL PINECONE INDEX FROM DIRECTORY
 def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
