@@ -22,6 +22,25 @@ const CHAINLIT_SERVER = "http://localhost:8000";
 const userEnv = {};
 
 export function Lawbot() {
+  const handleDefaultQuestionClick = (question: string) => {
+    setInputValue(question);
+    handleSendMessage();
+  };
+
+  const renderDefaultQuestions = () => {
+    return (
+      <div className="flex flex-wrap space-x-2">
+        {defaultQuestions.map((question, index) => (
+          <Button
+            key={index}
+            onClick={() => handleDefaultQuestionClick(question)}
+          >
+            {question}
+          </Button>
+        ))}
+      </div>
+    );
+  };
   const [age, setAge] = React.useState('');
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -106,6 +125,12 @@ export function Lawbot() {
       startRecording();
     }
   };
+  const defaultQuestions = [
+    "Tell me about yourself.",
+    "What are your strengths and weaknesses?",
+    "Why do you want to work for this company?",
+    // Add more default questions as needed
+  ];
 
   const handleSendMessage = () => {
     const content = inputValue.trim();
@@ -127,6 +152,7 @@ export function Lawbot() {
       hour: "2-digit",
       minute: "2-digit",
     };
+
     console.log("Text sended to me", message.content)
     let contentWithBreaks = message.content.replace(/\n/g, '<br>');
     contentWithBreaks = contentWithBreaks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -139,7 +165,7 @@ export function Lawbot() {
     return (
       <div key={message.id} className="flex items-start space-x-2">
         <div className="w-20 text-sm text-red-500">{message.author}</div>
-        <div className="flex-1 border rounded-lg p-2">
+        <div className="flex-1">
           <div
             className="text-black dark:text-white"
             dangerouslySetInnerHTML={contentWithHTML} // Render HTML content
@@ -151,7 +177,13 @@ export function Lawbot() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+    <div style={{
+      backgroundImage: 'url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")', // Replace with the actual path to your image
+      backgroundSize: 'cover', // Adjust as needed
+      // backgroundPosition: 'center', // Adjust as needed
+      height: "100vh",
+    }}
+      className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
       <div className="absolute top-4 right-4 z-10">
         <FormControl sx={{ m: 1, minWidth: 100 }}>
           <InputLabel id="demo-simple-select-helper-label">Languages</InputLabel>
@@ -172,18 +204,24 @@ export function Lawbot() {
           <FormHelperText>Select Language of Response</FormHelperText>
         </FormControl>
       </div>
-      <div className="flex-1 overflow-auto p-6">
-        <div className="space-y-4">
+      <div className="flex-1 overflow-auto mt-32 pl-28 pr-28">
+        <div className="space-y-4 bg-[#eeeeee] bg-opacity-70 p-2 border rounded-lg">
+          <div className="space-y-4 p-2">
+            {renderDefaultQuestions()}
+
+          </div>
           {messages.map((message) => renderMessage(message))}
+
         </div>
+
       </div>
-      <div className="border-t p-4 bg-white dark:bg-gray-800">
+      <div className="border-t p-4 dark:bg-gray-800">
         <div className="flex items-center space-x-2">
           <Input
             autoFocus
             className="flex-1"
-            id="message-input"
-            placeholder="Type a message"
+            id="message-input "
+            placeholder="Type a message pl-28 pr-28"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyUp={(e) => {

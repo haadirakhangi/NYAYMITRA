@@ -104,7 +104,7 @@ def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
 def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_NAME, embeddings=EMBEDDINGS):
     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
     data = loader.load()
-
+    print("Its indide the pinecode data")
     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
     docs = text_splitter.split_documents(data)
 
