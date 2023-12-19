@@ -186,24 +186,16 @@ def dashboard():
     return result_list
 
 @admin_bp.route('/advocate_details')
-@login_required
+# @login_required
 def advocate_details():
     # Fetch all advocate details for verification
-    advocates = Advocate.query.all()
+    advocates = Advocate.query.filter_by(verified=False).all()
 
     # Prepare the data in JSON format
-    advocate_data = []
-    for advocate in advocates:
-        advocate_info = {
-            'id': advocate.advocate_id,
-            'name': f'{advocate.fname} {advocate.lname}',
-            'email': advocate.email,
-            'resume': advocate.resume if advocate.resume else None,
-            'verified': advocate.verified,
-        }
-        advocate_data.append(advocate_info)
-
-    return jsonify({'advocates': advocate_data})
+    advocate_details = [connect.to_dict() for connect in advocates]
+    for advocate in advocate_details:
+        advocate['languages'] = json.loads(advocate['languages'])
+    return jsonify({'advocates': advocate_details})
 
 @admin_bp.route('/verify_advocate/<int:advocate_id>')
 @login_required
