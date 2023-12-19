@@ -56,7 +56,6 @@ DEVICE_TYPE = 'cuda' if torch.cuda.is_available() else 'cpu'
 # Download the spaCy model
 model_name = 'en_core_web_lg'
 # spacy.cli.download(model_name)
-nlp = spacy.load(model_name)
 
 # Loading BGE Embeddings From HuggingFace
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
@@ -105,7 +104,7 @@ def load_data_to_pinecone_vectorstore(data_directory, index_name, embeddings):
 def add_data_to_pinecone_vectorstore(data_directory, index_name=PINECONE_INDEX_NAME, embeddings=EMBEDDINGS):
     loader = DirectoryLoader(data_directory, glob="*.pdf", loader_cls=PyPDFLoader)
     data = loader.load()
-    print("Its indide the pinecode data")
+    print("Its inside the pinecone data")
     text_splitter  = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
     docs = text_splitter.split_documents(data)
 
@@ -222,7 +221,7 @@ def detect_source_langauge(text):
     
     return source_language
 
-def create_faiss_vectordb_for_document_qna(user_data_directory,embeddings):
+def create_faiss_vectordb_for_document_qna(user_data_directory=USER_DIRECTORY_FOR_DOC_QNA,embeddings=EMBEDDINGS):
   loader = DirectoryLoader(user_data_directory, loader_cls=UnstructuredFileLoader)
   docs = loader.load()
   doc_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)

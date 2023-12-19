@@ -1,6 +1,6 @@
 from flask import session, request, jsonify, Blueprint
 from flask_cors import cross_origin
-from server.models import User,Advocate,AdvoConnect
+from server.models import User, Advocate, AdvoConnect
 from server import db, bcrypt
 from functools import wraps
 from datetime import datetime
@@ -15,19 +15,24 @@ import shutil
 import ast
 import time
 from faster_whisper import WhisperModel
-from chatbots.utils import EMBEDDINGS
+from chatbots.utils import EMBEDDINGS, detect_source_langauge
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
+from deep_translator import GoogleTranslator
+
 
 FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
 docs = loader.load()
-docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)
+docs_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000, chunk_overlap=200)
 split_docs = docs_splitter.split_documents(docs)
-NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(split_docs,EMBEDDINGS)
-NYAYMITRA_FEATURES_VECTORSTORE.save_local('nyaymitra_data/faiz_index_assistant')
+NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(split_docs, EMBEDDINGS)
+NYAYMITRA_FEATURES_VECTORSTORE.save_local(
+    'nyaymitra_data/faiz_index_assistant')
 VECTORDB = FAISS.load_local('nyaymitra_data/faiz_index_assistant', EMBEDDINGS)
+
 
 def login_required(f):
     @wraps(f)
@@ -38,6 +43,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def single_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -47,7 +53,9 @@ def single_login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 user_bp = Blueprint(name='users', import_name=__name__)
+
 
 @user_bp.route('/register', methods=['POST'])
 def user_register():
@@ -64,8 +72,8 @@ def user_register():
     pincode = data.get("pincode")
     state = data.get("state")
     password = data.get("password")
-    print("password: -----------------------",gender)
-    print("name: -----------------------",state)
+    print("password: -----------------------", gender)
+    print("name: -----------------------", state)
 
     user_exists = User.query.filter_by(email=email).first() is not None
 
@@ -98,11 +106,12 @@ def user_register():
 
     return response
 
+
 tools = [
     {
         'type': 'function',
-        'function':{
-            
+        'function': {
+
             'name': 'retrieval_augmented_generation',
             'description': 'Fetches information about Nyaymitra\'s platform to answer user\'s query',
             'parameters': {
@@ -110,7 +119,7 @@ tools = [
                 'properties': {
                     'query': {
                         'type': 'string',
-                        'description': 'The query to use for searching the vector database'
+                        'description': 'The query to use for searching the vector database of Nyaymitra'
                     },
                 },
                 'required': ['query']
@@ -126,9 +135,8 @@ def user_login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    print("password:--------------------",password)
+    print("password:--------------------", password)
     user = User.query.filter_by(email=email).first()
-    
 
     if user is None:
         return jsonify({"message": "Unregistered email id", "response": False}), 201
@@ -138,21 +146,22 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant for the website Nyaymitra. Always use the functions provided to you to answer user's question about the nyaymitra platform",
+        instructions="You are a helpful assistant for the website Nyaymitra. Use the functions provided to you to answer user's question about the Nyaymitra platform. Help the user with navigating and getting information about the Nyaymitra website.",
         model="gpt-3.5-turbo-1106",
-        tools =  tools
+        tools=tools
     )
     session['assistant_id'] = assistant.id
-    print("Assitant id is generated",session['assistant_id'])
+    print("Assitant id is generated", session['assistant_id'])
     session["user_id"] = user.user_id
     print("user id is this:-", session.get('user_id'))
 
     return jsonify({"message": "User logged in successfully", "email": user.email, "response": True}), 200
 
+
 @user_bp.route('/voice-chat', methods=['POST'])
-@login_required
 def voice_chat():
     try:
+        print("Hello i m here")
         model_size = "large-v3"
         model = WhisperModel(model_size, device="cpu", compute_type="int8")
         # Run on GPU with FP16
@@ -161,7 +170,6 @@ def voice_chat():
         # or run on GPU with INT8
         # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
         # or run on CPU with INT8
-       
 
         if 'voice' not in request.files:
             return 'No voice file provided', 400
@@ -177,24 +185,27 @@ def voice_chat():
             filename = voice_file.filename
             filepath = os.path.join('upload_voice', filename)
             voice_file.save(filepath)
-            segments, info = model.transcribe("upload_voice/voice.wav", beam_size=5)
-            print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+            segments, info = model.transcribe(
+                "upload_voice/voice.wav", beam_size=5)
+            print("Detected language '%s' with probability %f" %
+                  (info.language, info.language_probability))
             for segment in segments:
-                print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+                print("[%.2fs -> %.2fs] %s" %
+                      (segment.start, segment.end, segment.text))
                 text2 = segment.text
             text = str([segment.text for segment in segments])
-            print("Text",text)
-            print("Text2",text2)
+            print("Text", text)
+            print("Text2", text2)
             shutil.rmtree('upload_voice')
-            return jsonify({"message": text, "email": "email", "response": True}), 200
+            return jsonify({"message": text2, "email": "email", "response": True}), 200
 
         return 'Invalid file type', 400
 
     except Exception as e:
-        print("Exception",e)
+        print("Exception", e)
         return str(e), 500
 
-    
+
 @user_bp.route('/', methods=['GET'])
 def getuser():
     user_id = session.get("user_id", None)
@@ -203,8 +214,10 @@ def getuser():
     if user is None:
         return jsonify({"message": "User not found", "response": False}), 404
 
-    response = {"message": "User found", "user_name": user.username, "email": user.email, "response": True}
+    response = {"message": "User found", "user_name": user.username,
+                "email": user.email, "response": True}
     return jsonify(response), 200
+
 
 @user_bp.route('/logout', methods=['GET'])
 @login_required
@@ -228,13 +241,14 @@ def document_summarization():
             os.makedirs(directory_faiss)
         filepath = os.path.join(directory, filename)
         file.save(filepath)
-    return jsonify({"message": "User logged in successfully","response": True}), 200
+    return jsonify({"message": "User logged in successfully", "response": True}), 200
 
 
 prompt_summary = """As a legal assistant, your role is to determine the appropriate legal specializations based on user queries. The available specializations are: Criminal Court, Civil Court, Immigration Court, Family Law, Personal Injury Law, Real Estate Law, and Corporate Law. Given a user query related to legal matters, your task is to analyze the content and discern all the applicable legal specializations. The output should be in JSON format, with the key "specializations" and the corresponding values are a list of identified legal specializations.
 
 User Query: {query}
 """
+
 
 def get_specialization_from_text(user_input):
     # Use OpenAI API to analyze user input and extract specialization
@@ -251,8 +265,9 @@ def get_specialization_from_text(user_input):
     )
 
     # Extract the recognized specialization from the API response
-    recognized_specialization = ast.literal_eval(response.choices[0].message.content)
-    print("output",recognized_specialization)
+    recognized_specialization = ast.literal_eval(
+        response.choices[0].message.content)
+    print("output", recognized_specialization)
     return recognized_specialization["specializations"]
 
 
@@ -262,10 +277,11 @@ def get_advocate():
     print("I am here my friend")
     search_value = data.get('search', '')
     spec = get_specialization_from_text(user_input=search_value)
-    print("Specualizaton:-----------------",spec)
-    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter(or_(*[Advocate.specialization == value for value in spec])).all()]
+    print("Specualizaton:-----------------", spec)
+    advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter(
+        or_(*[Advocate.specialization == value for value in spec])).all()]
     # print("Result",advocates_data)
-    return jsonify({"message": "User logged in successfully","response": True,"lawyers":advocates_data}), 200
+    return jsonify({"message": "User logged in successfully", "response": True, "lawyers": advocates_data}), 200
 
 
 def wait_on_run(run_id, thread_id):
@@ -280,7 +296,10 @@ def wait_on_run(run_id, thread_id):
         if run.status in ['failed', 'completed', 'requires_action']:
             return run
 
+
 client = OpenAI()
+
+
 def submit_tool_outputs(thread_id, run_id, tools_to_call):
     tools_outputs = []
     for tool in tools_to_call:
@@ -288,44 +307,55 @@ def submit_tool_outputs(thread_id, run_id, tools_to_call):
         tool_call_id = tool.id
         tool_name = tool.function.name
         tool_args = tool.function.arguments
-        print('TOOL CALLED:',tool_name)
+        print('TOOL CALLED:', tool_name)
         print('ARGUMENTS:', tool_args)
         tool_to_use = available_tools.get(tool_name)
-        output = tool_to_use(**tool_args)
+        if tool_name =='retrieval_augmented_generation':
+            tool_args_dict = ast.literal_eval(tool_args)
+            query = tool_args_dict['query']
+            output = tool_to_use(query)
         if output:
-            tools_outputs.append({'tool_call_id': tool_call_id, 'output': output})
-        
-    return client.beta.threads.runs.submit_tool_outputs(thread_id=thread_id, run_id=run_id, tool_outputs= tools_outputs)
+            tools_outputs.append(
+                {'tool_call_id': tool_call_id, 'output': output})
+
+    return client.beta.threads.runs.submit_tool_outputs(thread_id=thread_id, run_id=run_id, tool_outputs=tools_outputs)
 
 
-def retrieval_augmented_generation(query, vectordb = VECTORDB):
-    
+def retrieval_augmented_generation(query, vectordb=VECTORDB):
+
     relevant_docs = vectordb.similarity_search(query)
-    print(relevant_docs)
     rel_docs = [doc.page_content for doc in relevant_docs]
-    return rel_docs
+    output = '\n'.join(rel_docs)
+    print(output)
+    return output
+
 
 available_tools = {
     'retrieval_augmented_generation': retrieval_augmented_generation,
 }
 
+
 @user_bp.route('/chatbot-route', methods=['POST'])
-@login_required
 def chatbot_route():
     data = request.get_json()
     print(data)
     tool_check = []
     query = data.get('userdata', '')
-    if query:         
+    if query:
+        source_language = detect_source_langauge(query)
+        if source_language != 'en':
+            trans_query = GoogleTranslator(source=source_language, target='en').translate(query)
+        else:
+            trans_query = query
         assistant_id = session['assistant_id']
-        print('ASSISTANT ID',assistant_id)
+        print('ASSISTANT ID', assistant_id)
         thread = client.beta.threads.create()
         print('THREAD ID', thread.id)
-        
+        print(trans_query)
         message = client.beta.threads.messages.create(
-            thread_id= thread.id,
+            thread_id=thread.id,
             role="user",
-            content= query,
+            content= trans_query,
         )
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -337,38 +367,42 @@ def chatbot_route():
             print(run.error)
         elif run.status == 'requires_action':
             run = submit_tool_outputs(thread.id, run.id, run.required_action.submit_tool_outputs.tool_calls)
-            run = wait_on_run(thread.id, run.id)
+            run = wait_on_run(run.id,thread.id)
         messages = client.beta.threads.messages.list(thread_id=thread.id,order="asc")
         print('message',messages)
         content = None
         for thread_message in messages.data:
             content = thread_message.content
-        print("Content List",content)
+        print("Content List", content)
         if len(tool_check) == 0:
             chatbot_reply = content[0].text.value
             print("Chatbot reply",chatbot_reply)
-            response = {'chatbotResponse': chatbot_reply,'function_name': 'normal_search'}
+            if source_language != 'en':
+                trans_output = GoogleTranslator(source='auto', target=source_language).translate(chatbot_reply)
+            else:
+                trans_output = chatbot_reply
+            response = {'chatbotResponse': trans_output,'function_name': 'normal_search'}
         return jsonify(response)
     else:
         return jsonify({'error': 'User message not provided'}), 400
-    
+
+
 @user_bp.route('/add-meeting', methods=['POST'])
 @login_required
 def add_advo_connect():
+    # Get advocate_id from query parameters
+    advocate_id = request.form.get('id')
+    date = request.form.get('date')
+    time = request.form.get('time')
+    subject = request.form.get('subject')
+    description = request.form.get('description')
+
     user_id = session.get("user_id", None)
     if user_id is None:
         return jsonify({"message": "User not logged in", "response": False}), 401
-
-    data = request.json
-    subject = data.get("subject")
-    description = data.get("description")
-    date_str = data.get("date")
-    time_str = data.get("time")
-    advocate_id = data.get("advocate_id")
-
     try:
-        date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        time_obj = datetime.strptime(time_str, '%H:%M').time()
+        date = datetime.strptime(date, '%Y-%m-%d').date()
+        time_obj = datetime.strptime(time, '%H:%M').time()
 
         new_advo_connect = AdvoConnect(
             subject=subject,

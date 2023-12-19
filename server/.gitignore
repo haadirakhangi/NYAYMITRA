@@ -3,3 +3,7 @@ client/
 .ipynb_checkpoints/
 .env
 venv
+<<<<<<< HEAD
+.db
+=======
+>>>>>>> b088a1b2da49d1078ec4d7ef3e6f6b4e0a96e5af
