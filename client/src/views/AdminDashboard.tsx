@@ -7,6 +7,7 @@ import {
     Input,
     Button,
     AppBar,
+    InputLabel,
     Toolbar,
     Typography,
     MenuItem,
@@ -79,6 +80,10 @@ const statesOfIndia = [
 const AdminDashboard: React.FC = () => {
     const [selectedState, setSelectedState] = useState<string>('');
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+    const [fineSelectedFiles, setFineSelectedFiles] = useState<FileList | null>(null);
+    const [inputQuestion, setInputQuestion] = useState<string>('');
+
+
 
     const handleStateChange = (
         event: React.ChangeEvent<{ value: unknown }>
@@ -86,9 +91,15 @@ const AdminDashboard: React.FC = () => {
         setSelectedState(event.target.value as string);
     };
 
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         setSelectedFiles(files);
+    };
+
+    const handleFineFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        setFineSelectedFiles(files);
     };
 
     const handleSubmit = async () => {
@@ -112,6 +123,48 @@ const AdminDashboard: React.FC = () => {
             // Handle the response as needed
         } catch (error) {
             console.error('Error sending file:', error);
+        }
+    };
+
+
+    const handleQuestionChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setInputQuestion(event.target.value);
+    };
+
+    const handleFineSubmit = async () => {
+        console.log("I am sending stuff");
+
+        if (!fineSelectedFiles) {
+            console.error('No file selected.');
+            return;
+        }
+
+        if (!inputQuestion) {
+            console.error('No question input provided.');
+            return;
+        }
+
+        const formData = new FormData();
+
+        // Append files to FormData
+        for (let i = 0; i < fineSelectedFiles.length; i++) {
+            formData.append('documents', fineSelectedFiles[i]);
+        }
+
+        // Append input question to FormData
+        formData.append('question', inputQuestion);
+
+        try {
+            const response = await axios.post(
+                'http://127.0.0.1:5000/admin/update-drafting',
+                formData
+            );
+            console.log('Files and question sent successfully', response.data);
+            // Handle the response as needed
+        } catch (error) {
+            console.error('Error sending files and question:', error);
         }
     };
     return (
@@ -155,7 +208,7 @@ const AdminDashboard: React.FC = () => {
                             <Typography variant='h6'>Admin Dashboard</Typography>
                         </Toolbar>
                     </AppBar>
-                    <Box m={3}>
+                    <Box>
                         <FormControl
                             style={{ marginTop: '16px', marginBottom: '16px' }}
                             className='mb-5'
@@ -176,8 +229,11 @@ const AdminDashboard: React.FC = () => {
                             </Select>
                         </FormControl>
                         <Typography variant='h5'>Pie Chart</Typography>
-                        
-                        <Typography variant='h5' style={{ marginTop: '16px', marginBottom: "16px" }}>
+
+
+                    </Box>
+                    <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px',marginBottom: '20px' }}>
+                        <Typography variant='h5' style={{ marginTop: '16px', marginBottom: '16px' }}>
                             Upload Documents to Update The chatbots
                         </Typography>
                         <Button
@@ -192,10 +248,51 @@ const AdminDashboard: React.FC = () => {
                                 onChange={handleFileChange}
                             />
                         </Button>
-                        <Button variant='contained'
+                        <Button
+                            variant='contained'
                             color='primary'
-                            style={{ marginLeft: "10px" }}
-                            onClick={handleSubmit}>
+                            style={{ marginLeft: '10px' }}
+                            onClick={handleSubmit}
+                        >
+                            Update Data
+                        </Button>
+                    </Box>
+                    <Box style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px' }}>
+                        <Typography variant='h5' style={{ marginTop: '16px', marginBottom: '16px' }}>
+                            Upload Documents for document drafting
+                        </Typography>
+                        <Button
+                            component='label'
+                            variant='contained'
+                            startIcon={<CloudUploadIcon />}
+                        >
+                            Upload file
+                            <VisuallyHiddenInput
+                                type='file'
+                                multiple
+                                onChange={handleFineFileChange}
+                            />
+                        </Button>
+
+
+                        <Typography variant='h5' style={{ marginTop: '30px', marginBottom: '16px' }}>
+                            Input Question
+                        </Typography>
+                        <FormControl required fullWidth margin="normal">
+                            <InputLabel htmlFor="question">Question</InputLabel>
+                            <Input
+                                name="question"
+                                autoComplete="Question"
+                                value={inputQuestion}
+                                onChange={handleQuestionChange}
+                            />
+                        </FormControl>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            style={{ marginLeft: '10px' }}
+                            onClick={handleFineSubmit}
+                        >
                             Update Data
                         </Button>
                     </Box>

@@ -13,6 +13,8 @@ import Rights from "./main/rights"
 import Home from "./main/userhome";
 import Features from "./main/features";
 import Advocate_home from "./main/advocatehome";
+import VideoCall from "./views/VideoCall"
+import RoomPage from "./views/RoomPage";
 // import Document from "./main/documentdraft";
 import Connect from "./main/connect";
 import Community from "./main/community";
@@ -41,6 +43,9 @@ function App() {
         <Route path="/connect" element={<Connect />} />
         <Route path="/community" element={<Community />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/video-call" element={<VideoCall />} />
+        <Route path="/room-page" element={<RoomPage />} />
+
         {/* <Route path="/documentdraft" element={<Document />} /> */}
       </Routes>
     </Router>
