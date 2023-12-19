@@ -32,8 +32,11 @@ const Community = (props: Props) => {
                 />
                 <div id='info'>
                     <h1 id='name'>
-                        <a href='/'>CodePen</a>
+                        <br />
+                        <a href='/'>NyayMitra</a>
+                        <br />
                     </h1>
+
                     <nav>
                         <ul>
                             <li>
@@ -67,26 +70,38 @@ const Community = (props: Props) => {
                         Ready to experience the future of legal assistance? Join the LawBot AI community today and embark on a smoother, more informed legal journey. Got questions? Our team is here to help! Contact us at support@nyaymitra.com.
                     </p>
                     <hr />
-                    <div id='start'>Start Coding</div>
+                    <div id='start'>Community</div>
                 </aside>
                 <div id='content'>
-                    <div id='post'>
-                        <div id='placeholder'>
+                    <div>
+                        <div id='placeholder' className='space-x-10'>
                             <input
                                 type='text'
                                 placeholder="What's on your mind ?"
                                 value={inputValue}
                                 onChange={handleInputChange}
-                                style={{ width: "280px", margin: '4px' }}
+                                style={{ width: "380px", margin: '4px', height: '38px' }}
                             />
-                            <button onClick={handleAddPost} className=' pl-5 pr-5 pt-2 pb-2 border  bg-black text-white'>Add Post</button>
+                            <button onClick={handleAddPost} className='bg-[#eb427e] text-black pl-8 pr-8 pt-3 pb-3 rounded-xl hover:bg-transparent hover:border border-black hover:no-underline'>Add Post</button>
                         </div>
+                    </div>
+                    <div className=''>
+                        <article className='m-5'>
+                            <h2>Where can i get document summary?</h2>
+                            <p>Document Summary can be found in features. Feel free to adapt the content to suit your specific document or context. Summarization aims to capture the key points concisely while retaining the essential information from the original text.</p>
+                        </article>
+                        <article className='m-5'>
+                            <h2>Can i connect to advocates in my budget?</h2>
+                            <p>AdvoConnect is an feature you connect to advocates at as per your budget</p>
+                        </article>
                     </div>
                     <div>
                         {/* Display posts below the input */}
                         {posts.map((post, index) => (
                             <div key={index} className='post'>
-                                {post}
+                                <article className='m-5'>
+                                    <h2>{post}</h2>                                    
+                                </article>
                             </div>
                         ))}
                     </div>
