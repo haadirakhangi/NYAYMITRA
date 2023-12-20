@@ -21,7 +21,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 
 type Props = {}
 
-const AdminLogin = (props: Props) => {
+const AdvoLogin = (props: Props) => {
   const navigate = useNavigate();
   const [state, setState] = useState({
     email: "",
@@ -194,4 +194,4 @@ const AdminLogin = (props: Props) => {
   )
 }
 
-export default AdminLogin
+export default AdvoLogin

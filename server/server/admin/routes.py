@@ -50,7 +50,7 @@ def update_vectorb():
     try:
         # Create 'uploads' directory if it doesn't exist
         upload_dir = 'update_docs'
-        real_dir = 'nyaymitra_data'
+        real_dir = 'nyaymitra_data/categorized_docs'
         print("Update vectordb")
         # Iterate over each file in the request
         for file in request.files.getlist('documents'):
@@ -266,7 +266,59 @@ def view_document():
     return send_file(pdf_file_path, mimetype='application/pdf')
 
 
+@admin_bp.route('/view', methods=['GET'])
+def view_documents():
+    # Assuming the script is located in the 'server' directory
+    current_script_directory = os.path.dirname(os.path.abspath(__file__))
+    chatbots_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
+    server_side_directory = os.path.abspath(os.path.join(chatbots_directory, '..'))
+    sys.path.append(server_side_directory)
+    ROOT_FOLDER = os.path.join(server_side_directory,'nyaymitra_data', 'categorized_docs')
 
+    # Fetch category folders
+    categories = [category for category in os.listdir(ROOT_FOLDER) if os.path.isdir(os.path.join(ROOT_FOLDER, category))]
+
+    # Fetch documents and beneficiaries for each category
+    documents_data = {}
+    for category in categories:
+        category_folder_path = os.path.join(ROOT_FOLDER, category)
+        document_names = [doc_name for doc_name in os.listdir(category_folder_path) if doc_name.endswith('.pdf')]
+
+        # Fetch beneficiaries from LawCatgBenf model
+        beneficiaries_data = []
+        for doc_name in document_names:
+            law_catg_benf = LawCatgBenf.query.filter_by(doc_name=doc_name).first()
+            if law_catg_benf:
+                beneficiaries_data.append({
+                    "doc_name": doc_name,
+                    "beneficiaries": json.loads(law_catg_benf.beneficiaries)
+                })
+
+        documents_data[category] = beneficiaries_data
+
+    return jsonify({"documents": documents_data, "response": True})
+
+@admin_bp.route('/get-cat-doc', methods=['POST'])
+def view_catg_document():
+    data = request.json
+    doc_name = data.get('docName')
+    category = data.get('category')
+
+    current_script_directory = os.path.dirname(os.path.abspath(__file__))
+    server_side_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
+    server_side_directory = os.path.abspath(os.path.join(server_side_directory, '..'))
+    sys.path.append(server_side_directory)
+    pdf_file_path = os.path.join(server_side_directory, 'nyaymitra_data', 'categorized_docs', category, doc_name)
+    print(pdf_file_path)
+    # pdf_file_path = os.path.normpath(pdf_file_path)
+
+    if os.path.exists(pdf_file_path):
+        # If the file exists, serve it
+        pdf_file_path = os.path.normpath(pdf_file_path)
+        return send_file(pdf_file_path, mimetype='application/pdf')
+    else:
+        # If the file does not exist, return an error response
+        return jsonify({'error': 'File not found'}), 404
 
 def extract_text_from_pdf(pdf_file):
     text = ""

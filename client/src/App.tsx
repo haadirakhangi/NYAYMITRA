@@ -19,7 +19,8 @@ import AdminAdvoVerification from "./views/AdminAdvoVerification";
 import Connect from "./main/connect";
 import Community from "./main/community";
 import AdminLogin from "./views/AdminLogin";
-import NewsComponent from './views/News'
+import NewsComponent from './views/News';
+import AdminCategory from "./views/AdminCategory";
 
 function App() {
 
@@ -45,6 +46,7 @@ function App() {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/video-call" element={<VideoCall />} />
         <Route path="/room-page" element={<RoomPage />} />
+        <Route path="/admin-category" element={<AdminCategory />} />
         <Route path="/admin-advocate-verified" element={<AdminAdvoVerification />} />
         <Route path="/news" element={<NewsComponent />} />
         {/* <Route path="/documentdraft" element={<Document />} /> */}

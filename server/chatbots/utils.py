@@ -422,7 +422,7 @@ def nyaymitra_kyr_chain_with_parent_docs(full_doc_retriever):
     return chain
 
 def document_drafting_chain():
-    llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY_DOCUMENT_DRAFTING'),model_name="ft:gpt-3.5-turbo-1106:codeomega::8VJA3OGz",temperature=0)
+    llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY_DOCUMENT_DRAFTING'),model_name="ft:gpt-3.5-turbo-1106:codeomega::8Xo32rwF",temperature=0)
     system_message_prompt = SystemMessagePromptTemplate.from_template(
        """LawYantra is a factual chatbot which generates the complete legal document according to the user query."""
     )
