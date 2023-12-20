@@ -1,14 +1,16 @@
-# Welcome to Chainlit! 🚀🤖
+#
+# Welcome to Narrative Legalism! 🤖
 
-Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
-
-## Useful Links 🔗
-
-- **Documentation:** Get started with our comprehensive [Chainlit Documentation](https://docs.chainlit.io) 📚
-- **Discord Community:** Join our friendly [Chainlit Discord](https://discord.gg/k73SQ3FyUh) to ask questions, share your projects, and connect with other developers! 💬
-
-We can't wait to see what you create with Chainlit! Happy coding! 💻😊
-
-## Welcome screen
-
-To modify the welcome screen, edit the `chainlit.md` file at the root of your project. If you do not want a welcome screen, just leave this file empty.
+'NyayMitra' is your storyteller-in-chief, transforming legal concepts into captivating narratives. Say goodbye to dull legal texts, and hello to a world of characters and adventures that make learning the law an enjoyable experience.
+#
+#
+Like a "choose your adventure" book, NyayMitra lets users decide the path of the story. 
+This feature empowers users to explore different legal outcomes and understand the consequences of their choices, making the learning process personalized 
+and dynamic.
+Encountered a tricky legal term? NyayMitra's glossary is here to save the day. It provides clear, concise explanations 
+of legal jargon, ensuring that users can easily grasp and remember key concepts.
+#
+#
+NyayMitra's primary goal is to demystify the law, proving that it's not an exclusive domain for legal experts. 
+By making legal concepts understandable and relatable, the chatbot empowers users to navigate the 
+legal landscape with confidence.

@@ -44,7 +44,7 @@ const Features = (props: Props) => {
     {
       imageUrl: forum,
       title: 'Communtiy Forums',
-      url: 'http://localhost:8004/',
+      url: '/community',
       description:
         'Immerse yourself in the NyayMitra Community, a digital sanctuary for legal enthusiasts and inquisitive minds alike. Engage in thought-provoking discussions, seek advice, and explore an abundance of legal resources within a supportive network.',
     },

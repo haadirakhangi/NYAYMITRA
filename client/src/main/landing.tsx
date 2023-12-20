@@ -2,14 +2,15 @@ import React from 'react';
 import img from './assets/images/logo.svg' 
 import './assets/css/bd-coming-soon.css'
 import { NavLink } from 'react-router-dom';
+import logo from '../img/logo-wbag.png'
 
 const ComingSoonPage: React.FC = () => {
     return (
         <div className='main'>
-            <header style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <header style={{ display: 'flex', justifyContent: 'space-between',alignItems:'center' }}>
                 <div className="container" style={{ display: 'flex', alignItems: 'center' }}>
-                    <div className="brand-wrapper">
-                        <img src={img} alt="logo" className="w-20 h-20" />
+                    <div className="">
+                        <img src={logo} alt="logo" className="w-56" />
                     </div>
                 </div>
                 <div className='maintain'>

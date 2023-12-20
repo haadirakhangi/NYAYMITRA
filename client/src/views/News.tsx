@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from '@/navbar';
+import Footer from '@/footer';
 import { Container, Typography, Card, CardContent, Link, Grid } from '@mui/material';
 
 interface NewsItem {

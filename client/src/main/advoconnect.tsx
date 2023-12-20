@@ -14,7 +14,7 @@ type Lawyer = {
   city: string;
   experience: string;
   specialization: string;
-  practiceAreas: string;
+  min_cost_per_hr: number;
   languages: string[];
 };
 
@@ -29,6 +29,8 @@ const LawyerCard: React.FC<LawyerCardProps> = ({
   city,
   experience,
   specialization,
+  min_cost_per_hr,
+  languages,
 }) => {
   const [value, setValue] = useState(rating);
 
@@ -73,9 +75,9 @@ const LawyerCard: React.FC<LawyerCardProps> = ({
   // ------------------------------------------------------------------
 
   return (
-    <div className='wrapper antialiased text-gray-900 w-[450px]'>
+    <div className='wrapper antialiased text-gray-900 w-[450px] min-h-[300px]'>
       <div className='relative px-4'>
-        <div className='bg-white p-6 rounded-lg shadow-lg items-center'>
+        <div className='bg-white p-6 rounded-lg shadow-lg items-center min-h-[370px]'>
           {/* <span className="bg-teal-200 text-teal-800 text-xs px-2 inline-block rounded-full  uppercase font-semibold tracking-wide">
                   New
                 </span> */}
@@ -87,6 +89,10 @@ const LawyerCard: React.FC<LawyerCardProps> = ({
             {city},{state}
           </div>
           <div className='mt-1'>Practice Areas: {specialization}</div>
+          <div className='mt-1'>Minimun Cost per Hour: {min_cost_per_hr}</div>
+          <div className='mt-1' style={{ minHeight: '2em' }}>
+          Languages: {languages}
+          </div>
           <div className='mt-2'>
             <span className='text-md font-semibold'>
               Experience: {experience}
@@ -219,6 +225,8 @@ const Lawyers: React.FC = () => {
     }
 
     return (
+      <>
+      <div className="ml-5"><h2>Recommendation on Location & Minimum Cost</h2></div>
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
         {lawyersData.map((lawyer) => (
           <div key={lawyer.advocate_id} className='mb-4 mr-5'>
@@ -226,6 +234,7 @@ const Lawyers: React.FC = () => {
           </div>
         ))}
       </div>
+      </>
     );
   };
 
