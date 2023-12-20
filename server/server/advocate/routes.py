@@ -125,11 +125,11 @@ def advocate_login():
     # check user is registered or not
     user = Advocate.query.filter_by(email=email).first()
     if user is None:
-        return jsonify({"message": "Unregistered email id", "response": False}), 200
+        return jsonify({"message": "Unregistered email id", "response": False}), 201
 
     # check password
     if not bcrypt.check_password_hash(user.password, password.encode('utf-8')):
-        return jsonify({"message": "Incorrect password", "response": False}), 200
+        return jsonify({"message": "Incorrect password", "response": False}), 201
 
     # start user session
     session["advocate_id"] = user.advocate_id
@@ -167,8 +167,7 @@ def advocate_logout():
 
 @advocate_bp.route('/get-meetings', methods=['GET'])
 def get_advocate_connects():
-    # advocate_id = session.get("advocate_id", None)
-    advocate_id = 11
+    advocate_id = session.get("advocate_id", None)
     if advocate_id is None:
         return jsonify({"message": "Advocate not logged in", "response": False}), 401
 

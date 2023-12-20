@@ -22,6 +22,8 @@ from langchain.document_loaders import PyPDFLoader
 from deep_translator import GoogleTranslator
 
 
+model_size = "large-v3"
+model = WhisperModel(model_size, device="cpu", compute_type="int8")
 FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
 docs = loader.load()
@@ -130,7 +132,6 @@ tools = [
 
 
 @user_bp.route('/login', methods=['POST'])
-@single_login_required
 def user_login():
     data = request.get_json()
     email = data.get('email')
@@ -161,9 +162,7 @@ def user_login():
 @user_bp.route('/voice-chat', methods=['POST'])
 def voice_chat():
     try:
-        print("Hello i m here")
-        model_size = "large-v3"
-        model = WhisperModel(model_size, device="cpu", compute_type="int8")
+        print("Analyzing")
         # Run on GPU with FP16
         # model = WhisperModel(model_size, device="cuda", compute_type="float16")
 
@@ -220,14 +219,12 @@ def getuser():
 
 
 @user_bp.route('/logout', methods=['GET'])
-@login_required
 def user_logout():
     session.pop('user_id', None)
     return jsonify({'message': 'User logged out successfully'})
 
 
 @user_bp.route('/document-summarization', methods=['POST'])
-@login_required
 def document_summarization():
     directory = "chatbots/document_sum/user_data"
     directory_faiss = "chatbots/document_sum/faiss_index"
@@ -388,7 +385,6 @@ def chatbot_route():
 
 
 @user_bp.route('/add-meeting', methods=['POST'])
-@login_required
 def add_advo_connect():
     # Get advocate_id from query parameters
     advocate_id = request.form.get('id')

@@ -63,21 +63,20 @@ async def main(message: cl.Message):
     # print("Glossary",glossary)
     for i in preprocessed_text:
         if i.lower()+" " in glossary:
-            print('YE I HAI', i)
-            print('YE I KA TYPE HAI', type(i))
+            print('Its there', i)
             glossary_text +="<b>" + i.title() + " : " + "</b>" + GLOSSARY[i.title()+" "] + "<br/> "
         else:
-            print("Not here bc",i)
-    
+            print("No glossary",i)
+    final_answer = final_answer + '\n\n' + glossary_text
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
     else:
-        trans_output = final_answer
+        trans_output = final_answer + '\n\n' + glossary_text
     # Sql Database
-    # data = {}
-    # data['query']=trans_query
-    # data['mostcommon']=most_common_filename
-    # response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
+    data = {}
+    data['query']=trans_query
+    data['mostcommon']=most_common_filename
+    response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
     # if response.status_code == 200:
     #     print('Response from Flask server:', response.text)
     # else:
@@ -97,8 +96,6 @@ async def main(message: cl.Message):
             trans_output += f"\nSources: {', '.join(source_names)}"
         else:
             trans_output += "\nNo sources found"
-
-    trans_output = trans_output+ '\n\n' + glossary_text
 
 
     await cl.Message(content=trans_output,author="Tool 1",elements=text_elements).send()

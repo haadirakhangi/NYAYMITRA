@@ -2,10 +2,28 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa'; // Import the hamburger icon and close icon from react-icons
 import logo from './img/logo-wbag.png';
+import axios from 'axios';
 
 type Props = {};
 
 const Navbar = (props: Props) => {
+
+    const handleLogout = async () => {
+        try {
+            // Make an Axios request to your logout route
+            const response = await axios.get('/api/user/logout');
+
+            // Assuming your server responds with a success message
+            if (response.data.success) {
+                console.log('Logout successful');
+                // You can also redirect the user or perform other actions after logout
+            } else {
+                console.error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
     const [isNavOpen, setNavOpen] = useState(false);
 
     const toggleNav = () => {
@@ -76,6 +94,7 @@ const Navbar = (props: Props) => {
                                 <a className="nav-link page-scroll" href="#details">
                                     <NavLink to="/advoconnect">AdvoConnect</NavLink>
                                 </a>
+
                             </li>
                             <li>
                                 <a className="nav-link page-scroll" href="#details">
