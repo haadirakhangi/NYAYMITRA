@@ -35,7 +35,7 @@ async def main(message: cl.Message):
     cb = cl.AsyncLangchainCallbackHandler()
     response = await chain.acall(trans_query, callbacks=[cb])
     print(response)
-    final_answer = response.get('answer')
+    final_answer = response.get('text')
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
     else:

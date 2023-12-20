@@ -25,3 +25,4 @@ unstructured[pdf]
 faster-whisper
 spacy
 pymupdf
+gtts

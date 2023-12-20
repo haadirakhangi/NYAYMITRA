@@ -15,12 +15,14 @@ import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
 import VisibilityOffTwoToneIcon from "@mui/icons-material/VisibilityOffTwoTone";
 import CloseIcon from "@mui/icons-material/Close";
 import { NavLink } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import InputAdornment from "@mui/material/InputAdornment";
 
 type Props = {}
 
 const AdminLogin = (props: Props) => {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -62,6 +64,7 @@ const AdminLogin = (props: Props) => {
     try {
       const response = await axios.post("/api/advocate/login", newUserCredentials);
       console.log(response.data);
+      navigate('/advohome');
       // Handle success, you can log the response or perform additional actions
     } catch (error) {
       // Handle error, you can log the error or show a user-friendly message
@@ -100,7 +103,7 @@ const AdminLogin = (props: Props) => {
                     disableUnderline={true}
                     onChange={handleChange("email")} />
                   
-                </div>
+                </div> 
 
                 <div className="relative mb-6" data-te-input-wrapper-init>
                   <Input
