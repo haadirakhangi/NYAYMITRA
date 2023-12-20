@@ -22,9 +22,6 @@ const Landing: React.FC = () => {
             zIndex: -1,
           }}
         >
-          <source src={videoSrc} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
 
         <Navbar />
 
