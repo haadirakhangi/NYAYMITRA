@@ -71,7 +71,7 @@ async def on_chat_start():
             time.sleep(1)
 
     faiss_vectordb = create_faiss_vectordb_for_document_qna()
-    pinecone_vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS, text_key = 'text')
+    pinecone_vectordb = Pinecone.from_existing_index(index_name= PINECONE_INDEX_NAME, embedding=EMBEDDINGS)
 
     if os.path.exists(directory):
         shutil.rmtree(directory)

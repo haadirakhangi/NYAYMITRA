@@ -95,7 +95,7 @@ const ChatWidget: React.FC = () => {
 
       const data = await response.json();
 
-      const chatbotResponse = data.message;
+      const chatbotResponse = data.chatbotResponse;
 
       const newChatHistoryWithResponse = [
         ...newChatHistory,
