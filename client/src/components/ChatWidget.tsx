@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faRobot,
@@ -7,7 +7,7 @@ import {
   faMicrophone,
   faMicrophoneAltSlash,
 } from '@fortawesome/free-solid-svg-icons';
-
+import axios from 'axios';
 import './chat_widget.css'; // Import your styles
 
 const ChatWidget: React.FC = () => {
@@ -16,48 +16,111 @@ const ChatWidget: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<Array<{ role: string; message: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const audioChunks = useRef<Array<Blob>>([]);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+
+  const startRecording = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      mediaRecorder.current = new MediaRecorder(stream);
+      mediaRecorder.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.current.push(event.data);
+        }
+      };
+      mediaRecorder.current.onstop = () => {
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
+        // Send the audioBlob to the server
+        sendAudioToServer(audioBlob);
+        audioChunks.current = [];
+      };
+
+      mediaRecorder.current.start();
+    });
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder.current) {
+      mediaRecorder.current.stop();
+
+      // Ensure the stop method is called after a short delay
+      setTimeout(() => {
+        // Reset the microphone stream
+        const stream = mediaRecorder.current?.stream;
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+      }, 100);
+    }
+  };
+
+  const sendAudioToServer = async (audioBlob: Blob) => {
+    try {
+      setLoading(true);
+  
+      // Create a FormData object and append the audioBlob with a key
+      const formData = new FormData();
+      formData.append('voice', audioBlob, 'voice.wav');
+  
+      // Send the FormData to the Flask route using axios
+      const response = await axios.post("/api/user/voice-chat", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      setUserMessage(response.data.message);
+    } catch (error) {
+      console.error('Error sending audio to server:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
 
   const handleSendMessage = async () => {
-    let newChatHistory = [];
-    let userdata = ""
-    newChatHistory = [...chatHistory, { role: "user", message: userMessage }];
-    setChatHistory(newChatHistory);
-    userdata = userMessage
+    let newChatHistory = [...chatHistory];
+    newChatHistory.push({ role: 'user', message: userMessage });
+
     setLoading(true);
 
     try {
-      // Send userMessage to your chatbot backend and handle the response
-      const response = await fetch("/api/user/chatbot-route", {
-        method: "POST",
+      const response = await fetch('/api/user/chatbot-route', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userdata }),
+        body: JSON.stringify({ userdata: userMessage }),
       });
 
       const data = await response.json();
 
-      const chatbotResponse = data.chatbotResponse;
-      const newChatHistoryWithResponse = [...newChatHistory, { role: "chatbot", message: chatbotResponse }];
-      setChatHistory(newChatHistoryWithResponse);
-      setLoading(false)
+      const chatbotResponse = data.message;
 
+      const newChatHistoryWithResponse = [
+        ...newChatHistory,
+        { role: 'chatbot', message: chatbotResponse },
+      ];
+      setChatHistory(newChatHistoryWithResponse);
     } catch (error) {
-      console.error("Error fetching chatbot response:", error);
+      console.error('Error fetching chatbot response:', error);
+    } finally {
+      setLoading(false);
     }
 
-    // Clear the input field
-    setUserMessage("");
+    setUserMessage('');
   };
 
+  
+
   const handleStartVoiceInput = () => {
-    // Add logic to start voice input
-    // Update setListening accordingly
+    startRecording();
+    setListening(true);
   };
 
   const handleStopVoiceInput = () => {
-    // Add logic to stop voice input
-    // Update setListening accordingly
+    stopRecording();
+    setListening(false);
   };
 
   return (
@@ -96,14 +159,9 @@ const ChatWidget: React.FC = () => {
             <button onClick={handleSendMessage} style={{ marginRight: '10px' }}>
               <FontAwesomeIcon icon={faPaperPlane} />
             </button>
-            <button onClick={handleStartVoiceInput}>
-              <FontAwesomeIcon icon={faMicrophone} />
+            <button onClick={listening ? handleStopVoiceInput : handleStartVoiceInput}>
+              <FontAwesomeIcon icon={listening ? faMicrophoneAltSlash : faMicrophone} />
             </button>
-            {listening && (
-              <button onClick={handleStopVoiceInput} style={{ marginLeft: '10px' }}>
-                <FontAwesomeIcon icon={faMicrophoneAltSlash} />
-              </button>
-            )}
           </div>
         </div>
       )}

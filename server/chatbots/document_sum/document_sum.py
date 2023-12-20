@@ -13,8 +13,20 @@ sys.path.append(server_side_directory)
 from chatbots.utils import *
 from langchain.memory import ConversationBufferMemory
 import chainlit as cl
+from gtts import gTTS
 
 load_dotenv()
+
+def text_to_speech(text, language='en', directory='audio_files'):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    # Create a gTTS object
+    speech = gTTS(text=text, lang=language, slow=False)
+    # Specify the file path including the directory to save the MP3 file
+    file_path = os.path.join(directory, 'text.mp3')
+    # Save the speech to the specified file path
+    speech.save(file_path)
+    return file_path
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 # full_doc_retriever = get_parent_docs_retriever(PINECONE_INDEX_NAME, EMBEDDINGS, LOCAL_FILE_STORE_PATH, CHILD_SPLITTER)
@@ -112,3 +124,11 @@ async def main(message: cl.Message):
         trans_output = res
 
     await cl.Message(content=trans_output).send()
+    file_path=text_to_speech(trans_output, language=source_lang, directory='audio_files')
+    elements = [
+        cl.Audio(name="text.mp3", path=file_path, display="inline"),
+    ]
+    await cl.Message(
+        content="Here is an audio file",
+        elements=elements,
+    ).send()
