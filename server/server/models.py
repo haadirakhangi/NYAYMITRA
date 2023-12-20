@@ -77,6 +77,7 @@ class Advocate(db.Model):
             'rating': self.rating,
             'date_joined': self.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
             'degree_doc': self.degree_doc,
+            'min_cost_per_hr':self.min_cost_per_hr,
             'verified': self.verified
         }
     

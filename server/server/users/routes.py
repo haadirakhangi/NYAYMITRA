@@ -23,16 +23,15 @@ from deep_translator import GoogleTranslator
 
 
 model_size = "large-v3"
-# model = WhisperModel(model_size, device="cpu", compute_type="int8")
-FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
+model = WhisperModel(model_size, device="cpu", compute_type="int8")
+FEATURE_DOCS_PATH = 'nyaymitra_data/Perfect_nyaymitra_explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
 docs = loader.load()
-docs_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000, chunk_overlap=200)
+docs_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 split_docs = docs_splitter.split_documents(docs)
 NYAYMITRA_FEATURES_VECTORSTORE = FAISS.from_documents(split_docs, EMBEDDINGS)
-NYAYMITRA_FEATURES_VECTORSTORE.save_local(
-    'nyaymitra_data/faiz_index_assistant')
+NYAYMITRA_FEATURES_VECTORSTORE.save_local('nyaymitra_data/faiz_index_assistant')
+print('CREATED VECTORSTORE')
 VECTORDB = FAISS.load_local('nyaymitra_data/faiz_index_assistant', EMBEDDINGS)
 
 
@@ -147,7 +146,7 @@ def user_login():
     client = OpenAI()
     assistant = client.beta.assistants.create(
         name="NYAYMITRA",
-        instructions="You are a helpful assistant for the website Nyaymitra. Use the functions provided to you to answer user's question about the Nyaymitra platform. Help the user with navigating and getting information about the Nyaymitra website.",
+        instructions="You are a helpful assistant for the website Nyaymitra. Use the functions provided to you to answer user's question about the Nyaymitra platform. Help the user with navigating and getting information about the Nyaymitra website.Provide the navigation links defined in the document whenever required",
         model="gpt-3.5-turbo-1106",
         tools=tools
     )
@@ -275,9 +274,15 @@ def get_advocate():
     search_value = data.get('search', '')
     spec = get_specialization_from_text(user_input=search_value)
     print("Specualizaton:-----------------", spec)
+    user_id = session.get("user_id", None)
+    user = User.query.get(user_id)
     advocates_data = [advocate.to_dict() for advocate in Advocate.query.filter(
-        or_(*[Advocate.specialization == value for value in spec])).all()]
-    # print("Result",advocates_data)
+    or_(*[Advocate.specialization == value for value in spec]),
+    Advocate.city == user.city,
+    ).order_by(Advocate.min_cost_per_hr.asc(), Advocate.rating.desc()).all()]
+    # for advocate in advocates_data:
+    #     advocate['languages'] = json.loads(advocate['languages'])
+    #     advocate['languages'] = ', '.join(advocate['languages'])
     return jsonify({"message": "User logged in successfully", "response": True, "lawyers": advocates_data}), 200
 
 

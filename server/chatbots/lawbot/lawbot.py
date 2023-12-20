@@ -71,12 +71,12 @@ async def main(message: cl.Message):
     if source_lang != 'en':
         trans_output = GoogleTranslator(source='auto', target=source_lang).translate(final_answer)
     else:
-        trans_output = final_answer + '\n\n' + glossary_text
+        trans_output = final_answer
     # Sql Database
-    data = {}
-    data['query']=trans_query
-    data['mostcommon']=most_common_filename
-    response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
+    # data = {}
+    # data['query']=trans_query
+    # data['mostcommon']=most_common_filename
+    # response = requests.post('http://127.0.0.1:5000/category', json=data,headers = {"Content-Type": "application/json"})
     # if response.status_code == 200:
     #     print('Response from Flask server:', response.text)
     # else:
