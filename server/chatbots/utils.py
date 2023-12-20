@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, AutoModelForSeq2SeqLM, BitsAndBytesConfig, AutoConfig, StoppingCriteria, StoppingCriteriaList
 from langchain.output_parsers import PydanticOutputParser
-from langchain.llms import OpenAI
+# from langchain.llms import OpenAI
+from openai import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, PromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
 from langchain.retrievers import ParentDocumentRetriever

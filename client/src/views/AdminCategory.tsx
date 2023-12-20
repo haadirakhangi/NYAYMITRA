@@ -51,12 +51,12 @@ const AdminCategory = () => {
             <Grid container spacing={2}>
                 {docs.map((doc) => (
                     <Grid item key={doc.doc_name} xs={12} sm={6} md={4}>
-                        <Card style={{ minHeight: '200px' ,flex:'auto' }}>
-                            <CardContent>
+                        <Card style={{ minHeight: '200px',minWidth:'100px', flex: 'auto' }}>
+                            <CardContent style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                                 <Avatar>
                                     <CategoryIcon />
                                 </Avatar>
-                                <Typography variant="h6" component="div" style={{ marginTop: '10px', whiteSpace: 'normal' }}>
+                                <Typography variant="h2" component="div" style={{ marginTop: '10px', paddingRight:'10px' }}>
                                     {doc.doc_name}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary" component="div">
