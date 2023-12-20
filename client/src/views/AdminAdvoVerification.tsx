@@ -4,6 +4,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close'; 
 import DoneIcon from '@mui/icons-material/Done';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import {
     Container,
     AppBar,
@@ -21,8 +22,8 @@ import {
     IconButton,
     Button,
     Paper,
-    Link,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import logo from '../img/logo-wbag.png';
 import axios from 'axios';
 
@@ -85,21 +86,29 @@ const AdminAdvoVerification: React.FC = () => {
             <div style={{ flex: '0 0 20%' }} className='bg-sky-200 p-2'>
                 <img src={logo} className='m-auto w-4/6'></img>
                 <List>
-                    <ListItem
+                    <a><ListItem
                         component={Link}
                         to='/admin-home'
-                        className='bg-blue-500 hover:-translate-y-1 hover:scale-105 transition ease-in-out delay-90'
+                        className='hover:bg-blue-500 translate-y-1 hover:scale-105 transition ease-in-out delay-90'
                     >
                         <DashboardIcon></DashboardIcon>
                         <ListItemText className='m-2' primary='Dashboard' />
-                    </ListItem>
+                    </ListItem></a>
                     <ListItem
                         component={Link}
                         to='/category'
-                        className='hover:bg-blue-500 hover:-translate-y-1 hover:scale-105 transition ease-in-out delay-90'
+                        className='hover:bg-blue-500 translate-y-1 hover:scale-105 transition ease-in-out delay-90'
                     >
                         <CategoryIcon></CategoryIcon>
                         <ListItemText className='m-2' primary='Category' />
+                    </ListItem>
+                    <ListItem
+                        component={Link}
+                        to='/admin-advocate-verified'
+                        className='bg-blue-500 hover:-translate-y-1 hover:scale-105 transition ease-in-out delay-90'
+                    >
+                        <VerifiedIcon></VerifiedIcon>
+                        <ListItemText className='m-2' primary='Advocate Verifications' />
                     </ListItem>
                     <ListItem
                         component={Link}

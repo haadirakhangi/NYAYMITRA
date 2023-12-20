@@ -23,7 +23,7 @@ from deep_translator import GoogleTranslator
 
 
 model_size = "large-v3"
-model = WhisperModel(model_size, device="cpu", compute_type="int8")
+# model = WhisperModel(model_size, device="cpu", compute_type="int8")
 FEATURE_DOCS_PATH = 'nyaymitra_data/Feature explaination.pdf'
 loader = PyPDFLoader(FEATURE_DOCS_PATH)
 docs = loader.load()

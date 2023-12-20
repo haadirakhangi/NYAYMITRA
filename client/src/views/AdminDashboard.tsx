@@ -22,6 +22,7 @@ import {
 import { Link } from 'react-router-dom';
 import logo from '../img/logo-wbag.png';
 import { styled } from '@mui/material/styles';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from 'axios';
 
@@ -214,11 +215,19 @@ const AdminDashboard: React.FC = () => {
                     </ListItem>
                     <ListItem
                         component={Link}
-                        to='/category'
+                        to='/admin-category'
                         className='hover:bg-blue-500 hover:-translate-y-1 hover:scale-105 transition ease-in-out delay-90'
                     >
                         <CategoryIcon></CategoryIcon>
                         <ListItemText className='m-2' primary='Category' />
+                    </ListItem>
+                    <ListItem
+                        component={Link}
+                        to='/admin-advocate-verified'
+                        className='hover:bg-blue-500 hover:-translate-y-1 hover:scale-105 transition ease-in-out delay-90'
+                    >
+                        <VerifiedIcon></VerifiedIcon>
+                        <ListItemText className='m-2' primary='Advocate Verifications' />
                     </ListItem>
                     <ListItem
                         component={Link}
@@ -259,7 +268,7 @@ const AdminDashboard: React.FC = () => {
                                 ))}
                             </Select>
                         </FormControl>
-                        <Typography variant='h5'>Pie Chart</Typography>
+                        <Typography variant='h5'>Add New Documents</Typography>
 
 
                     </Box>
