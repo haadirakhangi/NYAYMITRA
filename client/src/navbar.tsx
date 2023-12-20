@@ -45,13 +45,23 @@ const Navbar = (props: Props) => {
                                     <NavLink to="/advoconnect">AdvoConnect</NavLink>
                                 </a>
                             </li>
+                            <li>
+                                <a className="nav-link page-scroll" href="#details">
+                                    <NavLink to="/news">News</NavLink>
+                                </a>
+                            </li>
+                            <li>
+                                <a className="nav-link page-scroll" href="#details">
+                                    <NavLink to="/landing">LogOut</NavLink>
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
                     {/* Additional styles for the navigation links on small screens */}
                     <div className={`sm:hidden navbar-collapseoffcanvas-collapse lg:flex lg:flex-grow lg:items-center text-[1rem] ${isNavOpen ? 'hidden' : 'block'}`} id="navbarsExampleDefault">
                         <ul className="pl-0 mb-2 ml-auto flex flex-col list-none lg:mt-0 lg:mb-0 lg:flex-row">
-                            <li>
+                            <li >
                                 <a className="nav-link page-scroll active" href="#header">
                                     <NavLink to="/userhome">Home </NavLink>
                                     <span className="sr-only">(current)</span>
@@ -65,6 +75,16 @@ const Navbar = (props: Props) => {
                             <li>
                                 <a className="nav-link page-scroll" href="#details">
                                     <NavLink to="/advoconnect">AdvoConnect</NavLink>
+                                </a>
+                            </li>
+                            <li>
+                                <a className="nav-link page-scroll" href="#details">
+                                    <NavLink to="/news">News</NavLink>
+                                </a>
+                            </li>
+                            <li>
+                                <a className="nav-link page-scroll" href="#details">
+                                    <NavLink to="/landing">LogOut</NavLink>
                                 </a>
                             </li>
                         </ul>

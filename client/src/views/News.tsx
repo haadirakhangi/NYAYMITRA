@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Navbar from '@/navbar';
+import Footer from '@/footer';
 
 interface NewsItem {
     title: string;
@@ -37,6 +39,67 @@ const NewsComponent: React.FC = () => {
                 description: 'This is the description for Sample News 2.',
             },
             // Add more items as needed
+            {
+                title: 'Sample News 1',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 1.',
+            },
+            {
+                title: 'Sample News 2',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 2.',
+            },
+            {
+                title: 'Sample News 1',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 1.',
+            },
+            {
+                title: 'Sample News 2',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 2.',
+            },
+            {
+                title: 'Sample News 1',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 1.',
+            },
+            {
+                title: 'Sample News 2',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 2.',
+            },
+            {
+                title: 'Sample News 1',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 1.',
+            },
+            {
+                title: 'Sample News 2',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 2.',
+            },
+            {
+                title: 'Sample News 1',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 1.',
+            },
+            {
+                title: 'Sample News 2',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 2.',
+            },
+            {
+                title: 'Sample News 1',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 1.',
+            },
+            {
+                title: 'Sample News 2',
+                link: 'https://google.com',
+                description: 'This is the description for Sample News 2.',
+            },
+            
         ];
 
         setNews(staticData);
@@ -44,6 +107,7 @@ const NewsComponent: React.FC = () => {
 
     return (
         <div>
+            <Navbar/>
             <h1 className='flex items-center place-content-center m-5'>Latest News</h1>
             <ul className='flex w-screen flex-wrap'>
                 {news.map((item, index) => (
@@ -53,6 +117,7 @@ const NewsComponent: React.FC = () => {
                     </li>
                 ))}
             </ul>
+            <Footer/>
         </div>
     );
 };
