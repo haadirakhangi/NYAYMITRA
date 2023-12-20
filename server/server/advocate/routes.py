@@ -52,6 +52,7 @@ def advocate_register():
     court_type = data.get("typeCourt")
     languages = data.getlist("languages")
     resume_file = request.files['llbDocument']
+    min_cost=data.get("min_cost_per_hr")
     print("Languages:- ", languages)
     # languages = languages_str.split(",") if languages_str else []
 
@@ -83,6 +84,7 @@ def advocate_register():
         specialization=specialization,
         court_type=court_type,
         languages=languages_json,
+        min_cost_per_hr=min_cost,
         degree_doc=resume_filename  # Save the filename in the database
     )
 

@@ -93,6 +93,7 @@ const AdvoRegister = () => {
         mobile: "",
         gender: "",
         password: "",
+        min_cost_per_hr:"",
         llbDocument: null,
     });
 
@@ -146,6 +147,7 @@ const AdvoRegister = () => {
         state.languages.forEach((language) => formData.append("languages", language));
         formData.append("email", state.email);
         formData.append("password", state.password);
+        formData.append("min_cost_per_hr",state.min_cost_per_hr);
         console.log("languages",state.languages)
         axios
             .post("/api/advocate/register", formData, {
@@ -388,6 +390,14 @@ const AdvoRegister = () => {
                                                 </MenuItem>
                                             ))}
                                         </Select>
+                                    </FormControl>
+                                    <FormControl required fullWidth margin="normal">
+                                        <InputLabel htmlFor="firstName">Min Rate</InputLabel>
+                                        <Input
+                                            name="cost"
+                                            autoComplete="cost"
+                                            onChange={handleChange("min_cost_per_hr")}
+                                        />
                                     </FormControl>
                                 </div>
                             </Grid>

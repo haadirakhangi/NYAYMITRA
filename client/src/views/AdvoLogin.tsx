@@ -60,7 +60,7 @@ const AdminLogin = (props: Props) => {
     };
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/advocate/login", newUserCredentials);
+      const response = await axios.post("/api/advocate/login", newUserCredentials);
       console.log(response.data);
       // Handle success, you can log the response or perform additional actions
     } catch (error) {
