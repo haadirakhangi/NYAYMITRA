@@ -2,15 +2,19 @@
 
 ## Introduction
 **NYAYMITRA** is an advanced legal platform designed to empower individuals with knowledge about their rights and legalities under Indian laws. Leveraging cutting-edge technology, the platform offers a range of features, including a Know-Your-Rights chatbot, document retrieval, legal insights, and more.
-![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/579af1dc-ae20-4d54-a7d2-562dd50daf87)
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/93ecb945-d917-4d46-9e84-5ab7f722a405)
+
+
+### Personal Assistant
 
 
 ### Webscrapping Latest News
-![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/53e3efd0-9d2f-47e1-aa5c-045d86c27fdd)
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/9b27ce1a-a430-4411-ba1c-43bb30c690d7)
+
 
 
 ### Feature Page 
-![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/c5c1b5ef-dd2f-4782-a3aa-e3c24709115e)
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/d57dfe11-4bf4-450d-b162-c642965f286e)
 
 
 
