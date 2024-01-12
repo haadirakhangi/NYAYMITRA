@@ -5,20 +5,25 @@
 
 ## Features
 
-### Know-Your-Rights Chatbot
+### Know-Your-Rights Chatbot/Lawbot
 - **Retrieval Augmented Generation Pipeline**: Provides users with specific legal documents and insights based on their queries.
+
+### Document Summarization
+- **NyayMitra's Document QNA**: Focuses on the importance of documents, offering insights into each point to consider while creating and reviewing legal documents. This feature helps in nullifying human errors during the document preparation process.
+
+### Narrative Legalism
+- **Story-Like Explanations**: Simplifies complex legal concepts through engaging narrative-style content, making legal learning more accessible and engaging for Law Students.
 
 ### Multilingual Support
 - **Automated Language Detection**: Adapts to users' preferred languages for enhanced accessibility.
 - **Text-To-Speech Feature**: Converts text content into speech, catering to users with diverse needs.
 
-### Narrative Legalism
-- **Story-Like Explanations**: Simplifies complex legal concepts through engaging narrative-style content, making legal learning more accessible and engaging.
 
 ### Additional Features
 - **Legal Document Drafting**: Enables users to draft essential legal documents efficiently.
 - **Advo-Connect**: Offers recommendations for lawyers based on user requirements.
 - **Low-Code Approach**: Facilitates easy updates to the vector database, managed by administrators, ensuring the platform remains current and relevant.
+
 
 
 ## Getting Started
@@ -84,7 +89,7 @@ To get started with NYAYMITRA, follow these steps after cloning the repository:
 
 3. **Open new Terminal and Navigate to the Lawbot Chatbot Directory**:
    ```bash
-   cd chatbots/narrative_legalism
+   cd chatbots/lawbot
    ```
 
 4. **Run ChainLit for Lawbot**:
