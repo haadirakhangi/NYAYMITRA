@@ -6,29 +6,31 @@
 
 
 ### Personal Assistant
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/1ff6bf62-bc67-4fa8-8149-98a69aeb16ac)
 
 
 ### Webscrapping Latest News
 ![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/9b27ce1a-a430-4411-ba1c-43bb30c690d7)
 
 
-
 ### Feature Page 
 ![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/d57dfe11-4bf4-450d-b162-c642965f286e)
 
 
-
 ### Lawbot
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/2c9fa872-0d87-4bc9-9f30-5082f9f37281)
 
 
 ### Document Summarization/QNA
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/ffde14aa-6ddf-4cca-ad4d-d15b349fe716)
 
 
 ### Narrative Legalism
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/45d618cf-c511-47c5-ba04-b6d6aebc232b)
 
 
 ### Document Drafting
-
+![image](https://github.com/haadirakhangi/Smart-India-hackathon-2023/assets/95705972/3aeb6153-423a-499b-b802-a2be74f039a8)
 
 
 ### Advocaate Connect Page
@@ -45,6 +47,7 @@
 
 ### Know-Your-Rights Chatbot/Lawbot
 - **Retrieval Augmented Generation Pipeline**: Provides users with specific legal documents and insights based on their queries.
+
 
 ### Document Summarization
 - **NyayMitra's Document QNA**: Focuses on the importance of documents, offering insights into each point to consider while creating and reviewing legal documents. This feature helps in nullifying human errors during the document preparation process.
@@ -166,5 +169,5 @@ To get started with NYAYMITRA, follow these steps after cloning the repository:
 - Hatim Mullajiwala - HatimCodeforever
 - Vedant Kambli - Vedant-K1
 - Mehek Jain - Mehekjain05
-- Hashtansh Pandit - Hastansh12
+- Hastansh Pandit - Hastansh12
 - Meet Vasa - Meet3456
